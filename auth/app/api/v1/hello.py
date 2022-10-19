@@ -1,9 +1,9 @@
 from flask import Blueprint
 
 
-hello_page = Blueprint('hello_page', __name__)
+hello_page = Blueprint("hello_page", __name__)
 
 
-@hello_page.route('/')
+@hello_page.route("/")
 def hello_world():
-    return 'Hello, World!'
+    return "Hello, World!"
