@@ -1,5 +1,5 @@
-from auth.service.db.postgres.alchemy_init import db
-from auth.service.db.postgres.db_models import User
+from auth.app.db.postgres.alchemy_init import db
+from auth.app.db.postgres.db_models import User
 
 
 def ss():

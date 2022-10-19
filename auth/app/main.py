@@ -1,6 +1,6 @@
 from flask import Flask
-from endpoints.hello import hello_page
-from auth.service.db.postgres.alchemy_init import init_db
+from auth.app.api.v1.hello import hello_page
+from auth.app.db.postgres.alchemy_init import init_db
 
 
 app = Flask(__name__)
