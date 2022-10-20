@@ -6,6 +6,8 @@ services:
       - "5000:5000"
     env_file:
       - app/config/.dev.env
+    depends_on:
+      - redis
   postgres:
     image: postgres:13
     ports:
@@ -19,3 +21,5 @@ services:
     hostname: redis
     ports:
       - "6379:6379"
+    depends_on:
+     - postgres
