@@ -1,0 +1,7 @@
+Flask==2.2.2
+Flask-SQLAlchemy==3.0.2
+SQLAlchemy==1.4.42
+black==22.10.0
+flake8==5.0.4
+psycopg2-binary==2.9.4
+pyuwsgi==2.0.20
