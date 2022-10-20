@@ -5,3 +5,4 @@ black==22.10.0
 flake8==5.0.4
 psycopg2-binary==2.9.4
 pyuwsgi==2.0.20
+pydantic==1.10.2
