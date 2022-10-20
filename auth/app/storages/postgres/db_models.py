@@ -17,6 +17,7 @@ class User(db.Model):
     password = db.Column(db.String, nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
     r_jwt = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, nullable=False)
 
     roles = db.relationship("Role")
 
