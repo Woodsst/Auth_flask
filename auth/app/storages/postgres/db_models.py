@@ -1,5 +1,4 @@
 import uuid
-from main import app
 from sqlalchemy.dialects.postgresql import UUID
 from storages.postgres.alchemy_init import db, init_db
 
@@ -18,11 +17,16 @@ class User(db.Model):
     password = db.Column(db.String, nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
     r_jwt = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, nullable=False)
 
     roles = db.relationship("Role")
 
     def __repr__(self):
         return f"<User {self.login}>"
+
+    def to_dict(self):
+        self.__dict__.pop('_sa_instance_state')
+        return self.__dict__
 
 
 class Role(db.Model):
@@ -35,15 +39,8 @@ class Role(db.Model):
         return f"<User {self.role}>"
 
 
-# Инстанс таблиц в базу
-init_db(app)
-app.app_context().push()
-db.create_all()
-# Создание ролей
+def init_tables(app):
+    """Создание таблиц если их нет"""
 
-if Role.query.count() == 0:
-    follower = Role(id=1, role="follower")
-    subscriber = Role(id=2, role="subscriber")
-    db.session.add(follower)
-    db.session.add(subscriber)
-    db.session.commit()
+    app.app_context().push()
+    db.create_all()

@@ -8,4 +8,5 @@ db = SQLAlchemy()
 def init_db(app: Flask):
     app.config["SQLALCHEMY_DATABASE_URI"] = default_settings.postgres
     db.init_app(app)
-    import storages.postgres.db_models  # Импорт для инстанса моделей
+    import storages.postgres.db_models as models
+    models.init_tables(app)
