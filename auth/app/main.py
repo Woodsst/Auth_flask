@@ -10,8 +10,7 @@ app.register_blueprint(hello_page)
 
 def main():
     init_db(app)
-    app.run(host=default_settings.host_app,
-            debug=default_settings.debug)
+    app.run(host=default_settings.host_app, debug=default_settings.debug)
 
 
 if __name__ == "__main__":

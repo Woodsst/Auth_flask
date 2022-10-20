@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     JWT_key: str = Field("key", env="JWT_KEY")
 
     debug: bool = Field(False, env="DEBUG")
-    host_app: str = Field('0.0.0.0', env="HOST_APP")
+    host_app: str = Field("0.0.0.0", env="HOST_APP")
 
 
 default_settings = Settings()
