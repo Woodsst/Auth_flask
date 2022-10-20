@@ -8,5 +8,4 @@ db = SQLAlchemy()
 def init_db(app: Flask):
     app.config["SQLALCHEMY_DATABASE_URI"] = default_settings.postgres
     db.init_app(app)
-    app.app_context().push()
-    db.create_all()
+    import storages.postgres.db_models

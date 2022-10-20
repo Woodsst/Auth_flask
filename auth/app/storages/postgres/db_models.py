@@ -1,0 +1,46 @@
+import uuid
+from main import app
+from sqlalchemy.dialects.postgresql import UUID
+from storages.postgres.alchemy_init import db, init_db
+
+
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        unique=True,
+        nullable=False,
+    )
+    login = db.Column(db.String, unique=True, nullable=False)
+    password = db.Column(db.String, nullable=False)
+    role_id = db.Column(db.Integer, nullable=False, unique=True)
+    r_jwt = db.Column(db.String, nullable=False)
+    roles = db.relationship("Role")
+
+    def __repr__(self):
+        return f"<User {self.login}>"
+
+
+class Role(db.Model):
+    __tablename__ = "roles"
+    id = db.Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        unique=True,
+        nullable=False,
+    )
+    role_id = db.Column(db.Integer, db.ForeignKey("users.role_id"), nullable=False)
+    role = db.Column(db.String, nullable=False)
+
+    def __repr__(self):
+        return f"<User {self.role}>"
+
+
+# Инстанс таблиц в базу
+init_db(app)
+app.app_context().push()
+db.create_all()
