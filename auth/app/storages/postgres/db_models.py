@@ -48,7 +48,7 @@ class Social(db.Model):
     __tablename__ = "socials"
 
     id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    name = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String, nullable=False)
 
 
 class UserDevice(db.Model):
@@ -56,9 +56,9 @@ class UserDevice(db.Model):
 
     id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     user_id = db.Column(db.ForeignKey("users.id"), primary_key=True)
-    social_id = db.Column(db.ForeignKey("devices.id"), primary_key=True)
+    device_id = db.Column(db.ForeignKey("devices.id"), primary_key=True)
     entry_time = db.Column(db.DateTime, default=datetime.datetime.utcnow())
-    social = db.relationship("Device")
+    device = db.relationship("Device")
 
 
 class Device(db.Model):
