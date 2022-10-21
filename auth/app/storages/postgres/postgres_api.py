@@ -54,17 +54,23 @@ class Postgres(BaseStorage):
         """Получение данных о времени и устройствах
         на которых клиент логинился в сервис"""
 
-        device_history = self.orm.session.query(
-            Device.device, UserDevice.entry_time
-        ).join(
-            User
-        ).join(
-            Device
-        ).filter(
-            UserDevice.user_id == User.id == user_id
-        ).all()
+        device_history = (
+            self.orm.session.query(Device.device, UserDevice.entry_time)
+            .join(User)
+            .join(Device)
+            .filter(UserDevice.user_id == user_id)
+            .all()
+        )
         return device_history
 
-    def get_client_social(self, user_name) -> dict:
+    def get_client_social(self, user_id: str) -> dict:
         """Получение данных о социальных сетях клиента"""
-        pass
+
+        user_social = (
+            self.orm.session.query(Social.name, UserSocial.url)
+            .join(User)
+            .join(Social)
+            .filter(UserSocial.user_id == user_id)
+            .all()
+        )
+        return user_social
