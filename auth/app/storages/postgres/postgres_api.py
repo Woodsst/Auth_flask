@@ -44,7 +44,7 @@ class Postgres(BaseStorage):
 
         self.orm.session.add(user_social)
 
-    def _add_social(self, social: str):
+    def _add_social(self, social: str) -> str:
         """Добавление социальной сети в список сетей,
         возвращает id сети для возможности добавления в список сетей клиента"""
 
@@ -77,7 +77,7 @@ class Postgres(BaseStorage):
         )
         return device_history
 
-    def get_user_social(self, user_id: str) -> dict:
+    def get_user_social(self, user_id: str) -> list:
         """Получение данных о социальных сетях клиента"""
 
         user_social = (
