@@ -1,29 +1,51 @@
+import uuid
 from storages.base import BaseStorage
-from storages.postgres.db_models import User
+from storages.postgres.db_models import (
+    User,
+    UserDevice,
+    Device,
+    Social,
+    UserSocial,
+)
 
 
 class Postgres(BaseStorage):
-
-    def get_client_data(self, client_name: str) -> dict:
+    def get_client_data(self, user_name: str) -> dict:
         """Получение данных о клиенте"""
-        return User.query.filter_by(login=client_name).first().to_dict()
+        return User.query.filter_by(login=user_name).first().to_dict()
 
-    def set_client(self, client_data: dict):
+    def set_client(self, user_data: dict):
         """Добавление данных клиента"""
-
-        client = User(**client_data)
-        self.orm.session.add(client)
+        user_id = uuid.uuid4()
+        user = User(**user_data.get("user"), id=user_id)
+        self._set_social(user_data.get("socials"), user_id)
+        self._set_device(user_data.get("device"), user_id)
+        self.orm.session.add(user)
         self.orm.session.commit()
 
-    def put_client_social(self, client_name: str):
+    def _set_device(self, device: str, user_id: str):
+        id = uuid.uuid4()
+        device = Device(id=id, device=device)
+        user_device = UserDevice(device_id=id, user_id=user_id)
+        self.orm.session.add(device)
+        self.orm.session.add(user_device)
+
+    def _set_social(self, social: str, user_id: str):
+        id = uuid.uuid4()
+        social_model = Social(id=id, name=social)
+        user_social = UserSocial(user_id=user_id, url=social, social_id=id)
+        self.orm.session.add(social_model)
+        self.orm.session.add(user_social)
+
+    def put_client_social(self, user_name: str, user_id: str):
         """Добавление социальных сетей клиента"""
         pass
 
-    def get_client_device_history(self, client_name) -> dict:
+    def get_client_device_history(self, user_name) -> dict:
         """Получение данных о времени и устройствах
         на которых клиент логинился в сервис"""
         pass
 
-    def get_client_social(self, client_name) -> dict:
+    def get_client_social(self, user_name) -> dict:
         """Получение данных о социальных сетях клиента"""
         pass
