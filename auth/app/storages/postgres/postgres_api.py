@@ -50,10 +50,20 @@ class Postgres(BaseStorage):
         self._set_social(social_id, user_id, url)
         self.orm.session.commit()
 
-    def get_client_device_history(self, user_name) -> dict:
+    def get_client_device_history(self, user_id: str) -> list:
         """Получение данных о времени и устройствах
         на которых клиент логинился в сервис"""
-        pass
+
+        device_history = self.orm.session.query(
+            Device.device, UserDevice.entry_time
+        ).join(
+            User
+        ).join(
+            Device
+        ).filter(
+            UserDevice.user_id == User.id == user_id
+        ).all()
+        return device_history
 
     def get_client_social(self, user_name) -> dict:
         """Получение данных о социальных сетях клиента"""
