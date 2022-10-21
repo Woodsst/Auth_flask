@@ -1,10 +1,18 @@
+import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy_utils.types.choice import ChoiceType
 from storages.postgres.alchemy_init import db
 
 
 class User(db.Model):
     __tablename__ = "users"
+
+    ROLES = [
+        ("user", "User"),
+        ("subscriber", "Subscriber"),
+        ("admin", "Admin"),
+    ]
 
     id = db.Column(
         UUID(as_uuid=True),
@@ -15,7 +23,7 @@ class User(db.Model):
     )
     login = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
-    role = db.Column(db.String, nullable=False)
+    role = db.Column(ChoiceType(ROLES), nullable=False)
     r_jwt = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False)
 
@@ -32,7 +40,7 @@ class UserSocial(db.Model):
     id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     user_id = db.Column(db.ForeignKey("users.id"), primary_key=True)
     social_id = db.Column(db.ForeignKey("socials.id"), primary_key=True)
-    url = db.Column(db.String)
+    url = db.Column(db.String, nullable=False)
     social = db.relationship("Social")
 
 
@@ -49,7 +57,7 @@ class UserDevice(db.Model):
     id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     user_id = db.Column(db.ForeignKey("users.id"), primary_key=True)
     social_id = db.Column(db.ForeignKey("devices.id"), primary_key=True)
-    entry_time = db.Column(db.String)
+    entry_time = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     social = db.relationship("Device")
 
 
