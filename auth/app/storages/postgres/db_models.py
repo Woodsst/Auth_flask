@@ -48,7 +48,7 @@ class Social(db.Model):
     __tablename__ = "socials"
 
     id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    name = db.Column(db.String, nullable=False)
+    name = db.Column(db.String, nullable=False, unique=True)
 
 
 class UserDevice(db.Model):
