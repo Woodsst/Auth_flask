@@ -9,28 +9,28 @@ class BaseStorage(abc.ABC):
         self.orm = orm
 
     @abc.abstractmethod
-    def get_client_data(self, client_name: str) -> dict:
+    def get_user_data(self, user_name: str) -> dict:
         """Получение данных о клиенте"""
         pass
 
     @abc.abstractmethod
-    def set_client(self, client_data: dict):
+    def set_user(self, user_data: dict):
         """Добавление данных клиента"""
         pass
 
     @abc.abstractmethod
-    def put_client_social(self, client_name: str):
+    def put_user_social(self, user_name: str):
         """Добавление социальных сетей клиента"""
         pass
 
     @abc.abstractmethod
-    def get_client_device_history(self, client_name) -> dict:
+    def get_user_device_history(self, user_name) -> dict:
         """Получение данных о времени и устройствах
         на которых клиент логинился в сервис"""
         pass
 
     @abc.abstractmethod
-    def get_client_social(self, client_name) -> dict:
+    def get_user_social(self, user_name) -> dict:
         """Получение данных о социальных сетях клиента"""
         pass
 
