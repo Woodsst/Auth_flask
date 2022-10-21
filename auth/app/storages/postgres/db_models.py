@@ -22,10 +22,10 @@ class User(db.Model):
         nullable=False,
     )
     login = db.Column(db.String, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False)
+    password = db.Column(db.String, nullable=False, unique=True)
     role = db.Column(ChoiceType(ROLES), nullable=False)
-    r_jwt = db.Column(db.String, nullable=False)
-    email = db.Column(db.String, nullable=False)
+    r_jwt = db.Column(db.String, nullable=False, unique=True)
+    email = db.Column(db.String, nullable=False, unique=True)
 
     social = db.relationship("UserSocial")
     device = db.relationship("UserDevice")
@@ -40,7 +40,7 @@ class UserSocial(db.Model):
     id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     user_id = db.Column(db.ForeignKey("users.id"), primary_key=True)
     social_id = db.Column(db.ForeignKey("socials.id"), primary_key=True)
-    url = db.Column(db.String, nullable=False)
+    url = db.Column(db.String, nullable=False, unique=True)
     social = db.relationship("Social")
 
 
