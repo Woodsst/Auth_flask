@@ -33,6 +33,10 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.login}>"
 
+    def to_dict(self):
+        self.__dict__.pop("_sa_instance_state")
+        return self.__dict__
+
 
 class UserSocial(db.Model):
     __tablename__ = "user_social"
