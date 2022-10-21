@@ -18,7 +18,6 @@ class Postgres(BaseStorage):
         """Добавление данных клиента"""
         user_id = uuid.uuid4()
         user = User(**user_data.get("user"), id=user_id)
-        self._set_social(user_data.get("socials"), user_id)
         self._set_device(user_data.get("device"), user_id)
         self.orm.session.add(user)
         self.orm.session.commit()
@@ -30,16 +29,26 @@ class Postgres(BaseStorage):
         self.orm.session.add(device)
         self.orm.session.add(user_device)
 
-    def _set_social(self, social: str, user_id: str):
-        id = uuid.uuid4()
-        social_model = Social(id=id, name=social)
-        user_social = UserSocial(user_id=user_id, url=social, social_id=id)
-        self.orm.session.add(social_model)
+    def _set_social(self, social_id: str, user_id: str, url):
+        user_social = UserSocial(user_id=user_id, url=url, social_id=social_id)
+
         self.orm.session.add(user_social)
 
-    def put_client_social(self, user_name: str, user_id: str):
+    def _add_social(self, social: str):
+        id = Social.query.filter_by(name=social).first()
+        if id:
+            return id.id
+        id = uuid.uuid4()
+        social_model = Social(id=id, name=social)
+        self.orm.session.add(social_model)
+
+        return id
+
+    def put_client_social(self, social: str, user_id: str, url: str):
         """Добавление социальных сетей клиента"""
-        pass
+        social_id = self._add_social(social)
+        self._set_social(social_id, user_id, url)
+        self.orm.session.commit()
 
     def get_client_device_history(self, user_name) -> dict:
         """Получение данных о времени и устройствах
