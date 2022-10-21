@@ -129,6 +129,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+.$uml.dtmp
 .$uml.bkp
 
 .python-version

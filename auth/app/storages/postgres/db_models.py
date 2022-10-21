@@ -1,10 +1,18 @@
+import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy_utils.types.choice import ChoiceType
 from storages.postgres.alchemy_init import db
 
 
 class User(db.Model):
     __tablename__ = "users"
+
+    ROLES = [
+        ("user", "User"),
+        ("subscriber", "Subscriber"),
+        ("admin", "Admin"),
+    ]
 
     id = db.Column(
         UUID(as_uuid=True),
@@ -14,29 +22,54 @@ class User(db.Model):
         nullable=False,
     )
     login = db.Column(db.String, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False)
-    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
-    r_jwt = db.Column(db.String, nullable=False)
-    email = db.Column(db.String, nullable=False)
+    password = db.Column(db.String, nullable=False, unique=True)
+    role = db.Column(ChoiceType(ROLES), nullable=False)
+    r_jwt = db.Column(db.String, nullable=False, unique=True)
+    email = db.Column(db.String, nullable=False, unique=True)
 
-    roles = db.relationship("Role")
+    social = db.relationship("UserSocial")
+    device = db.relationship("UserDevice")
 
     def __repr__(self):
         return f"<User {self.login}>"
 
     def to_dict(self):
-        self.__dict__.pop('_sa_instance_state')
+        self.__dict__.pop("_sa_instance_state")
         return self.__dict__
 
 
-class Role(db.Model):
-    __tablename__ = "roles"
+class UserSocial(db.Model):
+    __tablename__ = "user_social"
 
-    id = db.Column(db.Integer, primary_key=True)
-    role = db.Column(db.String, nullable=False)
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    user_id = db.Column(db.ForeignKey("users.id"), primary_key=True)
+    social_id = db.Column(db.ForeignKey("socials.id"), primary_key=True)
+    url = db.Column(db.String, nullable=False, unique=True)
+    social = db.relationship("Social")
 
-    def __repr__(self):
-        return f"<User {self.role}>"
+
+class Social(db.Model):
+    __tablename__ = "socials"
+
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+
+
+class UserDevice(db.Model):
+    __tablename__ = "user_device"
+
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    user_id = db.Column(db.ForeignKey("users.id"), primary_key=True)
+    device_id = db.Column(db.ForeignKey("devices.id"), primary_key=True)
+    entry_time = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+    device = db.relationship("Device")
+
+
+class Device(db.Model):
+    __tablename__ = "devices"
+
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    device = db.Column(db.String, nullable=False)
 
 
 def init_tables(app):
