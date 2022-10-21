@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
-from storages.postgres.alchemy_init import db, init_db
+from storages.postgres.alchemy_init import db
 
 
 class User(db.Model):
@@ -15,24 +15,31 @@ class User(db.Model):
     )
     login = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
-    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
+    role = db.Column(db.String, nullable=False)
     r_jwt = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False)
 
-    roles = db.relationship("Role")
+    social = db.relationship("UserSocial")
 
     def __repr__(self):
         return f"<User {self.login}>"
 
 
-class Role(db.Model):
-    __tablename__ = "roles"
+class UserSocial(db.Model):
+    __tablename__ = "user_social"
 
-    id = db.Column(db.Integer, primary_key=True)
-    role = db.Column(db.String, nullable=False)
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    client_id = db.Column(db.ForeignKey("users.id"), primary_key=True)
+    social_id = db.Column(db.ForeignKey("social.id"), primary_key=True)
+    url = db.Column(db.String)
+    social = db.relationship("Social")
 
-    def __repr__(self):
-        return f"<User {self.role}>"
+
+class Social(db.Model):
+    __tablename__ = "social"
+
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    name = db.Column(db.Integer, nullable=False)
 
 
 def init_tables(app):
