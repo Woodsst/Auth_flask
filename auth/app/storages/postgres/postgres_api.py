@@ -1,4 +1,8 @@
 import uuid
+
+import sqlalchemy
+from psycopg2.errors import UniqueViolation
+
 from storages.base import BaseStorage
 from storages.postgres.db_models import (
     User,
@@ -21,12 +25,17 @@ class Postgres(BaseStorage):
 
     def set_user(self, user_data: dict):
         """Добавление данных нового клиента"""
-
-        user_id = uuid.uuid4()
-        user = User(**user_data.get("user"), id=user_id)
-        self._set_device(user_data.get("device"), user_id)
-        self.orm.session.add(user)
-        self.orm.session.commit()
+        try:
+            user_id = uuid.uuid4()
+            user = User(**user_data.get("user"), id=user_id, role="user")
+            self._set_device(user_data.get("device"), user_id)
+            self.orm.session.add(user)
+            self.orm.session.commit()
+        except UniqueViolation:
+            return
+        except sqlalchemy.exc.IntegrityError:
+            return
+        return {"id": str(user.id), "role": user.role.value}
 
     def _set_device(self, device: str, user_id: str):
         """Добавление нового устройства с которого клиент зашел в аккаунт"""
