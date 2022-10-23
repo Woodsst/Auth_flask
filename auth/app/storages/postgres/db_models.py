@@ -24,7 +24,6 @@ class User(db.Model):
     login = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False, unique=True)
     role = db.Column(ChoiceType(ROLES), nullable=False)
-    r_jwt = db.Column(db.String, nullable=False, unique=True)
     email = db.Column(db.String, nullable=False, unique=True)
 
     social = db.relationship("UserSocial")
