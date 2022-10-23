@@ -7,3 +7,4 @@ psycopg2-binary==2.9.4
 pyuwsgi==2.0.20
 pydantic==1.10.2
 SQLAlchemy-Utils==0.38.3
+PyJWT==2.6.0
