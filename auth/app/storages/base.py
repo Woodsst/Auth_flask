@@ -42,11 +42,11 @@ class BaseCash(abc.ABC):
         self.con = connect
 
     @abc.abstractmethod
-    def get_token(self, key: str) -> dict:
+    def get_invalid_access_token(self, key: str) -> dict:
         """Получить данные по ключу"""
         pass
 
     @abc.abstractmethod
-    def set_token(self, key: str, value: str):
+    def set_invalid_access_token(self, key: str, value: str):
         """Внести данные"""
         pass
