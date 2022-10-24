@@ -47,7 +47,7 @@ def decode_access_token(token: str):
     return jwt.decode(
         token,
         key=default_settings.JWT_access_key,
-        algorithms=default_settings.JWT_access_algorithm,
+        algorithms=default_settings.JWT_algorithm,
     )
 
 
@@ -55,5 +55,15 @@ def decode_refresh_token(token: str):
     return jwt.decode(
         token,
         key=default_settings.JWT_refresh_key,
-        algorithms=default_settings.JWT_refresh_algorithm,
+        algorithms=default_settings.JWT_algorithm,
     )
+
+
+def get_token_time_to_end(token: str) -> int:
+    payload = decode_refresh_token(token)
+    end_time = payload["end_time"]
+    end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S.%f")
+    time_for_exited = (
+        end_time.timestamp() - datetime.datetime.now().timestamp()
+    )
+    return int(time_for_exited)
