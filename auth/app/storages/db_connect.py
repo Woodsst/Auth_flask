@@ -1,6 +1,13 @@
+import redis
+from config.settings import default_settings
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from config.settings import default_settings
+
+redis_conn = redis.Redis(
+    host=default_settings.redis_host,
+    port=default_settings.redis_port,
+    db=0,
+)
 
 db = SQLAlchemy()
 

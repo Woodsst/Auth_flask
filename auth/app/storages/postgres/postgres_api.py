@@ -32,10 +32,10 @@ class Postgres(BaseStorage):
             self.orm.session.add(user)
             self.orm.session.commit()
         except UniqueViolation:
-            return
+            return False
         except sqlalchemy.exc.IntegrityError:
-            return
-        return {"id": str(user.id), "role": user.role.value}
+            return False
+        return True
 
     def _set_device(self, device: str, user_id: str):
         """Добавление нового устройства с которого клиент зашел в аккаунт"""
