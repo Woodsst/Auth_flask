@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     debug: bool = Field(False, env="DEBUG")
     host_app: str = Field("0.0.0.0", env="HOST_APP")
+    port_app: int = Field(5000, env="PORT_APP")
 
 
 default_settings = Settings()

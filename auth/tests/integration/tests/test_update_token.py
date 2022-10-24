@@ -1,2 +1,2 @@
-def test_one(postgres_alchemy_con):
+def test_one(http_con, redis_con):
     pass
