@@ -1,7 +1,6 @@
 import logging
 from logging.config import dictConfig
 
-
 dictConfig(
     {
         "version": 1,

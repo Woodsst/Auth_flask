@@ -2,15 +2,9 @@ import uuid
 
 import sqlalchemy
 from psycopg2.errors import UniqueViolation
-
 from storages.base import BaseStorage
-from storages.postgres.db_models import (
-    User,
-    UserDevice,
-    Device,
-    Social,
-    UserSocial,
-)
+from storages.postgres.db_models import (Device, Social, User, UserDevice,
+                                         UserSocial)
 
 
 class Postgres(BaseStorage):

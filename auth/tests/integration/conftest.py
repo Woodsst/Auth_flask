@@ -1,8 +1,9 @@
 import http.client
 
+import psycopg2
 from pytest import fixture
 from redis import Redis
-import psycopg2
+
 from auth.tests.integration.settings import default_settings
 
 

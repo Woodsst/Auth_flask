@@ -1,6 +1,6 @@
+import jwt_api as jwt
 from storages.postgres.postgres_api import Postgres
 from storages.redis.redis_api import Redis
-import jwt_api as jwt
 
 
 class ServiceBase:
