@@ -24,14 +24,14 @@ class LoginAPI(ServiceBase):
                 "status": "fail",
                 "message": "the password does not match the user's password"
             }
-            return make_response(jsonify(responseObject)), 500
-        except Exception:
+            return make_response(jsonify(responseObject)), 401
+        except AttributeError:
             responseObject = {
                 "status": "fail",
                 "message": ("The user with such login and password was not"
                             "found")
             }
-            return make_response(jsonify(responseObject)), 500
+            return make_response(jsonify(responseObject)), 403
 
 
 def login_api():
