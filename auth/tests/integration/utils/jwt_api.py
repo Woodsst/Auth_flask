@@ -1,4 +1,5 @@
 import jwt
+
 from auth.tests.integration.settings import default_settings
 
 

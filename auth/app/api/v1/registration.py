@@ -1,7 +1,7 @@
 import email_validator
-from flask import Blueprint, request, jsonify
-from services.service_registration import registration_api
 from exceptions import PasswordException
+from flask import Blueprint, jsonify, request
+from services.service_registration import registration_api
 from exceptions import LoginException
 
 registration_page = Blueprint(
@@ -15,8 +15,7 @@ def registration_user():
         response = registration_api().registration(request)
         if response:
             return jsonify("status: registration complete"), 201
-        else:
-            return jsonify({"error": "login or email already registered"}), 409
+        return jsonify({"error": "login or email already registered"}), 409
     except PasswordException:
         return jsonify({"error": "pass too short"}), 400
     except email_validator.EmailSyntaxError:

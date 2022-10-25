@@ -2,15 +2,9 @@ import uuid
 
 import sqlalchemy
 from psycopg2.errors import UniqueViolation
-
 from storages.base import BaseStorage
-from storages.postgres.db_models import (
-    User,
-    UserDevice,
-    Device,
-    Social,
-    UserSocial,
-)
+from storages.postgres.db_models import (Device, Social, User, UserDevice,
+                                         UserSocial)
 
 
 class Postgres(BaseStorage):
@@ -27,7 +21,13 @@ class Postgres(BaseStorage):
         """Добавление данных нового клиента"""
         try:
             user_id = uuid.uuid4()
-            user = User(**user_data.get("user"), id=user_id, role="user")
+            user = User(
+                login=user_data.get("login"),
+                password=user_data.get("password"),
+                email=user_data.get("email"),
+                id=user_id,
+                role="user",
+            )
             self._set_device(user_data.get("device"), user_id)
             self.orm.session.add(user)
             self.orm.session.commit()

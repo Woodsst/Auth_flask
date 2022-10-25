@@ -1,7 +1,6 @@
 import datetime
 
 import jwt
-
 from config.settings import default_settings
 
 

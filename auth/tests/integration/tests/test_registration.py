@@ -49,11 +49,9 @@ def test_registration_409(http_con, postgres_con):
                 "url": "/api/v1/registration",
                 "body": json.dumps(
                     {
-                        "user": {
-                            "login": "",
-                            "password": "asdasdsssada",
-                            "email": "lupa@gmail.com",
-                        }
+                        "login": "",
+                        "password": "asdasdsssada",
+                        "email": "lupa@gmail.com",
                     }
                 ),
                 "headers": {"user-agent": "python"},
@@ -67,11 +65,9 @@ def test_registration_409(http_con, postgres_con):
                 "url": "/api/v1/registration",
                 "body": json.dumps(
                     {
-                        "user": {
-                            "login": "pupa",
-                            "password": "",
-                            "email": "lupa@gmail.com",
-                        }
+                        "login": "pupa",
+                        "password": "",
+                        "email": "lupa@gmail.com",
                     }
                 ),
                 "headers": {"user-agent": "python"},
@@ -85,11 +81,9 @@ def test_registration_409(http_con, postgres_con):
                 "url": "/api/v1/registration",
                 "body": json.dumps(
                     {
-                        "user": {
-                            "login": "pupa",
-                            "password": "asdasdaaaaa",
-                            "email": "lupagmail.com",
-                        }
+                        "login": "pupa",
+                        "password": "asdasdaaaaa",
+                        "email": "lupagmail.com",
                     }
                 ),
                 "headers": {"user-agent": "python"},
@@ -99,7 +93,7 @@ def test_registration_409(http_con, postgres_con):
         ),
     ],
 )
-def test_registration_403(
+def test_registration_400(
     http_con, postgres_con, bad_request, status_code, response_body
 ):
     http_con.request(**bad_request)

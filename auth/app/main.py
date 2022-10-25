@@ -1,15 +1,17 @@
-from flask import Flask
-from api.v1.update_tokens import update
+from api.v1.login import login_page
 from api.v1.registration import registration_page
 from api.v1.profile import profile
-from storages.db_connect import init_db
-from config.settings import default_settings
+from api.v1.update_tokens import update
 from config.logger import logger
+from config.settings import default_settings
+from flask import Flask
+from storages.db_connect import init_db
 
 app = Flask(__name__)
 
 app.register_blueprint(update)
 app.register_blueprint(registration_page)
+app.register_blueprint(login_page)
 app.register_blueprint(profile)
 
 

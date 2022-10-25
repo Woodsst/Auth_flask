@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from services.update_tokens_service import update_service
 
 update = Blueprint("update", __name__, url_prefix="/api/v1")
