@@ -8,6 +8,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class ServiceBase:
+    """Родительский класс для сервисов"""
+
     def __init__(self, db: Postgres = None, cash: Redis = None):
         self.db: Optional[Postgres] = db
         self.cash: Optional[Redis] = cash

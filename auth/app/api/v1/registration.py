@@ -11,6 +11,8 @@ registration_page = Blueprint(
 
 @registration_page.route("/registration", methods=["POST"])
 def registration_user():
+    """Ендпоинт регистрации клиента, принимает POST запрос с данными клиента
+    в теле запроса"""
     try:
         response = registration_api().registration(request)
         if response:
