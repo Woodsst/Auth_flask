@@ -1,10 +1,13 @@
 import json
 
-from services.service_base import ServiceBase
-from storages.db_connect import db
-from storages.postgres.postgres_api import Postgres
+from auth.app.services.service_base import ServiceBase
+from auth.app.storages.db_connect import db
+from auth.app.storages.postgres.postgres_api import Postgres
 from flask import Request
 from email_validator import validate_email
+from werkzeug.security import generate_password_hash
+
+from auth.app.exceptions import PasswordException
 
 
 class ProfileService(ServiceBase):
@@ -52,6 +55,23 @@ class ProfileService(ServiceBase):
         validate_email(new_email)
         user_id = self.get_user_id_from_token(request)
         self.db.change_user_email(user_id, new_email)
+
+    def change_password(self, request: Request):
+        user_id = self.get_user_id_from_token(request)
+        user_data = json.loads(request.data)
+        password = user_data.get("password")
+        new_password = user_data.get("new_password")
+
+        if len(new_password) < 8:
+            raise PasswordException("password too short")
+
+        if self.check_password(password, user_id):
+            if new_password == password:
+                return False
+            new_password = generate_password_hash(new_password)
+            self.db.change_user_password(user_id, new_password)
+            return True
+        return False
 
 
 def profile_service():
