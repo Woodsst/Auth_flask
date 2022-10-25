@@ -60,10 +60,13 @@ def decode_refresh_token(token: str):
 
 
 def get_token_time_to_end(token: str) -> int:
-    payload = decode_refresh_token(token)
+    try:
+        payload = decode_refresh_token(token)
+    except jwt.exceptions.InvalidSignatureError:
+        payload = decode_access_token(token)
     end_time = payload["end_time"]
     end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S.%f")
     time_for_exited = (
-        end_time.timestamp() - datetime.datetime.now().timestamp()
+        end_time.timestamp() - datetime.datetime.utcnow().timestamp()
     )
     return int(time_for_exited)
