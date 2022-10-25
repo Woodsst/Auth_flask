@@ -49,16 +49,14 @@ def test_registration_409(http_con, postgres_con):
                 "url": "/api/v1/registration",
                 "body": json.dumps(
                     {
-                        "user": {
-                            "login": "",
-                            "password": "asdasdsssada",
-                            "email": "lupa@gmail.com",
-                        }
+                        "login": "",
+                        "password": "asdasdsssada",
+                        "email": "lupa@gmail.com",
                     }
                 ),
                 "headers": {"user-agent": "python"},
             },
-            HTTPStatus.FORBIDDEN,
+            HTTPStatus.BAD_REQUEST,
             {"error": "login too short"},
         ),
         (
@@ -67,16 +65,14 @@ def test_registration_409(http_con, postgres_con):
                 "url": "/api/v1/registration",
                 "body": json.dumps(
                     {
-                        "user": {
-                            "login": "pupa",
-                            "password": "",
-                            "email": "lupa@gmail.com",
-                        }
+                        "login": "pupa",
+                        "password": "",
+                        "email": "lupa@gmail.com",
                     }
                 ),
                 "headers": {"user-agent": "python"},
             },
-            HTTPStatus.FORBIDDEN,
+            HTTPStatus.BAD_REQUEST,
             {"error": "pass too short"},
         ),
         (
@@ -85,25 +81,23 @@ def test_registration_409(http_con, postgres_con):
                 "url": "/api/v1/registration",
                 "body": json.dumps(
                     {
-                        "user": {
-                            "login": "pupa",
-                            "password": "asdasdaaaaa",
-                            "email": "lupagmail.com",
-                        }
+                        "login": "pupa",
+                        "password": "asdasdaaaaa",
+                        "email": "lupagmail.com",
                     }
                 ),
                 "headers": {"user-agent": "python"},
             },
-            HTTPStatus.FORBIDDEN,
+            HTTPStatus.BAD_REQUEST,
             {"error": "The email address is not valid"},
         ),
     ],
 )
-def test_registration_403(
+def test_registration_400(
     http_con, postgres_con, bad_request, status_code, response_body
 ):
     http_con.request(**bad_request)
     response = http_con.getresponse()
-    assert response.status == HTTPStatus.FORBIDDEN
+    assert response.status == status_code
     assert json.loads(response.read()) == response_body
     clear_table(postgres_con)

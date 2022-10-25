@@ -14,11 +14,10 @@ def registration_user():
         response = registration_api().registration(request)
         if response:
             return jsonify("status: registration complete"), 201
-        else:
-            return jsonify({"error": "login or email already registered"}), 409
+        return jsonify({"error": "login or email already registered"}), 409
     except PasswordException:
-        return jsonify({"error": "pass too short"}), 403
+        return jsonify({"error": "pass too short"}), 400
     except email_validator.EmailSyntaxError:
-        return jsonify({"error": "The email address is not valid"}), 403
+        return jsonify({"error": "The email address is not valid"}), 400
     except ValueError:
-        return jsonify({"error": "login too short"}), 403
+        return jsonify({"error": "login too short"}), 400
