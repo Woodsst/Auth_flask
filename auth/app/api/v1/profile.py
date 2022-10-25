@@ -1,6 +1,6 @@
 import email_validator
 from flask import Blueprint, request, jsonify
-from services.service_user_profile import profile_service
+from auth.app.services.service_user_profile import profile_service
 
 from auth.app.exceptions import PasswordException
 

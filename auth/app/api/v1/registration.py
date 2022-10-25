@@ -1,8 +1,8 @@
 import email_validator
-from exceptions import PasswordException
+from auth.app.exceptions import PasswordException
 from flask import Blueprint, jsonify, request
-from services.service_registration import registration_api
-from exceptions import LoginException
+from auth.app.services.service_registration import registration_api
+from auth.app.exceptions import LoginException
 
 registration_page = Blueprint(
     "registration_page", __name__, url_prefix="/api/v1"

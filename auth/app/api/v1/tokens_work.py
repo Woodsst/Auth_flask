@@ -1,6 +1,6 @@
 import jwt
 from flask import Blueprint, request, jsonify
-from services.tokens_service import tokens_service
+from auth.app.services.tokens_service import tokens_service
 
 tokens_work = Blueprint("update", __name__, url_prefix="/api/v1")
 
