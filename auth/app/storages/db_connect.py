@@ -1,7 +1,8 @@
 import redis
-from config.settings import default_settings
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from auth.app.config.settings import default_settings
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
 redis_conn = redis.Redis(
     host=default_settings.redis_host,
@@ -9,12 +10,15 @@ redis_conn = redis.Redis(
     db=0,
 )
 
-db = SQLAlchemy()
+engine = create_engine(default_settings.postgres, convert_unicode=True)
+db_session = scoped_session(
+    sessionmaker(autocommit=False, autoflush=False, bind=engine)
+)
+Base = declarative_base()
+Base.query = db_session.query_property()
 
 
-def init_db(app: Flask):
-    app.config["SQLALCHEMY_DATABASE_URI"] = default_settings.postgres
-    db.init_app(app)
-    import storages.postgres.db_models as models
+def init_db():
+    import auth.app.storages.postgres.db_models as models
 
-    models.init_tables(app)
+    models.create_all(engine)

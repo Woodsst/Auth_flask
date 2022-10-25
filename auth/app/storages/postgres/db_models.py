@@ -2,14 +2,15 @@ import datetime
 import uuid
 from copy import copy
 
+from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 from sqlalchemy_utils.types.choice import ChoiceType
-from storages.db_connect import db
-from exceptions import LoginException
+from auth.app.storages.db_connect import Base
+from auth.app.exceptions import LoginException
 
 
-class User(db.Model):
+class User(Base):
     __tablename__ = "users"
 
     ROLES = [
@@ -18,17 +19,17 @@ class User(db.Model):
         ("admin", "Admin"),
     ]
 
-    id = db.Column(
+    id = Column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
         unique=True,
         nullable=False,
     )
-    login = db.Column(db.String, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False, unique=True)
-    role = db.Column(ChoiceType(ROLES), nullable=False)
-    email = db.Column(db.String, nullable=False, unique=True)
+    login = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False, unique=True)
+    role = Column(ChoiceType(ROLES), nullable=False)
+    email = Column(String, nullable=False, unique=True)
 
     @validates("login", "password")
     def validate_login(self, key, field) -> str:
@@ -37,8 +38,8 @@ class User(db.Model):
                 raise LoginException()
         return field
 
-    social = db.relationship("UserSocial", cascade="all, delete")
-    device = db.relationship("UserDevice", cascade="all, delete")
+    social = relationship("UserSocial", cascade="all, delete")
+    device = relationship("UserDevice", cascade="all, delete")
 
     def __repr__(self):
         return f"<User {self.login}>"
@@ -49,50 +50,47 @@ class User(db.Model):
         return d
 
 
-class UserSocial(db.Model):
+class UserSocial(Base):
     __tablename__ = "user_social"
 
-    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    user_id = db.Column(
-        db.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    user_id = Column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    social_id = db.Column(
-        db.ForeignKey("socials.id", ondelete="CASCADE"), primary_key=True
+    social_id = Column(
+        ForeignKey("socials.id", ondelete="CASCADE"), primary_key=True
     )
-    url = db.Column(db.String, nullable=False, unique=True)
-    social = db.relationship("Social", cascade="all, delete")
+    url = Column(String, nullable=False, unique=True)
+    social = relationship("Social", cascade="all, delete")
 
 
-class Social(db.Model):
+class Social(Base):
     __tablename__ = "socials"
 
-    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    name = db.Column(db.String, nullable=False, unique=True)
+    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    name = Column(String, nullable=False, unique=True)
 
 
-class UserDevice(db.Model):
+class UserDevice(Base):
     __tablename__ = "user_device"
 
-    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    user_id = db.Column(
-        db.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    user_id = Column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    device_id = db.Column(
-        db.ForeignKey("devices.id", ondelete="CASCADE"), primary_key=True
+    device_id = Column(
+        ForeignKey("devices.id", ondelete="CASCADE"), primary_key=True
     )
-    entry_time = db.Column(db.DateTime, default=datetime.datetime.utcnow())
-    device = db.relationship("Device", cascade="all, delete")
+    entry_time = Column(DateTime, default=datetime.datetime.utcnow())
+    device = relationship("Device", cascade="all, delete")
 
 
-class Device(db.Model):
+class Device(Base):
     __tablename__ = "devices"
 
-    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    device = db.Column(db.String, nullable=False)
+    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    device = Column(String, nullable=False)
 
 
-def init_tables(app):
-    """Создание таблиц если их нет"""
-
-    app.app_context().push()
-    db.create_all()
+def create_all(engine):
+    Base.metadata.create_all(bind=engine)

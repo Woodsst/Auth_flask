@@ -1,7 +1,7 @@
-from jwt_api import decode_refresh_token, get_token_time_to_end
-from services.service_base import ServiceBase
-from storages.db_connect import redis_conn
-from storages.redis.redis_api import Redis
+from auth.app.jwt_api import decode_refresh_token, get_token_time_to_end
+from auth.app.services.service_base import ServiceBase
+from auth.app.storages.db_connect import redis_conn
+from auth.app.storages.redis.redis_api import Redis
 
 
 class Update(ServiceBase):

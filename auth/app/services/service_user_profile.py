@@ -1,7 +1,7 @@
 import json
 
 from auth.app.services.service_base import ServiceBase
-from auth.app.storages.db_connect import db
+from auth.app.storages.db_connect import db_session
 from auth.app.storages.postgres.postgres_api import Postgres
 from flask import Request
 from email_validator import validate_email
@@ -75,4 +75,4 @@ class ProfileService(ServiceBase):
 
 
 def profile_service():
-    return ProfileService(Postgres(db))
+    return ProfileService(Postgres(db_session))

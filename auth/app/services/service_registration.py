@@ -1,12 +1,12 @@
 import json
 
 from email_validator import validate_email
-from exceptions import PasswordException
+from auth.app.exceptions import PasswordException
 from flask import Request
-from services.service_base import ServiceBase
-from storages.db_connect import db, redis_conn
-from storages.postgres.postgres_api import Postgres
-from storages.redis.redis_api import Redis
+from auth.app.services.service_base import ServiceBase
+from auth.app.storages.db_connect import db_session, redis_conn
+from auth.app.storages.postgres.postgres_api import Postgres
+from auth.app.storages.redis.redis_api import Redis
 from werkzeug.security import generate_password_hash
 
 
@@ -34,4 +34,4 @@ class Registration(ServiceBase):
 
 
 def registration_api():
-    return Registration(Postgres(db), Redis(redis_conn))
+    return Registration(Postgres(db_session), Redis(redis_conn))

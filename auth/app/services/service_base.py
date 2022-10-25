@@ -1,9 +1,9 @@
 from typing import Optional
 
-import jwt_api as jwt
+import auth.app.jwt_api as jwt
 from flask import Request
-from storages.postgres.postgres_api import Postgres
-from storages.redis.redis_api import Redis
+from auth.app.storages.postgres.postgres_api import Postgres
+from auth.app.storages.redis.redis_api import Redis
 from werkzeug.security import generate_password_hash, check_password_hash
 
 

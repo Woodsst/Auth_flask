@@ -16,7 +16,7 @@ app.register_blueprint(profile)
 
 
 def main():
-    init_db(app)
+    init_db()
     logger.info("app start")
     app.run(host=default_settings.host_app, debug=default_settings.debug)
 

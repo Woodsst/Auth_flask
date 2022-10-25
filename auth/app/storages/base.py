@@ -20,7 +20,7 @@ class BaseStorage(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def put_user_social(self, user_name: str):
+    def put_user_social(self, social: str, user_id: str, url: str):
         """Добавление социальных сетей клиента"""
         pass
 

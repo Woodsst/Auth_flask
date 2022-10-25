@@ -2,9 +2,14 @@ import uuid
 
 import sqlalchemy
 from psycopg2.errors import UniqueViolation
-from storages.base import BaseStorage
-from storages.postgres.db_models import (Device, Social, User, UserDevice,
-                                         UserSocial)
+from auth.app.storages.base import BaseStorage
+from auth.app.storages.postgres.db_models import (
+    Device,
+    Social,
+    User,
+    UserDevice,
+    UserSocial,
+)
 
 
 class Postgres(BaseStorage):
@@ -29,8 +34,8 @@ class Postgres(BaseStorage):
                 role="user",
             )
             self._set_device(user_data.get("device"), user_id)
-            self.orm.session.add(user)
-            self.orm.session.commit()
+            self.orm.add(user)
+            self.orm.commit()
         except UniqueViolation:
             return False
         except sqlalchemy.exc.IntegrityError:
@@ -43,15 +48,15 @@ class Postgres(BaseStorage):
         id = uuid.uuid4()
         device = Device(id=id, device=device)
         user_device = UserDevice(device_id=id, user_id=user_id)
-        self.orm.session.add(device)
-        self.orm.session.add(user_device)
+        self.orm.add(device)
+        self.orm.add(user_device)
 
     def _set_social(self, social_id: str, user_id: str, url):
         """Добавление новой социальной сети клиента"""
 
         user_social = UserSocial(user_id=user_id, url=url, social_id=social_id)
 
-        self.orm.session.add(user_social)
+        self.orm.add(user_social)
 
     def _add_social(self, social: str) -> str:
         """Добавление социальной сети в список сетей,
@@ -62,7 +67,7 @@ class Postgres(BaseStorage):
             return id.id
         id = uuid.uuid4()
         social_model = Social(id=id, name=social)
-        self.orm.session.add(social_model)
+        self.orm.add(social_model)
 
         return id
 
@@ -71,14 +76,14 @@ class Postgres(BaseStorage):
 
         social_id = self._add_social(social)
         self._set_social(social_id, user_id, url)
-        self.orm.session.commit()
+        self.orm.commit()
 
     def get_user_device_history(self, user_id: str) -> list:
         """Получение данных о времени и устройствах
         на которых клиент логинился в сервис"""
 
         device_history = (
-            self.orm.session.query(Device.device, UserDevice.entry_time)
+            self.orm.query(Device.device, UserDevice.entry_time)
             .join(User)
             .join(Device)
             .filter(UserDevice.user_id == user_id)
@@ -90,7 +95,7 @@ class Postgres(BaseStorage):
         """Получение данных о социальных сетях клиента"""
 
         user_social = (
-            self.orm.session.query(Social.name, UserSocial.url)
+            self.orm.query(Social.name, UserSocial.url)
             .join(User)
             .join(Social)
             .filter(UserSocial.user_id == user_id)
@@ -101,22 +106,20 @@ class Postgres(BaseStorage):
     def change_user_email(self, user_id: str, email: str):
         """Изменение почты клиента"""
 
-        self.orm.session.query(User).filter(User.id == user_id).update(
+        self.orm.query(User).filter(User.id == user_id).update(
             {"email": email}, synchronize_session="fetch"
         )
-        self.orm.session.commit()
+        self.orm.commit()
 
     def get_user_password(self, user_id: str):
         return (
-            self.orm.session.query(User.password)
-            .filter(User.id == user_id)
-            .first()
+            self.orm.query(User.password).filter(User.id == user_id).first()
         )[0]
 
     def change_user_password(self, user_id, password: str):
         """Изменение пароля клиента"""
 
-        self.orm.session.query(User).filter(User.id == user_id).update(
+        self.orm.query(User).filter(User.id == user_id).update(
             {"password": password}, synchronize_session="fetch"
         )
-        self.orm.session.commit()
+        self.orm.commit()
