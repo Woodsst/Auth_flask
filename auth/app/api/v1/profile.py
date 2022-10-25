@@ -14,3 +14,9 @@ def user_full_information():
 def user_device_history():
     user_devices_data = profile_service().get_devices_user_history(request)
     return user_devices_data, 200
+
+
+@profile.route("/profile/socials", methods=["GET"])
+def user_socials():
+    user_socials_data = profile_service().get_socials(request)
+    return user_socials_data, 200

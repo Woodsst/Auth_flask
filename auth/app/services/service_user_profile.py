@@ -40,6 +40,11 @@ class ProfileService(ServiceBase):
             history.append(entry)
         return history
 
+    def get_socials(self, request):
+        user_id = self.get_user_id_from_token(request)
+        social = self.db.get_user_social(user_id)
+        return social
+
 
 def profile_service():
     return ProfileService(Postgres(db))
