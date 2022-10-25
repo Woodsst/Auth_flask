@@ -6,6 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import validates
 from sqlalchemy_utils.types.choice import ChoiceType
 from storages.db_connect import db
+from exceptions import LoginException
 
 
 class User(db.Model):
@@ -33,7 +34,7 @@ class User(db.Model):
     def validate_login(self, key, field) -> str:
         if key == "login":
             if len(field) <= 2:
-                raise ValueError("login too short")
+                raise LoginException()
         return field
 
     social = db.relationship("UserSocial", cascade="all, delete")
