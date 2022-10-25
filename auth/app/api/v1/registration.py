@@ -10,12 +10,13 @@ registration_page = Blueprint(
 
 @registration_page.route("/registration", methods=["POST"])
 def registration_user():
+    """Ендпоинт регистрации клиента, принимает POST запрос с данными клиента
+    в теле запроса"""
     try:
         response = registration_api().registration(request)
         if response:
             return jsonify("status: registration complete"), 201
-        else:
-            return jsonify({"error": "login or email already registered"}), 409
+        return jsonify({"error": "login or email already registered"}), 409
     except PasswordException:
         return jsonify({"error": "pass too short"}), 403
     except email_validator.EmailSyntaxError:

@@ -12,6 +12,8 @@ from email_validator import validate_email
 
 
 class Registration(ServiceBase):
+    """Сервис регистрации клиентов"""
+
     def registration(self, request: Request) -> dict:
         """Регистрация нового пользователя"""
 
@@ -28,6 +30,8 @@ class Registration(ServiceBase):
 
     @staticmethod
     def validation_request(user_data: dict):
+        """Валидация данных из тела запроса"""
+
         if len(user_data["user"]["password"]) < 8:
             raise PasswordException("password too short")
         validate_email(email=user_data["user"]["email"])

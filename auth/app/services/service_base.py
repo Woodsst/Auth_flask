@@ -4,6 +4,8 @@ import jwt_api as jwt
 
 
 class ServiceBase:
+    """Родительский класс для сервисов"""
+
     def __init__(self, db: Postgres = None, cash: Redis = None):
         self.db = db
         self.cash = cash

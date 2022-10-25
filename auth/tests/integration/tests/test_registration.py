@@ -8,6 +8,8 @@ from auth.tests.integration.utils.db_requests import clear_table
 
 
 def test_registration_200(postgres_con, http_con):
+    """Проверка регистрации клиента"""
+
     http_con.request(
         "POST",
         "/api/v1/registration",
@@ -20,6 +22,8 @@ def test_registration_200(postgres_con, http_con):
 
 
 def test_registration_409(http_con, postgres_con):
+    """Проверка ошибки регистрации при уже существующем клиенте"""
+
     http_con.request(
         "POST",
         "/api/v1/registration",
@@ -102,6 +106,7 @@ def test_registration_409(http_con, postgres_con):
 def test_registration_403(
     http_con, postgres_con, bad_request, status_code, response_body
 ):
+    """Проверка ошибок валидации логина пароля и почты"""
     http_con.request(**bad_request)
     response = http_con.getresponse()
     assert response.status == HTTPStatus.FORBIDDEN

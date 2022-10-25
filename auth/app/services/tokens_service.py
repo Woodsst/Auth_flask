@@ -13,6 +13,8 @@ from flask import Request, request, jsonify
 
 
 class TokensService(ServiceBase):
+    """Сервис для работы с обновлением и проверкой токенов"""
+
     def update_tokens(self, token: str) -> dict:
         """Функция обновления токена.
         Проводится проврка наличия токена среди отработаных токенов
@@ -31,6 +33,8 @@ class TokensService(ServiceBase):
 
     @staticmethod
     def check_token(request: Request):
+        """Функция проверки состояния токена"""
+
         token = request.headers["Authorization"]
         token = token.split(" ")[1]
         token_time = get_token_time_to_end(token)
