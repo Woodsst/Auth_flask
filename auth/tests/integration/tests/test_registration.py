@@ -58,7 +58,7 @@ def test_registration_409(http_con, postgres_con):
                 ),
                 "headers": {"user-agent": "python"},
             },
-            HTTPStatus.FORBIDDEN,
+            HTTPStatus.BAD_REQUEST,
             {"error": "login too short"},
         ),
         (
@@ -76,7 +76,7 @@ def test_registration_409(http_con, postgres_con):
                 ),
                 "headers": {"user-agent": "python"},
             },
-            HTTPStatus.FORBIDDEN,
+            HTTPStatus.BAD_REQUEST,
             {"error": "pass too short"},
         ),
         (
@@ -94,7 +94,7 @@ def test_registration_409(http_con, postgres_con):
                 ),
                 "headers": {"user-agent": "python"},
             },
-            HTTPStatus.FORBIDDEN,
+            HTTPStatus.BAD_REQUEST,
             {"error": "The email address is not valid"},
         ),
     ],
@@ -104,6 +104,6 @@ def test_registration_403(
 ):
     http_con.request(**bad_request)
     response = http_con.getresponse()
-    assert response.status == HTTPStatus.FORBIDDEN
+    assert response.status == status_code
     assert json.loads(response.read()) == response_body
     clear_table(postgres_con)

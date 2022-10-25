@@ -18,8 +18,8 @@ def registration_user():
         else:
             return jsonify({"error": "login or email already registered"}), 409
     except PasswordException:
-        return jsonify({"error": "pass too short"}), 403
+        return jsonify({"error": "pass too short"}), 400
     except email_validator.EmailSyntaxError:
-        return jsonify({"error": "The email address is not valid"}), 403
+        return jsonify({"error": "The email address is not valid"}), 400
     except LoginException:
-        return jsonify({"error": "login too short"}), 403
+        return jsonify({"error": "login too short"}), 400

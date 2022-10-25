@@ -4,6 +4,7 @@ from services.service_base import ServiceBase
 from storages.db_connect import db
 from storages.postgres.postgres_api import Postgres
 from flask import Request
+from email_validator import validate_email
 
 
 class ProfileService(ServiceBase):
@@ -27,11 +28,11 @@ class ProfileService(ServiceBase):
     def get_devices_user_history(self, request: Request):
         user_id = self.get_user_id_from_token(request)
         raw_history = self.db.get_user_device_history(user_id)
-        history = self.format_devices_history(raw_history)
+        history = self._format_devices_history(raw_history)
         return history
 
     @staticmethod
-    def format_devices_history(raw_history: list) -> dict:
+    def _format_devices_history(raw_history: list) -> dict:
         history = []
         for entry in raw_history:
             entry = entry._asdict()
@@ -44,6 +45,13 @@ class ProfileService(ServiceBase):
         user_id = self.get_user_id_from_token(request)
         social = self.db.get_user_social(user_id)
         return social
+
+    def change_email(self, request: Request):
+        user_data = json.loads(request.data)
+        new_email = user_data.get("new_email")
+        validate_email(new_email)
+        user_id = self.get_user_id_from_token(request)
+        self.db.change_user_email(user_id, new_email)
 
 
 def profile_service():

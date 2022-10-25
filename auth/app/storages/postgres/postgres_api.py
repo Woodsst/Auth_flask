@@ -97,3 +97,11 @@ class Postgres(BaseStorage):
             .all()
         )
         return user_social
+
+    def change_user_email(self, user_id: str, email: str):
+        """Изменение почты клиента"""
+
+        self.orm.session.query(User).filter(User.id == user_id).update(
+            {"email": email}, synchronize_session="fetch"
+        )
+        self.orm.session.commit()
