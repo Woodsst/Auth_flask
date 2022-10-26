@@ -1,13 +1,14 @@
 import email_validator
 from flask import Blueprint, request, jsonify
 from services.service_user_profile import profile_service
-
+from services.tokens_service import token_required
 from exceptions import PasswordException
 
 profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
 
 
 @profile.route("/", methods=["GET"])
+@token_required()
 def user_full_information():
     """Ендпоинт для запроса данных пользователя"""
 
@@ -16,6 +17,7 @@ def user_full_information():
 
 
 @profile.route("/devices", methods=["GET"])
+@token_required()
 def user_device_history():
     """Ендпоинт для запроса истории девайсов с которых была авторизация"""
 
@@ -24,6 +26,7 @@ def user_device_history():
 
 
 @profile.route("/socials", methods=["GET"])
+@token_required()
 def user_socials():
     """Ендпоинт списка социальных сетей пользователя"""
 
@@ -32,6 +35,7 @@ def user_socials():
 
 
 @profile.route("/change/email", methods=["POST"])
+@token_required()
 def change_user_email():
     """Ендпоинт для изменения почтового адреса пользователя"""
 
@@ -43,6 +47,7 @@ def change_user_email():
 
 
 @profile.route("/change/password", methods=["POST"])
+@token_required
 def change_user_password():
     """Ендпоинт для изменения пароля пользователя"""
     try:

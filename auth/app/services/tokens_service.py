@@ -5,6 +5,7 @@ import jwt
 from jwt_api import (
     get_token_time_to_end,
     decode_refresh_token,
+    decode_access_token
 )
 from services.service_base import ServiceBase
 from storages.db_connect import redis_conn
@@ -48,21 +49,32 @@ def tokens_service():
     return TokensService(cash=Redis(redis_conn))
 
 
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        if "Authorization" in request.headers:
-            token = request.headers["Authorization"]
-            token = token.split(" ")[1]
-        if not token:
-            return jsonify({"message": "Token is missing !!"}), 401
-        try:
-            token_time = get_token_time_to_end(token)
-            if token_time <= 0:
-                return jsonify({"message": "Token time expired"}), 401
-        except jwt.exceptions.InvalidSignatureError:
-            return jsonify({"error": "token is invalid"}), 401
-        return f(*args, **kwargs)
+def token_required(admin=False):
 
-    return decorated
+    def f_wrapper(f):
+
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            token = None
+            if request.headers.get('Authorization'):
+                token = request.headers["Authorization"]
+                token = token.split(" ")
+                if len(token) > 1:
+                    token = token[1]
+            if not token:
+                return jsonify({"message": "Token is missing !!"}), 401
+            if admin:
+                payload = decode_access_token(token)
+                if payload.get('role') != 1:
+                    return jsonify({"message": "Forbidden"}), 403
+            try:
+                token_time = get_token_time_to_end(token)
+                if token_time <= 0:
+                    return jsonify({"message": "Token time expired"}), 401
+            except jwt.exceptions.InvalidSignatureError:
+                return jsonify({"error": "token is invalid"}), 401
+            except jwt.exceptions.DecodeError:
+                return jsonify({"error": "token is invalid"}), 401
+            return f(*args, **kwargs)
+        return decorated
+    return f_wrapper
