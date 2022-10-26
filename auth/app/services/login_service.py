@@ -1,6 +1,6 @@
 from flask import Request, jsonify, make_response
 from services.service_base import ServiceBase
-from storages.db_connect import db, redis_conn
+from storages.db_connect import db_session, redis_conn
 from storages.postgres.db_models import User
 from storages.postgres.postgres_api import Postgres
 from storages.redis.redis_api import Redis
@@ -22,17 +22,18 @@ class LoginAPI(ServiceBase):
                 return self.generate_tokens(payload)
             responseObject = {
                 "status": "fail",
-                "message": "the password does not match the user's password"
+                "message": "the password does not match the user's password",
             }
             return make_response(jsonify(responseObject)), 401
         except AttributeError:
             responseObject = {
                 "status": "fail",
-                "message": ("The user with such login and password was not"
-                            "found")
+                "message": (
+                    "The user with such login and password was not" "found"
+                ),
             }
             return make_response(jsonify(responseObject)), 403
 
 
 def login_api():
-    return LoginAPI(Postgres(db), Redis(redis_conn))
+    return LoginAPI(Postgres(db_session), Redis(redis_conn))
