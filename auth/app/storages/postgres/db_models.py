@@ -100,6 +100,8 @@ def create_all(engine, db_session):
     """Создание таблиц по моделям и добавление стандартных ролей"""
 
     Base.metadata.create_all(bind=engine)
+    if len(Role.query.all()) > 0:
+        return
     admin = Role(role="Admin", description="full access")
     user = Role(role="User", description="default access")
     db_session.add(admin)

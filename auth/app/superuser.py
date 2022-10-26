@@ -1,30 +1,25 @@
-import uuid
-
-import psycopg2
 import argparse
 
+import sqlalchemy
 from werkzeug.security import generate_password_hash
 
-from config.settings import default_settings
+from storages.db_connect import db_session
+from storages.postgres.db_models import User
+from services.crud import DefaultRole
 
 
 def add_superuser(user_data: dict):
-    con = psycopg2.connect(default_settings.postgres)
-    with con.cursor() as cur:
-        cur.execute(
-            """
-        INSERT INTO users (id, login, password, role, email)
-        VALUES (%(id)s, %(login)s, %(password)s, %(role)s, %(email)s)
-        """,
-            {
-                "id": str(uuid.uuid4()),
-                "login": user_data["login"],
-                "password": generate_password_hash(user_data["password"]),
-                "role": "admin",
-                "email": user_data["email"],
-            },
-        )
-        con.commit()
+    try:
+        admin = User(role=DefaultRole.ADMIN_KEY.value,
+                     login=user_data['login'],
+                     password=generate_password_hash(user_data["password"]),
+                     email=user_data['email']
+                     )
+        db_session.add(admin)
+        db_session.commit()
+    except sqlalchemy.exc.IntegrityError:
+        print("User already exist")
+        return
 
 
 parser = argparse.ArgumentParser()
