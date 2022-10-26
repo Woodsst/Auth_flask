@@ -1,9 +1,8 @@
+from functools import lru_cache
+
 from flask import Request, jsonify, make_response
 from services.service_base import ServiceBase
-from storages.db_connect import db_session, redis_conn
 from storages.postgres.db_models import User
-from storages.postgres.postgres_api import Postgres
-from storages.redis.redis_api import Redis
 from werkzeug.security import check_password_hash
 
 
@@ -35,5 +34,6 @@ class LoginAPI(ServiceBase):
             return make_response(jsonify(responseObject)), 403
 
 
+@lru_cache()
 def login_api():
-    return LoginAPI(Postgres(db_session), Redis(redis_conn))
+    return LoginAPI()

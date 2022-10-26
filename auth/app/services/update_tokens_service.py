@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from jwt_api import decode_refresh_token, get_token_time_to_end
 from services.service_base import ServiceBase
 from storages.db_connect import redis_conn
@@ -23,5 +25,6 @@ class Update(ServiceBase):
             return self.generate_tokens(payload)
 
 
+@lru_cache()
 def update_service():
     return Update(cash=Redis(redis_conn))

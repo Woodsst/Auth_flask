@@ -96,5 +96,12 @@ class Role(Base):
     description = Column(String, nullable=False)
 
 
-def create_all(engine):
+def create_all(engine, db_session):
+    """Создание таблиц по моделям и добавление стандартных ролей"""
+
     Base.metadata.create_all(bind=engine)
+    admin = Role(role="Admin", description="full access")
+    user = Role(role="User", description="default access")
+    db_session.add(admin)
+    db_session.add(user)
+    db_session.commit()

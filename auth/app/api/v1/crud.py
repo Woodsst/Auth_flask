@@ -6,7 +6,7 @@ crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
 
 @crud_pages.route("/add_role", methods=["POST"])
 def add_role():
-    if crud().create_role(request.get_json()):
+    if crud().add_role(request.get_json()):
         return jsonify({"correct": "role created"})
     return jsonify({"fail": "bad request"}), 400
 
