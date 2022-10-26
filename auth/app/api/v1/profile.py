@@ -2,7 +2,7 @@ import email_validator
 from flask import Blueprint, request, jsonify
 from services.service_user_profile import profile_service
 
-from auth.app.exceptions import PasswordException
+from exceptions import PasswordException
 
 profile = Blueprint("profile", __name__, url_prefix="/api/v1")
 

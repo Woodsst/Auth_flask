@@ -2,7 +2,7 @@ from functools import wraps
 
 import jwt
 
-from auth.app.jwt_api import (
+from jwt_api import (
     get_token_time_to_end,
     decode_refresh_token,
 )

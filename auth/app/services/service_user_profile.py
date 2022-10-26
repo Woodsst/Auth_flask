@@ -7,7 +7,7 @@ from flask import Request
 from email_validator import validate_email
 from werkzeug.security import generate_password_hash
 
-from auth.app.exceptions import PasswordException
+from exceptions import PasswordException
 
 
 class ProfileService(ServiceBase):
