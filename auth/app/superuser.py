@@ -10,11 +10,12 @@ from services.crud import DefaultRole
 
 def add_superuser(user_data: dict):
     try:
-        admin = User(role=DefaultRole.ADMIN_KEY.value,
-                     login=user_data['login'],
-                     password=generate_password_hash(user_data["password"]),
-                     email=user_data['email']
-                     )
+        admin = User(
+            role=DefaultRole.ADMIN_KEY.value,
+            login=user_data["login"],
+            password=generate_password_hash(user_data["password"]),
+            email=user_data["email"],
+        )
         db_session.add(admin)
         db_session.commit()
     except sqlalchemy.exc.IntegrityError:

@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.crud import crud
 from services.tokens_service import token_required
+
 crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
 
 
