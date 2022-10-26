@@ -16,9 +16,3 @@ db_session = scoped_session(
 )
 Base = declarative_base()
 Base.query = db_session.query_property()
-
-
-def init_db():
-    import storages.postgres.db_models as models
-
-    models.create_all(engine, db_session)
