@@ -1,25 +1,34 @@
 import json
+from functools import lru_cache
 
 from services.service_base import ServiceBase
 from storages.db_connect import db_session
-from storages.postgres.postgres_api import Postgres
+from storages.postgres.db_models import (
+    User,
+    Social,
+    UserSocial,
+    Device,
+    UserDevice,
+    Role,
+)
 from flask import Request
 from email_validator import validate_email
 from werkzeug.security import generate_password_hash
 
-from auth.app.exceptions import PasswordException
+from exceptions import PasswordException
 
 
 class ProfileService(ServiceBase):
     def get_all_user_info(self, request: Request):
         user_id = self.get_user_id_from_token(request)
 
-        user_data = self.db.get_user_data(user_id)
+        user_data = self.get_user_data(user_id)
         return self._format_user_data(user_data)
 
     @staticmethod
     def _format_user_data(user_data: dict) -> dict:
-        role = user_data.get("role").value
+        role = user_data.get("role")
+        user_data = user_data.get("User").to_dict()
         return json.dumps(
             {
                 "login": user_data.get("login"),
@@ -30,7 +39,7 @@ class ProfileService(ServiceBase):
 
     def get_devices_user_history(self, request: Request):
         user_id = self.get_user_id_from_token(request)
-        raw_history = self.db.get_user_device_history(user_id)
+        raw_history = self.get_user_device_history(user_id)
         history = self._format_devices_history(raw_history)
         return history
 
@@ -46,7 +55,7 @@ class ProfileService(ServiceBase):
 
     def get_socials(self, request):
         user_id = self.get_user_id_from_token(request)
-        social = self.db.get_user_social(user_id)
+        social = self.get_user_social(user_id)
         return social
 
     def change_email(self, request: Request):
@@ -54,7 +63,7 @@ class ProfileService(ServiceBase):
         new_email = user_data.get("new_email")
         validate_email(new_email)
         user_id = self.get_user_id_from_token(request)
-        self.db.change_user_email(user_id, new_email)
+        self.change_user_email(user_id, new_email)
 
     def change_password(self, request: Request):
         user_id = self.get_user_id_from_token(request)
@@ -69,10 +78,66 @@ class ProfileService(ServiceBase):
             if new_password == password:
                 return False
             new_password = generate_password_hash(new_password)
-            self.db.change_user_password(user_id, new_password)
+            self.change_user_password(user_id, new_password)
             return True
         return False
 
+    def change_user_email(self, user_id: str, email: str):
+        """Изменение почты клиента"""
 
+        self.orm.query(User).filter(User.id == user_id).update(
+            {"email": email}, synchronize_session="fetch"
+        )
+        self.orm.commit()
+
+    def change_user_password(self, user_id, password: str):
+        """Изменение пароля клиента"""
+
+        self.orm.query(User).filter(User.id == user_id).update(
+            {"password": password}, synchronize_session="fetch"
+        )
+        self.orm.commit()
+
+    def get_user_data(self, user_id: str) -> dict:
+        """Получение данных о клиенте"""
+
+        user_data = (
+            self.orm.query(User, Role.role)
+            .join(Role)
+            .filter(User.id == user_id)
+            .first()
+        )
+
+        user_data = user_data._asdict()
+
+        return user_data
+
+    def get_user_social(self, user_id: str) -> list:
+        """Получение данных о социальных сетях клиента"""
+
+        user_social = (
+            self.orm.query(Social.name, UserSocial.url)
+            .join(User)
+            .join(Social)
+            .filter(UserSocial.user_id == user_id)
+            .all()
+        )
+        return user_social
+
+    def get_user_device_history(self, user_id: str) -> list:
+        """Получение данных о времени и устройствах
+        на которых клиент логинился в сервис"""
+
+        device_history = (
+            self.orm.query(Device.device, UserDevice.entry_time)
+            .join(User)
+            .join(Device)
+            .filter(UserDevice.user_id == user_id)
+            .all()
+        )
+        return device_history
+
+
+@lru_cache()
 def profile_service():
-    return ProfileService(Postgres(db_session))
+    return ProfileService(db_session)

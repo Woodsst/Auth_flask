@@ -1,8 +1,8 @@
-from functools import wraps
+from functools import wraps, lru_cache
 
 import jwt
 
-from auth.app.jwt_api import (
+from jwt_api import (
     get_token_time_to_end,
     decode_refresh_token,
 )
@@ -43,6 +43,7 @@ class TokensService(ServiceBase):
         return False
 
 
+@lru_cache()
 def tokens_service():
     return TokensService(cash=Redis(redis_conn))
 

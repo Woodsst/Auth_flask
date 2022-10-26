@@ -15,3 +15,9 @@ USERS = [
         "email": "lupa3@gmail.com",
     },
 ]
+
+LOGIN = {"login": "user1", "password": "pupaaaaaaa"}
+
+CHANGE_EMAIL = {"new_email": "dfjkg@gmail.com"}
+
+ADD_ROLE = {"role": "new_role", "description": "new description"}
