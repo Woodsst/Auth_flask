@@ -17,11 +17,10 @@ class DefaultRole(enum.Enum):
 
 class Crud(ServiceBase):
     def add_role(self, role: str, description: str) -> bool:
-        """Создание новой роли"""
+        """Добавление новой роли в базу"""
         return self.__create_role(role, description)
 
     def __create_role(self, role: str, description: str):
-        """Добавление новой роли в базу"""
         try:
             role = Role(role=role, description=description)
             self.orm.add(role)
@@ -32,13 +31,11 @@ class Crud(ServiceBase):
         return True
 
     def delete_role(self, role: str) -> bool:
-        """Удаление роли"""
+        """Удаление роли из базы, если есть пользователи с этой ролью,
+        они получают базовую роль user"""
         return self.__delete_role(role)
 
     def __delete_role(self, role: str):
-        """Удаление роли из базы, если есть пользователи с этой ролью,
-        они получают базовую роль user"""
-
         role_id = (
             self.orm.query(Role.role_id).filter(Role.role == role).first()
         )
@@ -56,6 +53,8 @@ class Crud(ServiceBase):
     def change_role(
         self, role: str, change_for_description: str, change_for_role: str
     ):
+        """Изменение роли или описания роли в базе, при отсутствии роли
+        возвращает False"""
         return self.__change_role(
             role, change_for_description, change_for_role
         )
@@ -63,9 +62,6 @@ class Crud(ServiceBase):
     def __change_role(
         self, role: str, change_for_description: str, change_for_role: str
     ):
-        """Изменение роли или описания роли в базе, при отсутствии роли
-        возвращает False"""
-
         if len(change_for_description) > 0:
             self.orm.query(Role).filter(Role.role == role).update(
                 {"description": change_for_description},
@@ -84,22 +80,16 @@ class Crud(ServiceBase):
 
     def all_role(self) -> dict:
         """Возвращает список всех ролей"""
+
         roles = self.orm.query(Role).all()
         return {role.role: role.description for role in roles}
 
-    def set_user_role(self, request_data: dict):
-        """Назначить пользователю роль"""
-
-        user_id = request_data.get("user_id")
-        role = request_data.get("role")
-        if user_id is None or role is None:
-            return False
-        if self.__set_user_role(user_id, role):
-            return True
-        return False
+    def set_user_role(self, user_id: str, role: str) -> bool:
+        """Назначить пользователю роль, если роли нет или она уже задана
+        возвращает False"""
+        return self.__set_user_role(user_id, role)
 
     def __set_user_role(self, user_id: str, role: str):
-        """Назначить пользователю роль"""
         try:
             result = (
                 self.orm.query(User)
@@ -113,13 +103,6 @@ class Crud(ServiceBase):
             self.orm.rollback()
             return False
         return True
-
-    def set_default_user_role(self, user_id: str):
-        """Задать стандартную роль пользователю"""
-
-        if self.__set_user_role(user_id, 1):
-            return True
-        return False
 
     def get_user_role(self, user_id: str) -> list:
         """Получить роль пользователя"""

@@ -76,7 +76,8 @@ def change_role():
 
 @crud_pages.route("/roles", methods=["GET"])
 @token_required(admin=True)
-def roles():
+def get_roles():
+    """Получение списка всех возможных ролей и их индексов"""
     roles = crud().all_role()
     return jsonify(roles)
 
@@ -84,6 +85,16 @@ def roles():
 @crud_pages.route("/set_user_role", methods=["POST"])
 @token_required(admin=True)
 def set_user_role():
-    if crud().set_user_role(request.get_json()):
-        return jsonify({"correct": "role set"})
-    return jsonify({"fail": "bad request"}), 400
+    """Назначить пользователю роль, задает любую из возможных ролей"""
+
+    request_data = request.get_json()
+    user_id = request_data.get("user_id")
+    role = request_data.get("role")
+
+    if user_id is None or role is None:
+        return jsonify(BAD_REQUEST), 400
+
+    if crud().set_user_role(user_id, role):
+        return jsonify(ROLE_CHANGE)
+
+    return jsonify(BAD_REQUEST), 400
