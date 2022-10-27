@@ -25,15 +25,6 @@ def user_device_history():
     return user_devices_data
 
 
-@profile.route("/socials", methods=["GET"])
-@token_required()
-def user_socials():
-    """Ендпоинт списка социальных сетей пользователя"""
-
-    user_socials_data = profile_service().get_socials(request)
-    return user_socials_data
-
-
 @profile.route("/change/email", methods=["POST"])
 @token_required()
 def change_user_email():
