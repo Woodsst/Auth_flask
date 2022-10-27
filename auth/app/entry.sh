@@ -2,4 +2,4 @@
 
 cd /auth/app/
 alembic upgrade head
-python3 main.py
+uwsgi --http 0.0.0.0:5000 --master -p 4 -w wsgi:app

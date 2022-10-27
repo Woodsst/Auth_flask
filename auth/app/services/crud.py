@@ -36,6 +36,7 @@ class Crud(ServiceBase):
             self.orm.add(role)
             self.orm.commit()
         except sqlalchemy.exc.IntegrityError:
+            self.orm.rollback()
             return False
         return True
 
@@ -128,6 +129,7 @@ class Crud(ServiceBase):
                 return False
             self.orm.commit()
         except sqlalchemy.exc.IntegrityError:
+            self.orm.rollback()
             return False
         return True
 

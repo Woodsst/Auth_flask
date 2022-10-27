@@ -50,6 +50,7 @@ class Registration(ServiceBase):
             self.orm.add(user)
             self.orm.commit()
         except sqlalchemy.exc.IntegrityError:
+            self.orm.rollback()
             return False
         return True
 
