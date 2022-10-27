@@ -31,16 +31,9 @@ class Crud(ServiceBase):
             return False
         return True
 
-    def delete_role(self, request_data: dict) -> bool:
+    def delete_role(self, role: str) -> bool:
         """Удаление роли"""
-
-        role = request_data.get("role")
-        if role == DefaultRole.USER.value or role == DefaultRole.ADMIN.value:
-            return False
-
-        if self.__delete_role(role):
-            return True
-        return False
+        return self.__delete_role(role)
 
     def __delete_role(self, role: str):
         """Удаление роли из базы, если есть пользователи с этой ролью,
@@ -49,12 +42,15 @@ class Crud(ServiceBase):
         role_id = (
             self.orm.query(Role.role_id).filter(Role.role == role).first()
         )
+        if role_id is None:
+            return False
         role_id = role_id[0]
         self.orm.query(User).filter(User.role == role_id).update(
             {"role": DefaultRole.USER_KEY.value}, synchronize_session="fetch"
         )
         self.orm.query(Role).filter(Role.role == role).delete()
         self.orm.commit()
+
         return True
 
     def change_role(self, request_data):

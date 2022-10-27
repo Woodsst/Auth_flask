@@ -1,7 +1,13 @@
 from flask import Blueprint, request, jsonify
-from services.crud import crud
+from services.crud import crud, DefaultRole
 from services.tokens_service import token_required
-from core.responses import BAD_REQUEST, ROLE_EXISTS
+from core.responses import (
+    BAD_REQUEST,
+    ROLE_EXISTS,
+    ROLE_CREATE,
+    ROLE_DELETE,
+    DEFAULT_ROLE_NOT_DELETE,
+    ROLE_NOT_EXIST)
 
 crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
 
@@ -21,16 +27,25 @@ def add_role():
         return jsonify(BAD_REQUEST), 400
 
     if crud().add_role(role, description):
-        return jsonify({"correct": "role created"})
+        return jsonify(ROLE_CREATE), 200
     return jsonify(ROLE_EXISTS), 400
 
 
 @crud_pages.route("/delete_role", methods=["POST"])
 @token_required(admin=True)
 def delete_role():
-    if crud().delete_role(request.get_json()):
-        return jsonify({"correct": "role delete"})
-    return jsonify({"fail": "bad request"}), 400
+    """Удаление роли, если были пользователи с удаляемой ролью, они получают
+    стандартную роль User"""
+
+    request_data = request.get_json()
+    role = request_data.get('role')
+    if role == DefaultRole.USER.value or role == DefaultRole.ADMIN.value:
+        return jsonify(DEFAULT_ROLE_NOT_DELETE), 400
+
+    if crud().delete_role(role):
+        return jsonify(ROLE_DELETE), 200
+
+    return jsonify(ROLE_NOT_EXIST), 400
 
 
 @crud_pages.route("/change_role", methods=["POST"])
