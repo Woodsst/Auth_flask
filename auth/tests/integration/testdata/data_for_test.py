@@ -21,3 +21,9 @@ LOGIN = {"login": "user1", "password": "pupaaaaaaa"}
 CHANGE_EMAIL = {"new_email": "dfjkg@gmail.com"}
 
 ADD_ROLE = {"role": "new_role", "description": "new description"}
+
+USER_AGENT = {"user-agent": "python"}
+
+REGISTRATION_URL = "/api/v1/registration"
+
+LOGIN_URL = "/api/v1/login"

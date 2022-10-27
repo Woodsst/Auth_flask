@@ -41,18 +41,18 @@ def change_user_email():
 
     try:
         profile_service().change_email(request)
-        return jsonify({"correct": "email changed"})
+        return jsonify({"message": "email changed"})
     except email_validator.EmailSyntaxError:
         return jsonify({"error": "The email address is not valid"}), 400
 
 
 @profile.route("/change/password", methods=["POST"])
-@token_required
+@token_required()
 def change_user_password():
     """Ендпоинт для изменения пароля пользователя"""
     try:
         if profile_service().change_password(request):
-            return jsonify({"correct": "password changed"})
+            return jsonify({"message": "password changed"})
         return jsonify({"error": "bad password"}), 400
     except PasswordException:
         return jsonify({"error": "pass too short"}), 400

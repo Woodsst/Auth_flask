@@ -4,7 +4,8 @@ import psycopg2
 from pytest import fixture
 from redis import Redis
 
-from auth.tests.integration.settings import default_settings
+from .settings import default_settings
+from .utils.db_requests import clear_table
 
 
 @fixture(scope="session")
@@ -36,3 +37,10 @@ def http_con():
     )
     yield con
     con.close()
+
+
+@fixture(scope="function")
+def clear_databases(postgres_con, redis_con):
+    yield
+    clear_table(postgres_con)
+    redis_con.execute_command("FLUSHDB")

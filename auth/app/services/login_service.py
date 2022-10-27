@@ -1,3 +1,4 @@
+import json
 from functools import lru_cache
 
 from flask import Request, jsonify, make_response
@@ -8,7 +9,7 @@ from werkzeug.security import check_password_hash
 
 class LoginAPI(ServiceBase):
     def login(self, request: Request):
-        data = request.get_json()
+        data = json.loads(request.data)
         login = data.get("login")
         password = data.get("password")
         try:
