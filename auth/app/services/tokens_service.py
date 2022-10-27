@@ -79,7 +79,7 @@ def token_required(admin=False):
                 return jsonify({"message": "Forbidden"}), 403
             if admin:
                 payload = decode_access_token(token)
-                if payload.get("role") != 1:
+                if int(payload.get("role")) != 1:
                     return jsonify({"message": "Forbidden"}), 403
             try:
                 token_time = get_token_time_to_end(token)

@@ -16,18 +16,9 @@ class DefaultRole(enum.Enum):
 
 
 class Crud(ServiceBase):
-    def add_role(self, request_data: dict) -> bool:
-        """Валидация и создание новой роли"""
-
-        role = request_data.get("role")
-        description = request_data.get("description")
-        if (len(role) == 0 or role is None) or (
-            len(description) == 0 or description is None
-        ):
-            return False
-        if self.__create_role(role, description):
-            return True
-        return False
+    def add_role(self, role: str, description: str) -> bool:
+        """Создание новой роли"""
+        return self.__create_role(role, description)
 
     def __create_role(self, role: str, description: str):
         """Добавление новой роли в базу"""
