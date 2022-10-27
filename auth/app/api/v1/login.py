@@ -16,7 +16,7 @@ def logout_user():
     if access_token is None:
         return jsonify({"message": "token is missing"})
 
-    access_token = access_token.split(' ')
+    access_token = access_token.split(" ")
     if len(access_token) != 2:
         return jsonify({"message": "wrong token format"})
 

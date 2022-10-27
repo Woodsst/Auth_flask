@@ -13,8 +13,9 @@ from storages.redis.redis_api import Redis
 class ServiceBase:
     """Родительский класс для сервисов"""
 
-    def __init__(self, orm: scoped_session = None, cash:
-    Redis = Redis(redis_conn)):
+    def __init__(
+        self, orm: scoped_session = None, cash: Redis = Redis(redis_conn)
+    ):
         self.orm: Optional[scoped_session] = orm
         self.cash: Optional[Redis] = cash
 
