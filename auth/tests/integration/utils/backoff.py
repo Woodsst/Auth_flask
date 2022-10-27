@@ -16,7 +16,8 @@ def backoff(
     log: Logger = logger,
 ):
     """
-    Функция для повторного выполнения функции через некоторое время, если возникла ошибка.
+    Функция для повторного выполнения функции
+    через некоторое время, если возникла ошибка.
     Использует наивный экспоненциальный рост времени повтора
     (factor) до граничного времени ожидания (border_sleep_time)
 
@@ -46,7 +47,8 @@ def backoff(
                     return result
                 except redis.exceptions.ConnectionError:
                     log.warning(
-                        f"redis соединение потеряно, следующая попытка соединения {connect_timer} sec "
+                        f"redis соединение потеряно, "
+                        f"следующая попытка соединения {connect_timer} sec "
                         f"Осталось попыток {connection_attempts - try_}"
                     )
                     connect_timer = connect_timer * 2**factor
