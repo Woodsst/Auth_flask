@@ -8,6 +8,7 @@ services:
       - app/config/.dev.env
     depends_on:
       - redis
+    entrypoint: ["/auth/app/entry.sh"]
 
   postgres:
     image: postgres:13

@@ -20,27 +20,38 @@ class TokensService(ServiceBase):
         """Функция обновления токена.
         Проводится проврка наличия токена среди отработаных токенов
         и выдача новой пары токенов"""
-        if self.cash.get_invalid_refresh_token(token):
+        if self.cash.get_token(token):
             return False
         else:
-            get_token_time_to_end(token)
-            self.cash.set_invalid_refresh_token(
+            time_to_end_token = get_token_time_to_end(token)
+            if not time_to_end_token:
+                return False
+            self.cash.set_token(
                 key=token,
                 value=1,  # Ключом является токен, значение неважно
-                exited=get_token_time_to_end(token),
+                exited=time_to_end_token,
             )
             payload = decode_refresh_token(token)
             return self.generate_tokens(payload)
 
-    @staticmethod
-    def check_token(request: Request):
+    def check_token(self, request: Request):
         """Функция проверки состояния токена"""
 
         token = request.headers["Authorization"]
-        token = token.split(" ")[1]
+        token = token.split(" ")
+        if len(token) > 1:
+            token = token[1]
+        else:
+            return False
+
+        if self.cash.get_token(token):
+            return False
+
         token_time = get_token_time_to_end(token)
-        if token_time > 0:
-            return True
+        if token_time:
+            if token_time > 0:
+                return True
+            return False
         return False
 
 
@@ -61,6 +72,8 @@ def token_required(admin=False):
                     token = token[1]
             if not token:
                 return jsonify({"message": "Token is missing !!"}), 401
+            if redis_conn.get(token):
+                return jsonify({"message": "Forbidden"}), 403
             if admin:
                 payload = decode_access_token(token)
                 if payload.get("role") != 1:

@@ -27,3 +27,10 @@ USER_AGENT = {"user-agent": "python"}
 REGISTRATION_URL = "/api/v1/registration"
 
 LOGIN_URL = "/api/v1/login"
+
+OUT_TIME_TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFlZj" \
+                 "hjNDI3LTExMDAtNDczNi04Y2IxLWRlMDlmZGUzNDMzNiIsInJvbGUiOiIy" \
+                 "IiwicmVjZWlwdF90aW1lIjoiMjAyMi0xMC0yNyAwOTo0ODoxNy4yMDg1NT" \
+                 "IiLCJlbmRfdGltZSI6IjIwMjItMTAtMjcgMTA6NDg6MTcuMjA4NTUyIiwi" \
+                 "YWNjZXNzIjoiYWNjZXNzIn0.7FBltHK7JzNh3MQ4lNlRtQ-T_GieVyv9PJ" \
+                 "l2BYq3WoA"

@@ -8,11 +8,11 @@ class BaseCash(abc.ABC):
         self.con = connect
 
     @abc.abstractmethod
-    def get_invalid_refresh_token(self, key: str) -> dict:
+    def get_token(self, key: str) -> dict:
         """Получить данные по ключу"""
         pass
 
     @abc.abstractmethod
-    def set_invalid_refresh_token(self, key: str, value: str, exited: int):
+    def set_token(self, key: str, value: str, exited: int):
         """Внести данные"""
         pass
