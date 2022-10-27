@@ -19,7 +19,10 @@ class TokensService(ServiceBase):
     def update_tokens(self, token: str) -> dict:
         """Функция обновления токена.
         Проводится проврка наличия токена среди отработаных токенов
-        и выдача новой пары токенов"""
+        и выдача новой пары токенов, refresh токен с действующим временем
+        вносится в редис в виде ключа,
+        значение ключа в данном случае роли не играет"""
+
         if self.cash.get_token(token):
             return False
         else:
@@ -28,7 +31,7 @@ class TokensService(ServiceBase):
                 return False
             self.cash.set_token(
                 key=token,
-                value=1,  # Ключом является токен, значение неважно
+                value=1,
                 exited=time_to_end_token,
             )
             payload = decode_refresh_token(token)
