@@ -5,8 +5,6 @@ from services.service_base import ServiceBase
 from storages.db_connect import db_session
 from storages.postgres.db_models import (
     User,
-    Social,
-    UserSocial,
     Device,
     UserDevice,
     Role,
@@ -20,6 +18,8 @@ from exceptions import PasswordException
 
 class ProfileService(ServiceBase):
     def get_all_user_info(self, request: Request):
+        """Получение данных пользователя"""
+
         user_id = self.get_user_id_from_token(request)
 
         user_data = self.get_user_data(user_id)
@@ -27,6 +27,8 @@ class ProfileService(ServiceBase):
 
     @staticmethod
     def _format_user_data(user_data: dict) -> dict:
+        """Форматирование данных из базы для отправки пользователю"""
+
         role = user_data.get("role")
         user_data = user_data.get("User").to_dict()
         return json.dumps(
@@ -38,6 +40,8 @@ class ProfileService(ServiceBase):
         )
 
     def get_devices_user_history(self, request: Request):
+        """Получение устройств с которых входили в профиль"""
+
         user_id = self.get_user_id_from_token(request)
         raw_history = self.get_user_device_history(user_id)
         history = self._format_devices_history(raw_history)
@@ -45,6 +49,8 @@ class ProfileService(ServiceBase):
 
     @staticmethod
     def _format_devices_history(raw_history: list) -> dict:
+        """Форматирование данных истории устройств для отправки пользователю"""
+
         history = []
         for entry in raw_history:
             entry = entry._asdict()
@@ -53,12 +59,9 @@ class ProfileService(ServiceBase):
             history.append(entry)
         return history
 
-    def get_socials(self, request):
-        user_id = self.get_user_id_from_token(request)
-        social = self.get_user_social(user_id)
-        return social
-
     def change_email(self, request: Request):
+        """Изменение почты пользователя"""
+
         user_data = json.loads(request.data)
         new_email = user_data.get("new_email")
         validate_email(new_email)
@@ -66,6 +69,8 @@ class ProfileService(ServiceBase):
         self.change_user_email(user_id, new_email)
 
     def change_password(self, request: Request):
+        """Изменение пароля пользователя"""
+
         user_id = self.get_user_id_from_token(request)
         user_data = json.loads(request.data)
         password = user_data.get("password")
@@ -83,7 +88,7 @@ class ProfileService(ServiceBase):
         return False
 
     def change_user_email(self, user_id: str, email: str):
-        """Изменение почты клиента"""
+        """Запрос в базу для изменения почты клиента"""
 
         self.orm.query(User).filter(User.id == user_id).update(
             {"email": email}, synchronize_session="fetch"
@@ -91,7 +96,7 @@ class ProfileService(ServiceBase):
         self.orm.commit()
 
     def change_user_password(self, user_id, password: str):
-        """Изменение пароля клиента"""
+        """Запрос в базу для изменения пароля клиента"""
 
         self.orm.query(User).filter(User.id == user_id).update(
             {"password": password}, synchronize_session="fetch"
@@ -111,18 +116,6 @@ class ProfileService(ServiceBase):
         user_data = user_data._asdict()
 
         return user_data
-
-    def get_user_social(self, user_id: str) -> list:
-        """Получение данных о социальных сетях клиента"""
-
-        user_social = (
-            self.orm.query(Social.name, UserSocial.url)
-            .join(User)
-            .join(Social)
-            .filter(UserSocial.user_id == user_id)
-            .all()
-        )
-        return user_social
 
     def get_user_device_history(self, user_id: str) -> list:
         """Получение данных о времени и устройствах
