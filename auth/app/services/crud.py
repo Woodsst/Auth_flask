@@ -53,25 +53,19 @@ class Crud(ServiceBase):
 
         return True
 
-    def change_role(self, request_data):
-        """Изменение роли или описания роли"""
-
-        role = request_data.get("role")
-        change_for_description = request_data.get("change_description")
-        change_for_role = request_data.get("change_role")
-
-        if change_for_role is None or change_for_description is None:
-            return False
-
-        if self.__change_role(role, change_for_description, change_for_role):
-            return True
-
-        return False
+    def change_role(
+        self, role: str, change_for_description: str, change_for_role: str
+    ):
+        return self.__change_role(
+            role, change_for_description, change_for_role
+        )
 
     def __change_role(
         self, role: str, change_for_description: str, change_for_role: str
     ):
-        """Изменение роли или описания"""
+        """Изменение роли или описания роли в базе, при отсутствии роли
+        возвращает False"""
+
         if len(change_for_description) > 0:
             self.orm.query(Role).filter(Role.role == role).update(
                 {"description": change_for_description},

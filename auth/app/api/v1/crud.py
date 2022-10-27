@@ -7,7 +7,9 @@ from core.responses import (
     ROLE_CREATE,
     ROLE_DELETE,
     DEFAULT_ROLE_NOT_DELETE,
-    ROLE_NOT_EXIST)
+    ROLE_NOT_EXIST,
+    ROLE_CHANGE,
+)
 
 crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
 
@@ -22,7 +24,7 @@ def add_role():
     description = request_data.get("description")
 
     if (len(role) == 0 or role is None) or (
-            len(description) == 0 or description is None
+        len(description) == 0 or description is None
     ):
         return jsonify(BAD_REQUEST), 400
 
@@ -38,7 +40,7 @@ def delete_role():
     стандартную роль User"""
 
     request_data = request.get_json()
-    role = request_data.get('role')
+    role = request_data.get("role")
     if role == DefaultRole.USER.value or role == DefaultRole.ADMIN.value:
         return jsonify(DEFAULT_ROLE_NOT_DELETE), 400
 
@@ -51,9 +53,25 @@ def delete_role():
 @crud_pages.route("/change_role", methods=["POST"])
 @token_required(admin=True)
 def change_role():
-    if crud().change_role(request.get_json()):
-        return jsonify({"correct": "role change"})
-    return jsonify({"fail": "bad request"}), 400
+    """Изменение роли или описания роли, изменить можно как только роль
+    так и только описание"""
+
+    request_data = request.get_json()
+    role = request_data.get("role")
+    change_for_description = request_data.get("change_description")
+    change_for_role = request_data.get("change_role")
+
+    if change_for_role is None or change_for_description is None:
+        return jsonify(BAD_REQUEST), 400
+
+    if role is None or len(role) == 0:
+        return jsonify(BAD_REQUEST), 400
+
+    if crud().change_role(role, change_for_description, change_for_role):
+
+        return jsonify(ROLE_CHANGE)
+
+    return jsonify(ROLE_NOT_EXIST), 400
 
 
 @crud_pages.route("/roles", methods=["GET"])
