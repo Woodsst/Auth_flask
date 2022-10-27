@@ -1,7 +1,7 @@
 """Added account table
 
 Revision ID: 419da2b6e21f
-Revises: 
+Revises:
 Create Date: 2022-10-26 17:59:27.166478
 
 """
