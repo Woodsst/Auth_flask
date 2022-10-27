@@ -3,11 +3,10 @@ from http import HTTPStatus
 
 import pytest
 
-from auth.tests.integration.testdata.users import USERS
-from auth.tests.integration.utils.db_requests import clear_table
+from ..testdata.data_for_test import USERS
 
 
-def test_registration_200(postgres_con, http_con):
+def test_registration_200(clear_databases, http_con):
     """Проверка регистрации клиента"""
 
     http_con.request(
@@ -18,10 +17,9 @@ def test_registration_200(postgres_con, http_con):
     )
     response = http_con.getresponse()
     assert response.status == HTTPStatus.CREATED
-    clear_table(postgres_con)
 
 
-def test_registration_409(http_con, postgres_con):
+def test_registration_409(http_con, clear_databases):
     """Проверка ошибки регистрации при уже существующем клиенте"""
 
     http_con.request(
@@ -41,7 +39,6 @@ def test_registration_409(http_con, postgres_con):
     assert response.status == HTTPStatus.CONFLICT
     response = json.loads(response.read())
     assert response.get("error") == "login or email already registered"
-    clear_table(postgres_con)
 
 
 @pytest.mark.parametrize(
@@ -98,11 +95,10 @@ def test_registration_409(http_con, postgres_con):
     ],
 )
 def test_registration_400(
-    http_con, postgres_con, bad_request, status_code, response_body
+    http_con, clear_databases, bad_request, status_code, response_body
 ):
     """Проверка ошибок валидации логина пароля и почты"""
     http_con.request(**bad_request)
     response = http_con.getresponse()
     assert response.status == status_code
     assert json.loads(response.read()) == response_body
-    clear_table(postgres_con)
