@@ -18,6 +18,8 @@ USERS = [
 
 LOGIN = {"login": "user1", "password": "pupaaaaaaa"}
 
+ADMIN_LOGIN = {"login": "admin", "password": "admin111"}
+
 CHANGE_EMAIL = {"new_email": "dfjkg@gmail.com"}
 
 ADD_ROLE = {"role": "new_role", "description": "new description"}
@@ -27,6 +29,8 @@ USER_AGENT = {"user-agent": "python"}
 REGISTRATION_URL = "/api/v1/registration"
 
 PROFILE_URL = "/api/v1/profile/"
+
+CRUD_URL = "api/v1/crud/"
 
 LOGIN_URL = "/api/v1/login"
 
@@ -43,3 +47,6 @@ OUT_TIME_TOKEN = (
 
 ACCESS_TOKEN_LIFE_TIME = 3600
 REFRESH_TOKEN_LIFE_TIME = 1210000
+
+NEW_ROLE = "new role"
+DESCRIPTION = "description"

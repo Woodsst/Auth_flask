@@ -7,9 +7,9 @@ from storages.postgres.db_models import Role, User
 
 
 class DefaultRole(enum.Enum):
-    ADMIN = "admin"
+    ADMIN = "Admin"
     ADMIN_KEY = 1
-    USER = "user"
+    USER = "User"
     USER_KEY = 2
 
 
@@ -88,6 +88,9 @@ class Crud(ServiceBase):
         return self.__set_user_role(user_id, role)
 
     def __set_user_role(self, user_id: str, role: str):
+        role = (
+            self.orm.query(Role.role_id).filter(Role.role == role).first()[0]
+        )
         try:
             result = (
                 self.orm.query(User)

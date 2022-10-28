@@ -24,7 +24,7 @@ def login_user():
     if login_api().wrong_request_data(login, 2):
         return jsonify(WRONG_LOGIN), 400
 
-    if login_api().wrong_request_data(password, 8):
+    if login_api().wrong_request_data(password, 7):
         return jsonify(SHORT_PASSWORD), 400
 
     response = login_api().login(login, password)

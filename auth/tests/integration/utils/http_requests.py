@@ -6,6 +6,9 @@ from ..testdata.data_for_test import (
     LOGIN_URL,
     USERS,
     LOGIN,
+    CRUD_URL,
+    DESCRIPTION,
+    NEW_ROLE,
 )
 
 
@@ -38,3 +41,13 @@ def get_access_token(http_con: HTTPConnection):
     tokens = login(http_con, LOGIN)
 
     return f"Bearer {tokens.get('access-token')}"
+
+
+def add_new_role(http_con: HTTPConnection, token: str):
+
+    http_con.request(
+        "POST",
+        f"{CRUD_URL}add_role",
+        body=json.dumps({"role": NEW_ROLE, "description": DESCRIPTION}),
+        headers={"Authorization": token},
+    )

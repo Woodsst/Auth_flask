@@ -44,7 +44,7 @@ def test_profile_devices_200(http_con, clear_databases):
     access_token = get_access_token(http_con)
     http_con.request(
         "GET",
-        f"{PROFILE_URL}/devices",
+        f"{PROFILE_URL}devices",
         headers={"Authorization": access_token},
     )
 

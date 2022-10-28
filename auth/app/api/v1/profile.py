@@ -9,7 +9,8 @@ from core.responses import (
     PASSWORD_CHANGE,
     SHORT_PASSWORD,
     PASSWORDS_EQUALS,
-    PASSWORD_NOT_MATCH, EMAIL_CHANGE,
+    PASSWORD_NOT_MATCH,
+    EMAIL_CHANGE,
 )
 
 profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
