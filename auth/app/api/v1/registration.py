@@ -23,14 +23,12 @@ def registration_user():
     в теле запроса"""
     user_data = json.loads(request.data)
 
-    if (len(user_data.get("password")) < 8) or user_data.get(
-        "password"
-    ) is None:
+    if registration_api().wrong_request_data(user_data.get("password"), 8):
         return jsonify(SHORT_PASSWORD), 400
 
     user_data["device"] = request.environ.get("HTTP_USER_AGENT")
 
-    if (len(user_data.get("login")) < 2) or user_data.get("login") is None:
+    if registration_api().wrong_request_data(user_data.get("login"), 2):
         return jsonify(WRONG_LOGIN), 400
 
     try:

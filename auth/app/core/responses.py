@@ -10,3 +10,6 @@ WRONG_EMAIL = {"message": "The email address is not valid"}
 WRONG_LOGIN = {"message": "login too short or not exist"}
 REGISTRATION_COMPLETE = {"message": "registration complete"}
 REGISTRATION_FAILED = {"message": "login or email already registered"}
+TOKEN_MISSING = {"message": "token is missing"}
+TOKEN_WRONG_FORMAT = {"message": "wrong token format"}
+LOGOUT = {"message": "logout"}

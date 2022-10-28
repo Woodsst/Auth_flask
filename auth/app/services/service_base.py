@@ -46,3 +46,9 @@ class ServiceBase:
         return (
             self.orm.query(User.password).filter(User.id == user_id).first()
         )[0]
+
+    @staticmethod
+    def wrong_request_data(data: Optional[str], lenght: int):
+        if (len(data) < lenght) or data is None:
+            return False
+        return True

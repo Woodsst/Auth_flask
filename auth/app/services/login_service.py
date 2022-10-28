@@ -1,7 +1,6 @@
-import json
 from functools import lru_cache
 
-from flask import Request, jsonify, make_response
+from flask import jsonify, make_response
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User
 from werkzeug.security import check_password_hash
@@ -9,10 +8,7 @@ from jwt_api import get_token_time_to_end
 
 
 class LoginAPI(ServiceBase):
-    def login(self, request: Request):
-        data = json.loads(request.data)
-        login = data.get("login")
-        password = data.get("password")
+    def login(self, login: str, password: str):
         try:
             user = User.query.filter_by(login=login).first()
             if check_password_hash(user.password, password):
