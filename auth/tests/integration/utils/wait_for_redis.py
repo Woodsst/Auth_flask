@@ -1,15 +1,21 @@
-import asyncio
+import logging
 
+import backoff
 import redis
-from backoff import backoff
+
+logger = logging.getLogger(__name__)
 
 
-@backoff()
-async def wait_for_redis():
-    redis_client = redis.Redis(host="redis", port=6379, db=0)
-    if not redis_client.ping():
-        raise redis.exceptions.ConnectionError
+@backoff.on_exception(backoff.expo, redis.exceptions.ConnectionError,
+                      max_tries=10, max_time=20,
+                      logger=logger.warning(
+                          "Пытаемся соединится с редисом"))
+def connect_postgres():
+    r = redis.Redis(host="redis",
+                    port=6379)
+    logger.warning('Повторная попытка соединения с редис')
+    r.ping()
 
 
 if __name__ == "__main__":
-    asyncio.run(wait_for_redis())
+    connect_postgres()
