@@ -1,4 +1,4 @@
-from functools import wraps, lru_cache
+from functools import wraps
 
 import jwt
 
@@ -9,7 +9,6 @@ from jwt_api import (
 )
 from services.service_base import ServiceBase
 from storages.db_connect import redis_conn
-from storages.redis.redis_api import Redis
 from flask import request, jsonify
 from core.responses import (
     TOKEN_MISSING,
@@ -57,9 +56,8 @@ class TokensService(ServiceBase):
         return False
 
 
-@lru_cache()
 def tokens_service():
-    return TokensService(cash=Redis(redis_conn))
+    return TokensService()
 
 
 def token_required(admin=False):

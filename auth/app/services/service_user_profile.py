@@ -1,8 +1,6 @@
 import json
-from functools import lru_cache
 
 from services.service_base import ServiceBase
-from storages.db_connect import db_session
 from storages.postgres.db_models import (
     User,
     Device,
@@ -119,6 +117,5 @@ class ProfileService(ServiceBase):
         return device_history
 
 
-@lru_cache()
 def profile_service():
-    return ProfileService(db_session)
+    return ProfileService()

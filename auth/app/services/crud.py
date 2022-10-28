@@ -1,10 +1,8 @@
 import enum
-from functools import lru_cache
 
 import sqlalchemy
 
 from services.service_base import ServiceBase
-from storages.db_connect import db_session
 from storages.postgres.db_models import Role, User
 
 
@@ -116,6 +114,5 @@ class Crud(ServiceBase):
         return user_role
 
 
-@lru_cache()
 def crud():
-    return Crud(db_session)
+    return Crud()

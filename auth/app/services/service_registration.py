@@ -1,10 +1,8 @@
 import uuid
-from functools import lru_cache
 
 import sqlalchemy
 
 from services.service_base import ServiceBase
-from storages.db_connect import db_session
 from storages.postgres.db_models import Device, UserDevice, User
 from werkzeug.security import generate_password_hash
 from services.crud import DefaultRole
@@ -46,6 +44,5 @@ class Registration(ServiceBase):
         self.orm.add(user_device)
 
 
-@lru_cache()
 def registration_api():
-    return Registration(db_session)
+    return Registration()

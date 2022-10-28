@@ -1,5 +1,3 @@
-from functools import lru_cache
-
 from flask import jsonify, make_response
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User
@@ -31,6 +29,5 @@ class LoginAPI(ServiceBase):
         self.cash.set_token(key=access_token, value=1, exited=time_to_end)
 
 
-@lru_cache()
 def login_api():
     return LoginAPI()

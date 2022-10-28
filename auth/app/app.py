@@ -20,7 +20,6 @@ added_default_roles()
 
 
 def main():
-    added_default_roles()
     logger.info("app start")
     app.run(host=default_settings.host_app, debug=default_settings.debug)
 
