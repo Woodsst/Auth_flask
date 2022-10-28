@@ -1,11 +1,8 @@
-import json
 import uuid
 from functools import lru_cache
 
 import sqlalchemy
-from email_validator import validate_email
-from exceptions import PasswordException
-from flask import Request
+
 from services.service_base import ServiceBase
 from storages.db_connect import db_session
 from storages.postgres.db_models import Device, UserDevice, User
@@ -14,29 +11,14 @@ from services.crud import DefaultRole
 
 
 class Registration(ServiceBase):
-    def registration(self, request: Request) -> dict:
-        """Регистрация нового пользователя"""
+    def registration(self, user_data: dict) -> dict:
+        """Хеширование пароля и добавление нового пользователя"""
 
-        user_data = json.loads(request.data)
-        if self.validation_request(user_data):
-            user_data["device"] = request.environ.get("HTTP_USER_AGENT")
-            user_data["password"] = generate_password_hash(
-                user_data["password"]
-            )
-            add_user = self.set_user(user_data)
-            if add_user:
-                return True
-            return False
-
-    @staticmethod
-    def validation_request(user_data: dict):
-        if len(user_data["password"]) < 8:
-            raise PasswordException("password too short")
-        validate_email(email=user_data["email"])
-        return True
+        user_data["password"] = generate_password_hash(user_data["password"])
+        return self.set_user(user_data)
 
     def set_user(self, user_data: dict):
-        """Добавление данных нового клиента"""
+        """Добавление данных нового пользователя"""
         try:
             user_id = uuid.uuid4()
             user = User(
