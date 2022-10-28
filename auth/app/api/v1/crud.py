@@ -23,8 +23,8 @@ def add_role():
     role = request_data.get("role")
     description = request_data.get("description")
 
-    if (len(role) == 0 or role is None) or (
-        len(description) == 0 or description is None
+    if (crud().wrong_request_data(role, 1)) or (
+        crud().wrong_request_data(description, 1)
     ):
         return jsonify(BAD_REQUEST), 400
 
@@ -41,6 +41,10 @@ def delete_role():
 
     request_data = request.get_json()
     role = request_data.get("role")
+
+    if crud().wrong_request_data(role, 1):
+        return jsonify(BAD_REQUEST), 400
+
     if role == DefaultRole.USER.value or role == DefaultRole.ADMIN.value:
         return jsonify(DEFAULT_ROLE_NOT_DELETE), 400
 
@@ -64,7 +68,7 @@ def change_role():
     if change_for_role is None or change_for_description is None:
         return jsonify(BAD_REQUEST), 400
 
-    if role is None or len(role) == 0:
+    if crud().wrong_request_data(role, 1):
         return jsonify(BAD_REQUEST), 400
 
     if crud().change_role(role, change_for_description, change_for_role):
@@ -91,7 +95,9 @@ def set_user_role():
     user_id = request_data.get("user_id")
     role = request_data.get("role")
 
-    if user_id is None or role is None:
+    if crud().wrong_request_data(user_id, 1) or crud().wrong_request_data(
+        role, 1
+    ):
         return jsonify(BAD_REQUEST), 400
 
     if crud().set_user_role(user_id, role):

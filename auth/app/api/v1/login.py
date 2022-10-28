@@ -33,6 +33,8 @@ def login_user():
 
 @login_page.route("/logout", methods=["GET"])
 def logout_user():
+    """Логаут пользователя, вносит действующий access токен в невалидные"""
+
     access_token = request.headers.get("Authorization")
     if access_token is None:
         return jsonify(TOKEN_MISSING), 400

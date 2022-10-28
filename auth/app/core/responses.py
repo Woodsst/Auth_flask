@@ -21,3 +21,5 @@ PASSWORD_NOT_MATCH = {
     "status": "fail",
     "message": "the password does not match the user's password",
 }
+PASSWORD_CHANGE = {"message": "password changed"}
+PASSWORDS_EQUALS = {"message": "passwords equals"}
