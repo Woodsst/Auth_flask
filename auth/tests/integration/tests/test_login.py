@@ -2,13 +2,16 @@ import datetime
 import json
 from http import HTTPStatus
 
-from ..testdata.data_for_test import USERS, LOGIN, LOGIN_URL
-from ..utils.http_requests import registration
+import pytest
+
+from ..testdata.data_for_test import USERS, LOGIN, LOGIN_URL, \
+    ACCESS_TOKEN_LIFE_TIME, REFRESH_TOKEN_LIFE_TIME, LOGOUT_URL, PROFILE_URL
+from ..utils.http_requests import registration, get_access_token
 from ..utils.jwt_api import decode_access_token, decode_refresh_token
 
 
 def test_login_200(http_con, clear_databases):
-    """Проверка входа в аккаунт"""
+    """Проверка входа в аккаунт и возвращаемых токенов"""
 
     registration(http_con, USERS[0])
 
@@ -35,10 +38,10 @@ def test_login_200(http_con, clear_databases):
     end_time = payload["end_time"]
     end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S.%f")
     time_for_exited = (
-        end_time.timestamp() - datetime.datetime.utcnow().timestamp()
+            end_time.timestamp() - datetime.datetime.utcnow().timestamp()
     )
 
-    assert 3600 > int(time_for_exited) > 0
+    assert ACCESS_TOKEN_LIFE_TIME > int(time_for_exited) > 0
 
     refresh_token = tokens.get("refresh-token")
 
@@ -50,7 +53,53 @@ def test_login_200(http_con, clear_databases):
     end_time = payload["end_time"]
     end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S.%f")
     time_for_exited = (
-        end_time.timestamp() - datetime.datetime.utcnow().timestamp()
+            end_time.timestamp() - datetime.datetime.utcnow().timestamp()
     )
 
-    assert 1210000 > int(time_for_exited) > 0
+    assert REFRESH_TOKEN_LIFE_TIME > int(time_for_exited) > 0
+
+
+@pytest.mark.parametrize(
+    "body, status_code", [
+        ({"login": "", "password": ""}, HTTPStatus.BAD_REQUEST),
+        ({}, HTTPStatus.BAD_REQUEST),
+        ({"login": "asd", "password": "sss"}, HTTPStatus.BAD_REQUEST),
+        ({"login": "user1", "password": "sss"}, HTTPStatus.BAD_REQUEST),
+    ]
+)
+def test_login_400(http_con, clear_databases, status_code, body):
+    """Проверка ошибок при входе пользователя"""
+    registration(http_con, USERS[0])
+
+    http_con.request("POST", LOGIN_URL, body=json.dumps(body))
+    assert http_con.getresponse().status == status_code
+
+
+def test_logout_200(http_con, clear_databases):
+    """Проверка выхода пользователя из аккаунта"""
+
+    token = get_access_token(http_con)
+
+    http_con.request("GET", LOGOUT_URL, headers={"Authorization": token})
+    response = http_con.getresponse()
+
+    assert response.status == HTTPStatus.OK
+
+    http_con.request("GET", PROFILE_URL, headers={"Authorization": token})
+    response = http_con.getresponse()
+    assert response.status == HTTPStatus.FORBIDDEN
+
+
+@pytest.mark.parametrize(
+    "token, status_code", [
+        ("bad token", HTTPStatus.BAD_REQUEST),
+        ("", HTTPStatus.BAD_REQUEST)
+    ]
+)
+def test_logout_400(http_con, clear_databases, token, status_code):
+    """Проверка невалидного токена для выхода из аккаунта"""
+
+    http_con.request("GET", LOGOUT_URL, headers={"Authorization": token})
+    response = http_con.getresponse()
+
+    assert response.status == HTTPStatus.BAD_REQUEST

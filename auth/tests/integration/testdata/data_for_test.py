@@ -26,7 +26,11 @@ USER_AGENT = {"user-agent": "python"}
 
 REGISTRATION_URL = "/api/v1/registration"
 
+PROFILE_URL = "/api/v1/profile/"
+
 LOGIN_URL = "/api/v1/login"
+
+LOGOUT_URL = "/api/v1/logout"
 
 OUT_TIME_TOKEN = (
     "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFlZj"
@@ -36,3 +40,6 @@ OUT_TIME_TOKEN = (
     "YWNjZXNzIjoiYWNjZXNzIn0.7FBltHK7JzNh3MQ4lNlRtQ-T_GieVyv9PJ"
     "l2BYq3WoA"
 )
+
+ACCESS_TOKEN_LIFE_TIME = 3600
+REFRESH_TOKEN_LIFE_TIME = 1210000

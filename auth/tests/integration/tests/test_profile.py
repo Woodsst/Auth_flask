@@ -3,8 +3,7 @@ from http import HTTPStatus
 
 import pytest
 
-from ..testdata.data_for_test import USERS, LOGIN
-from ..testdata.data_for_test import USER_AGENT
+from ..testdata.data_for_test import USERS, LOGIN, USER_AGENT, PROFILE_URL
 from ..utils.http_requests import get_access_token
 
 
@@ -13,7 +12,7 @@ def test_profile_data_200(http_con, clear_databases):
     access_token = get_access_token(http_con)
 
     http_con.request(
-        "GET", "/api/v1/profile/", headers={"Authorization": access_token}
+        "GET", PROFILE_URL, headers={"Authorization": access_token}
     )
 
     response = http_con.getresponse()
@@ -33,7 +32,7 @@ def test_profile_data_401(http_con, clear_databases):
 
     access_token = "bad token"
     http_con.request(
-        "GET", "/api/v1/profile/", headers={"Authorization": access_token}
+        "GET", PROFILE_URL, headers={"Authorization": access_token}
     )
     response = http_con.getresponse()
     assert response.status == HTTPStatus.UNAUTHORIZED
@@ -45,7 +44,7 @@ def test_profile_devices_200(http_con, clear_databases):
     access_token = get_access_token(http_con)
     http_con.request(
         "GET",
-        "/api/v1/profile/devices",
+        f"{PROFILE_URL}/devices",
         headers={"Authorization": access_token},
     )
 
@@ -66,7 +65,7 @@ def test_profile_devices_401(http_con, clear_databases):
     access_token = "bad token"
     http_con.request(
         "GET",
-        "/api/v1/profile/devices",
+        f"{PROFILE_URL}devices",
         headers={"Authorization": access_token},
     )
     response = http_con.getresponse()
@@ -80,7 +79,7 @@ def test_profile_change_email_200(http_con, clear_databases):
     new_email = "iaimnew@gmail.com"
     http_con.request(
         "POST",
-        "/api/v1/profile/change/email",
+        f"{PROFILE_URL}change/email",
         headers={"Authorization": access_token},
         body=json.dumps({"new_email": new_email}),
     )
@@ -92,7 +91,7 @@ def test_profile_change_email_200(http_con, clear_databases):
     assert response_data.get("message") == "email changed"
 
     http_con.request(
-        "GET", "/api/v1/profile/", headers={"Authorization": access_token}
+        "GET", PROFILE_URL, headers={"Authorization": access_token}
     )
 
     response_data = json.loads(http_con.getresponse().read())
@@ -105,7 +104,7 @@ def test_profile_change_email_401(http_con):
     access_token = "bad token"
     http_con.request(
         "POST",
-        "/api/v1/profile/change/email",
+        f"{PROFILE_URL}change/email",
         headers={"Authorization": access_token},
     )
     response = http_con.getresponse()
@@ -128,7 +127,7 @@ def test_profile_change_email_400(
     access_token = get_access_token(http_con)
     http_con.request(
         "POST",
-        "/api/v1/profile/change/email",
+        f"{PROFILE_URL}change/email",
         headers={"Authorization": access_token},
         body=json.dumps({"new_email": bad_email}),
     )
@@ -143,7 +142,7 @@ def test_profile_change_password_200(http_con, clear_databases):
 
     http_con.request(
         "POST",
-        "/api/v1/profile/change/password",
+        f"{PROFILE_URL}change/password",
         headers={"Authorization": access_token},
         body=json.dumps(
             {
@@ -167,7 +166,7 @@ def test_profile_change_password_401(http_con):
     access_token = "bad token"
     http_con.request(
         "POST",
-        "/api/v1/profile/change/password",
+        f"{PROFILE_URL}change/password",
         headers={"Authorization": access_token},
     )
     response = http_con.getresponse()
@@ -191,7 +190,7 @@ def test_profile_change_password_400(
     access_token = get_access_token(http_con)
     http_con.request(
         "POST",
-        "/api/v1/profile/change/password",
+        f"{PROFILE_URL}change/password",
         headers={"Authorization": access_token},
         body=json.dumps(
             {"password": user_password, "new_password": bad_password}

@@ -43,6 +43,7 @@ def logout_user():
     if len(access_token) != 2:
         return jsonify(TOKEN_WRONG_FORMAT), 400
 
-    login_api().logout(access_token[1])
+    if login_api().logout(access_token[1]):
+        return jsonify(LOGOUT)
 
-    return jsonify(LOGOUT)
+    return jsonify(TOKEN_WRONG_FORMAT), 400

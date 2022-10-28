@@ -26,7 +26,10 @@ class LoginAPI(ServiceBase):
         """Записывает токен в базу как невалидный"""
 
         time_to_end = get_token_time_to_end(access_token)
-        self.cash.set_token(key=access_token, value=1, exited=time_to_end)
+        if time_to_end:
+            self.cash.set_token(key=access_token, value=1, exited=time_to_end)
+            return True
+        return False
 
 
 def login_api():

@@ -51,6 +51,6 @@ class ServiceBase:
     @staticmethod
     def wrong_request_data(data: Optional[str], lenght: int):
         """Проверка существования и соответствия данных"""
-        if len(data) <= lenght or data is None:
+        if data is None or len(data) <= lenght:
             return True
         return False
