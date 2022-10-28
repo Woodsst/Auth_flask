@@ -11,6 +11,12 @@ from services.service_base import ServiceBase
 from storages.db_connect import redis_conn
 from storages.redis.redis_api import Redis
 from flask import request, jsonify
+from core.responses import (
+    TOKEN_MISSING,
+    TOKEN_OUTDATED,
+    ACCESS_DENIED,
+    TOKEN_WRONG_FORMAT,
+)
 
 
 class TokensService(ServiceBase):
@@ -57,6 +63,9 @@ def tokens_service():
 
 
 def token_required(admin=False):
+    """Декоратор для проверки access токена при запросах.
+    Принимает параметр указывающий на допуск администратора"""
+
     def f_wrapper(f):
         @wraps(f)
         def decorated(*args, **kwargs):
@@ -67,21 +76,21 @@ def token_required(admin=False):
                 if len(token) > 1:
                     token = token[1]
             if not token:
-                return jsonify({"message": "Token is missing !!"}), 401
+                return jsonify(TOKEN_MISSING), 401
             if redis_conn.get(token):
-                return jsonify({"message": "Forbidden"}), 403
+                return jsonify(TOKEN_OUTDATED), 403
             if admin:
                 payload = decode_access_token(token)
                 if int(payload.get("role")) != 1:
-                    return jsonify({"message": "Forbidden"}), 403
+                    return jsonify(ACCESS_DENIED), 403
             try:
                 token_time = get_token_time_to_end(token)
                 if token_time <= 0:
-                    return jsonify({"message": "Token time expired"}), 401
+                    return jsonify(TOKEN_OUTDATED), 401
             except jwt.exceptions.InvalidSignatureError:
-                return jsonify({"error": "token is invalid"}), 401
+                return jsonify(TOKEN_WRONG_FORMAT), 401
             except jwt.exceptions.DecodeError:
-                return jsonify({"error": "token is invalid"}), 401
+                return jsonify(TOKEN_WRONG_FORMAT), 401
             return f(*args, **kwargs)
 
         return decorated

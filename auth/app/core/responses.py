@@ -24,3 +24,5 @@ PASSWORD_NOT_MATCH = {
 PASSWORD_CHANGE = {"message": "password changed"}
 PASSWORDS_EQUALS = {"message": "passwords equals"}
 TOKEN_CORRECT = {"message": "correct token"}
+TOKEN_OUTDATED = {"message": "token is outdated"}
+ACCESS_DENIED = {"message": "access denied"}

@@ -26,9 +26,9 @@ def check():
     if len(token) > 1:
         token = token[1]
     else:
-        return jsonify(TOKEN_WRONG_FORMAT), 400
+        return jsonify(TOKEN_WRONG_FORMAT), 401
 
     if tokens_service().check_token(token):
         return jsonify(TOKEN_CORRECT)
 
-    return jsonify(TOKEN_WRONG_FORMAT), 400
+    return jsonify(TOKEN_WRONG_FORMAT), 401
