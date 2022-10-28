@@ -18,7 +18,7 @@ def logout_user():
 
     access_token = access_token.split(" ")
     if len(access_token) != 2:
-        return jsonify({"message": "wrong token format"})
+        return jsonify({"message": "wrong token format"}), 400
 
     login_api().logout(access_token[1])
 
