@@ -9,7 +9,7 @@ from core.responses import (
     PASSWORD_CHANGE,
     SHORT_PASSWORD,
     PASSWORDS_EQUALS,
-    PASSWORD_NOT_MATCH,
+    PASSWORD_NOT_MATCH, EMAIL_CHANGE,
 )
 
 profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
@@ -46,7 +46,7 @@ def change_user_email():
         return jsonify(WRONG_EMAIL), 400
 
     profile_service().change_email(request, new_email)
-    return jsonify(PASSWORD_CHANGE)
+    return jsonify(EMAIL_CHANGE)
 
 
 @profile.route("/change/password", methods=["POST"])
@@ -66,6 +66,6 @@ def change_user_password():
     if new_password == password:
         return jsonify(PASSWORDS_EQUALS), 400
 
-    if profile_service().change_password(request):
+    if profile_service().change_password(request, password, new_password):
         return jsonify(PASSWORD_CHANGE)
     return jsonify(PASSWORD_NOT_MATCH), 400
