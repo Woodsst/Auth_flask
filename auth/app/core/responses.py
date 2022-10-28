@@ -13,3 +13,11 @@ REGISTRATION_FAILED = {"message": "login or email already registered"}
 TOKEN_MISSING = {"message": "token is missing"}
 TOKEN_WRONG_FORMAT = {"message": "wrong token format"}
 LOGOUT = {"message": "logout"}
+USER_NOT_FOUND = {
+    "status": "fail",
+    "message": "The user with such login and password was not found",
+}
+PASSWORD_NOT_MATCH = {
+    "status": "fail",
+    "message": "the password does not match the user's password",
+}

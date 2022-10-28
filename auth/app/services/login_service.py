@@ -5,6 +5,7 @@ from services.service_base import ServiceBase
 from storages.postgres.db_models import User
 from werkzeug.security import check_password_hash
 from jwt_api import get_token_time_to_end
+from core.responses import USER_NOT_FOUND, PASSWORD_NOT_MATCH
 
 
 class LoginAPI(ServiceBase):
@@ -17,19 +18,11 @@ class LoginAPI(ServiceBase):
                     "role": str(user.role),
                 }
                 return self.generate_tokens(payload)
-            responseObject = {
-                "status": "fail",
-                "message": "the password does not match the user's password",
-            }
+            responseObject = PASSWORD_NOT_MATCH
             return make_response(jsonify(responseObject)), 401
         except AttributeError:
-            responseObject = {
-                "status": "fail",
-                "message": (
-                    "The user with such login and password was not" "found"
-                ),
-            }
-            return make_response(jsonify(responseObject)), 403
+            responseObject = USER_NOT_FOUND
+            return make_response(jsonify(responseObject)), 401
 
     def logout(self, access_token: str):
         """Записывает токен в базу как невалидный"""
