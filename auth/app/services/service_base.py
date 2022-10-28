@@ -1,17 +1,21 @@
 from typing import Optional
 
-import jwt_api as jwt
 from flask import Request
+from sqlalchemy.orm import scoped_session
+from werkzeug.security import generate_password_hash, check_password_hash
+
+import jwt_api as jwt
+from storages.db_connect import redis_conn
 from storages.postgres.db_models import User
 from storages.redis.redis_api import Redis
-from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.orm import scoped_session
 
 
 class ServiceBase:
     """Родительский класс для сервисов"""
 
-    def __init__(self, orm: scoped_session = None, cash: Redis = None):
+    def __init__(
+        self, orm: scoped_session = None, cash: Redis = Redis(redis_conn)
+    ):
         self.orm: Optional[scoped_session] = orm
         self.cash: Optional[Redis] = cash
 
