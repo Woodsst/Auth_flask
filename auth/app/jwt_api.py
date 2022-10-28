@@ -13,7 +13,7 @@ def encode_access_token(payload: dict) -> str:
 
     payload["receipt_time"] = str(receipt_time)
     payload["end_time"] = str(end_time)
-    payload["access"] = "access"
+    payload["token"] = "access"
 
     token = jwt.encode(
         payload=payload,
@@ -32,7 +32,7 @@ def encode_refresh_token(payload: dict) -> str:
 
     payload["receipt_time"] = str(receipt_time)
     payload["end_time"] = str(end_time)
-    payload["refresh"] = "refresh"
+    payload["token"] = "refresh"
 
     token = jwt.encode(
         payload=payload,

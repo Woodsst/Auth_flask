@@ -1,18 +1,13 @@
-import json
-from functools import lru_cache
-
-from flask import Request, jsonify, make_response
+from flask import jsonify, make_response
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User
 from werkzeug.security import check_password_hash
 from jwt_api import get_token_time_to_end
+from core.responses import USER_NOT_FOUND, PASSWORD_NOT_MATCH
 
 
 class LoginAPI(ServiceBase):
-    def login(self, request: Request):
-        data = json.loads(request.data)
-        login = data.get("login")
-        password = data.get("password")
+    def login(self, login: str, password: str):
         try:
             user = User.query.filter_by(login=login).first()
             if check_password_hash(user.password, password):
@@ -21,19 +16,11 @@ class LoginAPI(ServiceBase):
                     "role": str(user.role),
                 }
                 return self.generate_tokens(payload)
-            responseObject = {
-                "status": "fail",
-                "message": "the password does not match the user's password",
-            }
+            responseObject = PASSWORD_NOT_MATCH
             return make_response(jsonify(responseObject)), 401
         except AttributeError:
-            responseObject = {
-                "status": "fail",
-                "message": (
-                    "The user with such login and password was not" "found"
-                ),
-            }
-            return make_response(jsonify(responseObject)), 403
+            responseObject = USER_NOT_FOUND
+            return make_response(jsonify(responseObject)), 401
 
     def logout(self, access_token: str):
         """Записывает токен в базу как невалидный"""
@@ -42,6 +29,5 @@ class LoginAPI(ServiceBase):
         self.cash.set_token(key=access_token, value=1, exited=time_to_end)
 
 
-@lru_cache()
 def login_api():
     return LoginAPI()

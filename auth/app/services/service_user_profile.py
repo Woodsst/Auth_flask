@@ -1,8 +1,6 @@
 import json
-from functools import lru_cache
 
 from services.service_base import ServiceBase
-from storages.db_connect import db_session
 from storages.postgres.db_models import (
     User,
     Device,
@@ -10,10 +8,7 @@ from storages.postgres.db_models import (
     Role,
 )
 from flask import Request
-from email_validator import validate_email
 from werkzeug.security import generate_password_hash
-
-from exceptions import PasswordException
 
 
 class ProfileService(ServiceBase):
@@ -22,7 +17,7 @@ class ProfileService(ServiceBase):
 
         user_id = self.get_user_id_from_token(request)
 
-        user_data = self.get_user_data(user_id)
+        user_data = self._get_user_data(user_id)
         return self._format_user_data(user_data)
 
     @staticmethod
@@ -43,7 +38,7 @@ class ProfileService(ServiceBase):
         """Получение устройств с которых входили в профиль"""
 
         user_id = self.get_user_id_from_token(request)
-        raw_history = self.get_user_device_history(user_id)
+        raw_history = self._get_user_device_history(user_id)
         history = self._format_devices_history(raw_history)
         return history
 
@@ -59,35 +54,26 @@ class ProfileService(ServiceBase):
             history.append(entry)
         return history
 
-    def change_email(self, request: Request):
+    def change_email(self, request: Request, new_email: str):
         """Изменение почты пользователя"""
 
-        user_data = json.loads(request.data)
-        new_email = user_data.get("new_email")
-        validate_email(new_email)
         user_id = self.get_user_id_from_token(request)
-        self.change_user_email(user_id, new_email)
+        self._change_user_email(user_id, new_email)
 
-    def change_password(self, request: Request):
+    def change_password(
+        self, request: Request, password: str, new_password: str
+    ):
         """Изменение пароля пользователя"""
 
         user_id = self.get_user_id_from_token(request)
-        user_data = json.loads(request.data)
-        password = user_data.get("password")
-        new_password = user_data.get("new_password")
-
-        if len(new_password) < 8:
-            raise PasswordException("password too short")
 
         if self.check_password(password, user_id):
-            if new_password == password:
-                return False
             new_password = generate_password_hash(new_password)
-            self.change_user_password(user_id, new_password)
+            self._change_user_password(user_id, new_password)
             return True
         return False
 
-    def change_user_email(self, user_id: str, email: str):
+    def _change_user_email(self, user_id: str, email: str):
         """Запрос в базу для изменения почты клиента"""
 
         self.orm.query(User).filter(User.id == user_id).update(
@@ -95,7 +81,7 @@ class ProfileService(ServiceBase):
         )
         self.orm.commit()
 
-    def change_user_password(self, user_id, password: str):
+    def _change_user_password(self, user_id, password: str):
         """Запрос в базу для изменения пароля клиента"""
 
         self.orm.query(User).filter(User.id == user_id).update(
@@ -103,7 +89,7 @@ class ProfileService(ServiceBase):
         )
         self.orm.commit()
 
-    def get_user_data(self, user_id: str) -> dict:
+    def _get_user_data(self, user_id: str) -> dict:
         """Получение данных о клиенте"""
 
         user_data = (
@@ -117,7 +103,7 @@ class ProfileService(ServiceBase):
 
         return user_data
 
-    def get_user_device_history(self, user_id: str) -> list:
+    def _get_user_device_history(self, user_id: str) -> list:
         """Получение данных о времени и устройствах
         на которых клиент логинился в сервис"""
 
@@ -131,6 +117,5 @@ class ProfileService(ServiceBase):
         return device_history
 
 
-@lru_cache()
 def profile_service():
-    return ProfileService(db_session)
+    return ProfileService()

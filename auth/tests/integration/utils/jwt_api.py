@@ -1,6 +1,6 @@
 import jwt
 
-from auth.tests.integration.settings import default_settings
+from ..settings import default_settings
 
 
 def decode_access_token(token: str):

@@ -38,7 +38,7 @@ def test_registration_409(http_con, clear_databases):
     response = http_con.getresponse()
     assert response.status == HTTPStatus.CONFLICT
     response = json.loads(response.read())
-    assert response.get("error") == "login or email already registered"
+    assert response.get("message") == "login or email already registered"
 
 
 @pytest.mark.parametrize(
@@ -58,7 +58,7 @@ def test_registration_409(http_con, clear_databases):
                 "headers": {"user-agent": "python"},
             },
             HTTPStatus.BAD_REQUEST,
-            {"error": "login too short"},
+            {"message": "login too short or not exist"},
         ),
         (
             {
@@ -74,7 +74,7 @@ def test_registration_409(http_con, clear_databases):
                 "headers": {"user-agent": "python"},
             },
             HTTPStatus.BAD_REQUEST,
-            {"error": "pass too short"},
+            {"message": "password too short"},
         ),
         (
             {
@@ -90,7 +90,7 @@ def test_registration_409(http_con, clear_databases):
                 "headers": {"user-agent": "python"},
             },
             HTTPStatus.BAD_REQUEST,
-            {"error": "The email address is not valid"},
+            {"message": "The email address is not valid"},
         ),
     ],
 )
