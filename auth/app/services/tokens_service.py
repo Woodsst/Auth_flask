@@ -10,7 +10,7 @@ from jwt_api import (
 from services.service_base import ServiceBase
 from storages.db_connect import redis_conn
 from storages.redis.redis_api import Redis
-from flask import Request, request, jsonify
+from flask import request, jsonify
 
 
 class TokensService(ServiceBase):
@@ -37,15 +37,8 @@ class TokensService(ServiceBase):
             payload = decode_refresh_token(token)
             return self.generate_tokens(payload)
 
-    def check_token(self, request: Request):
+    def check_token(self, token: str):
         """Функция проверки состояния токена"""
-
-        token = request.headers["Authorization"]
-        token = token.split(" ")
-        if len(token) > 1:
-            token = token[1]
-        else:
-            return False
 
         if self.cash.get_token(token):
             return False

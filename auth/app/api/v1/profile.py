@@ -46,7 +46,7 @@ def change_user_email():
         return jsonify(WRONG_EMAIL), 400
 
     profile_service().change_email(request, new_email)
-    return jsonify({"message": "email changed"})
+    return jsonify(PASSWORD_CHANGE)
 
 
 @profile.route("/change/password", methods=["POST"])
