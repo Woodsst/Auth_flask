@@ -6,14 +6,16 @@ import redis
 logger = logging.getLogger(__name__)
 
 
-@backoff.on_exception(backoff.expo, redis.exceptions.ConnectionError,
-                      max_tries=10, max_time=20,
-                      logger=logger.warning(
-                          "Пытаемся соединится с редисом"))
+@backoff.on_exception(
+    backoff.expo,
+    redis.exceptions.ConnectionError,
+    max_tries=10,
+    max_time=20,
+    logger=logger.warning("Пытаемся соединится с редисом"),
+)
 def connect_postgres():
-    r = redis.Redis(host="redis",
-                    port=6379)
-    logger.warning('Повторная попытка соединения с редис')
+    r = redis.Redis(host="redis", port=6379)
+    logger.warning("Повторная попытка соединения с редис")
     r.ping()
 
 
