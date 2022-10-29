@@ -4,6 +4,12 @@ from http import HTTPStatus
 
 import pytest
 
+from ..testdata.responses import (
+    WRONG_LOGIN,
+    SHORT_PASSWORD,
+    LOGOUT,
+    TOKEN_WRONG_FORMAT,
+)
 from ..testdata.data_for_test import (
     USERS,
     LOGIN,
@@ -67,20 +73,32 @@ def test_login_200(http_con, clear_databases):
 
 
 @pytest.mark.parametrize(
-    "body, status_code",
+    "body, status_code, message",
     [
-        ({"login": "", "password": ""}, HTTPStatus.BAD_REQUEST),
-        ({}, HTTPStatus.BAD_REQUEST),
-        ({"login": "asd", "password": "sss"}, HTTPStatus.BAD_REQUEST),
-        ({"login": "user1", "password": "sss"}, HTTPStatus.BAD_REQUEST),
+        ({"login": "", "password": ""}, HTTPStatus.BAD_REQUEST, WRONG_LOGIN),
+        ({}, HTTPStatus.BAD_REQUEST, WRONG_LOGIN),
+        (
+            {"login": "asd", "password": "sss"},
+            HTTPStatus.BAD_REQUEST,
+            SHORT_PASSWORD,
+        ),
+        (
+            {"login": "user1", "password": "sss"},
+            HTTPStatus.BAD_REQUEST,
+            SHORT_PASSWORD,
+        ),
     ],
 )
-def test_login_400(http_con, clear_databases, status_code, body):
+def test_login_400(http_con, clear_databases, status_code, body, message):
     """Проверка ошибок при входе пользователя"""
     registration(http_con, USERS[0])
 
     http_con.request("POST", LOGIN_URL, body=json.dumps(body))
-    assert http_con.getresponse().status == status_code
+    response = http_con.getresponse()
+    assert response.status == status_code
+
+    response_message = json.loads(response.read())
+    assert response_message == message
 
 
 def test_logout_200(http_con, clear_databases):
@@ -92,6 +110,9 @@ def test_logout_200(http_con, clear_databases):
     response = http_con.getresponse()
 
     assert response.status == HTTPStatus.OK
+
+    response_message = json.loads(response.read())
+    assert response_message == LOGOUT
 
     http_con.request("GET", PROFILE_URL, headers={"Authorization": token})
     response = http_con.getresponse()
@@ -109,3 +130,6 @@ def test_logout_400(http_con, clear_databases, token, status_code):
     response = http_con.getresponse()
 
     assert response.status == HTTPStatus.BAD_REQUEST
+
+    response_message = json.loads(response.read())
+    assert response_message == TOKEN_WRONG_FORMAT

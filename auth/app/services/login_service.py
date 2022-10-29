@@ -1,3 +1,4 @@
+import jwt
 from flask import jsonify, make_response
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User
@@ -24,8 +25,10 @@ class LoginAPI(ServiceBase):
 
     def logout(self, access_token: str):
         """Записывает токен в базу как невалидный"""
-
-        time_to_end = get_token_time_to_end(access_token)
+        try:
+            time_to_end = get_token_time_to_end(access_token)
+        except jwt.exceptions.DecodeError:
+            return False
         if time_to_end:
             self.cash.set_token(key=access_token, value=1, exited=time_to_end)
             return True

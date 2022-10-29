@@ -16,6 +16,13 @@ from ..testdata.data_for_test import (
     USERS,
     PROFILE_URL,
 )
+from ..testdata.responses import (
+    BAD_REQUEST,
+    ROLE_DELETE,
+    DEFAULT_ROLE_NOT_DELETE,
+    ROLE_CHANGE,
+    ACCESS_DENIED,
+)
 from ..utils.db_requests import registration_admin, get_user_id
 
 
@@ -25,17 +32,14 @@ def test_add_role_200(http_con, clear_databases, postgres_con):
     registration_admin(postgres_con)
     token = login(http_con, ADMIN_LOGIN)
     token = f"Bearer {token['access-token']}"
-
     add_new_role(http_con, token)
 
     response = http_con.getresponse()
-
     assert response.status == HTTPStatus.OK
 
     http_con.request(
         "GET", f"{CRUD_URL}roles", headers={"Authorization": token}
     )
-
     response = json.loads(http_con.getresponse().read())
 
     assert isinstance(response, dict)
@@ -67,8 +71,10 @@ def test_add_role_400(
         body=json.dumps({"role": role, "description": description}),
         headers={"Authorization": token},
     )
-
-    assert http_con.getresponse().status == status_code
+    response = http_con.getresponse()
+    assert response.status == status_code
+    message = json.loads(response.read())
+    assert message == BAD_REQUEST
 
 
 def test_delete_role_200(http_con, postgres_con, clear_databases):
@@ -101,6 +107,9 @@ def test_delete_role_200(http_con, postgres_con, clear_databases):
     response = http_con.getresponse()
     assert response.status == HTTPStatus.OK
 
+    message = json.loads(response.read())
+    assert message == ROLE_DELETE
+
     http_con.request(
         "GET", f"{CRUD_URL}roles", headers={"Authorization": token}
     )
@@ -116,15 +125,15 @@ def test_delete_role_200(http_con, postgres_con, clear_databases):
 
 
 @pytest.mark.parametrize(
-    "role, status_code",
+    "role, status_code, message",
     [
-        ("", HTTPStatus.BAD_REQUEST),
-        ("Admin", HTTPStatus.BAD_REQUEST),
-        ("User", HTTPStatus.BAD_REQUEST),
+        ("", HTTPStatus.BAD_REQUEST, BAD_REQUEST),
+        ("Admin", HTTPStatus.BAD_REQUEST, DEFAULT_ROLE_NOT_DELETE),
+        ("User", HTTPStatus.BAD_REQUEST, DEFAULT_ROLE_NOT_DELETE),
     ],
 )
 def test_delete_role_400(
-    postgres_con, http_con, clear_databases, role, status_code
+    postgres_con, http_con, clear_databases, role, status_code, message
 ):
     """Проверка невалидных запросов"""
 
@@ -141,6 +150,9 @@ def test_delete_role_400(
 
     response = http_con.getresponse()
     assert response.status == status_code
+
+    message = json.loads(response.read())
+    assert message == message
 
 
 def test_change_role_200(postgres_con, http_con, clear_databases):
@@ -169,6 +181,9 @@ def test_change_role_200(postgres_con, http_con, clear_databases):
     response = http_con.getresponse()
     assert response.status == HTTPStatus.OK
 
+    message = json.loads(response.read())
+    assert message == ROLE_CHANGE
+
     http_con.request(
         "GET", f"{CRUD_URL}roles", headers={"Authorization": token}
     )
@@ -177,16 +192,16 @@ def test_change_role_200(postgres_con, http_con, clear_databases):
 
 
 @pytest.mark.parametrize(
-    "role, desc, status_code",
+    "role, desc, message",
     [
-        ("Admin", "", HTTPStatus.BAD_REQUEST),
-        ("User", "", HTTPStatus.BAD_REQUEST),
-        (None, "", HTTPStatus.BAD_REQUEST),
-        ("", None, HTTPStatus.BAD_REQUEST),
+        ("Admin", "", DEFAULT_ROLE_NOT_DELETE),
+        ("User", "", DEFAULT_ROLE_NOT_DELETE),
+        (None, "", BAD_REQUEST),
+        ("", None, BAD_REQUEST),
     ],
 )
 def test_change_role_400(
-    postgres_con, http_con, clear_databases, role, desc, status_code
+    postgres_con, http_con, clear_databases, role, desc, message
 ):
     """Проверка невалидных запросов на изменение роли и описания"""
 
@@ -206,7 +221,10 @@ def test_change_role_400(
     )
 
     response = http_con.getresponse()
-    assert response.status == status_code
+    assert response.status == HTTPStatus.BAD_REQUEST
+
+    r_message = json.loads(response.read())
+    assert r_message == message
 
 
 def test_set_user_role_200(http_con, postgres_con, clear_databases):
@@ -230,6 +248,10 @@ def test_set_user_role_200(http_con, postgres_con, clear_databases):
     response = http_con.getresponse()
 
     assert response.status == HTTPStatus.OK
+
+    r_message = json.loads(response.read())
+    assert r_message == ROLE_CHANGE
+
     token = login(http_con, USERS[0])
     token = f"Bearer {token['access-token']}"
 
@@ -240,15 +262,15 @@ def test_set_user_role_200(http_con, postgres_con, clear_databases):
 
 
 @pytest.mark.parametrize(
-    "user_id, role, status_code",
+    "user_id, role",
     [
-        ("", "", HTTPStatus.BAD_REQUEST),
-        (None, "", HTTPStatus.BAD_REQUEST),
-        ("", None, HTTPStatus.BAD_REQUEST),
+        ("", ""),
+        (None, ""),
+        ("", None),
     ],
 )
 def test_set_user_role_400(
-    http_con, postgres_con, clear_databases, role, user_id, status_code
+    http_con, postgres_con, clear_databases, role, user_id
 ):
     """Проверка не валидных запросов изменения роли пользователя"""
 
@@ -263,8 +285,10 @@ def test_set_user_role_400(
         headers={"Authorization": token},
     )
     response = http_con.getresponse()
+    assert response.status == HTTPStatus.BAD_REQUEST
 
-    assert response.status == status_code
+    r_message = json.loads(response.read())
+    assert r_message == BAD_REQUEST
 
 
 def test_get_all_roles(http_con, postgres_con, clear_databases):
@@ -297,3 +321,6 @@ def test_get_add_roles_400(http_con, postgres_con, clear_databases):
     response = http_con.getresponse()
 
     assert response.status == HTTPStatus.FORBIDDEN
+
+    r_message = json.loads(response.read())
+    assert r_message == ACCESS_DENIED

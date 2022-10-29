@@ -47,7 +47,6 @@ class TokensService(ServiceBase):
 
         if self.cash.get_token(token):
             return False
-
         token_time = get_token_time_to_end(token)
         if token_time:
             if token_time > 0:
@@ -83,8 +82,11 @@ def token_required(admin=False):
                     return jsonify(ACCESS_DENIED), 403
             try:
                 token_time = get_token_time_to_end(token)
-                if token_time <= 0:
-                    return jsonify(TOKEN_OUTDATED), 401
+                if token_time:
+                    if token_time <= 0:
+                        return jsonify(TOKEN_OUTDATED), 401
+                else:
+                    return jsonify(TOKEN_WRONG_FORMAT), 401
             except jwt.exceptions.InvalidSignatureError:
                 return jsonify(TOKEN_WRONG_FORMAT), 401
             except jwt.exceptions.DecodeError:

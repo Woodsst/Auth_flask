@@ -4,6 +4,13 @@ from http import HTTPStatus
 import pytest
 
 from ..testdata.data_for_test import USERS
+from ..testdata.responses import (
+    REGISTRATION_COMPLETE,
+    WRONG_EMAIL,
+    SHORT_PASSWORD,
+    REGISTRATION_FAILED,
+    WRONG_LOGIN,
+)
 
 
 def test_registration_200(clear_databases, http_con):
@@ -17,9 +24,11 @@ def test_registration_200(clear_databases, http_con):
     )
     response = http_con.getresponse()
     assert response.status == HTTPStatus.CREATED
+    message = json.loads(response.read())
+    assert message == REGISTRATION_COMPLETE
 
 
-def test_registration_409(http_con, clear_databases):
+def test_registration_401(http_con, clear_databases):
     """Проверка ошибки регистрации при уже существующем клиенте"""
 
     http_con.request(
@@ -38,7 +47,7 @@ def test_registration_409(http_con, clear_databases):
     response = http_con.getresponse()
     assert response.status == HTTPStatus.CONFLICT
     response = json.loads(response.read())
-    assert response.get("message") == "login or email already registered"
+    assert response == REGISTRATION_FAILED
 
 
 @pytest.mark.parametrize(
@@ -58,7 +67,7 @@ def test_registration_409(http_con, clear_databases):
                 "headers": {"user-agent": "python"},
             },
             HTTPStatus.BAD_REQUEST,
-            {"message": "login too short or not exist"},
+            WRONG_LOGIN,
         ),
         (
             {
@@ -74,7 +83,7 @@ def test_registration_409(http_con, clear_databases):
                 "headers": {"user-agent": "python"},
             },
             HTTPStatus.BAD_REQUEST,
-            {"message": "password too short"},
+            SHORT_PASSWORD,
         ),
         (
             {
@@ -90,7 +99,7 @@ def test_registration_409(http_con, clear_databases):
                 "headers": {"user-agent": "python"},
             },
             HTTPStatus.BAD_REQUEST,
-            {"message": "The email address is not valid"},
+            WRONG_EMAIL,
         ),
     ],
 )

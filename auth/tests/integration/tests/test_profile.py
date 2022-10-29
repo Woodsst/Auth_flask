@@ -5,6 +5,13 @@ import pytest
 
 from ..testdata.data_for_test import USERS, LOGIN, USER_AGENT, PROFILE_URL
 from ..utils.http_requests import get_access_token
+from ..testdata.responses import (
+    TOKEN_WRONG_FORMAT,
+    EMAIL_CHANGE,
+    WRONG_EMAIL,
+    PASSWORD_CHANGE,
+    SHORT_PASSWORD,
+)
 
 
 def test_profile_data_200(http_con, clear_databases):
@@ -28,7 +35,7 @@ def test_profile_data_200(http_con, clear_databases):
 
 
 def test_profile_data_401(http_con, clear_databases):
-    """Проверка доступа к профилю по токену"""
+    """Проверка доступа к профилю по невалидному токену"""
 
     access_token = "bad token"
     http_con.request(
@@ -36,6 +43,8 @@ def test_profile_data_401(http_con, clear_databases):
     )
     response = http_con.getresponse()
     assert response.status == HTTPStatus.UNAUTHORIZED
+    message = json.loads(response.read())
+    assert message == TOKEN_WRONG_FORMAT
 
 
 def test_profile_devices_200(http_con, clear_databases):
@@ -70,6 +79,8 @@ def test_profile_devices_401(http_con, clear_databases):
     )
     response = http_con.getresponse()
     assert response.status == HTTPStatus.UNAUTHORIZED
+    message = json.loads(response.read())
+    assert message == TOKEN_WRONG_FORMAT
 
 
 def test_profile_change_email_200(http_con, clear_databases):
@@ -87,8 +98,8 @@ def test_profile_change_email_200(http_con, clear_databases):
     response = http_con.getresponse()
     assert response.status == HTTPStatus.OK
 
-    response_data = json.loads(response.read())
-    assert response_data.get("message") == "email changed"
+    message = json.loads(response.read())
+    assert message == EMAIL_CHANGE
 
     http_con.request(
         "GET", PROFILE_URL, headers={"Authorization": access_token}
@@ -109,6 +120,9 @@ def test_profile_change_email_401(http_con):
     )
     response = http_con.getresponse()
     assert response.status == HTTPStatus.UNAUTHORIZED
+
+    message = json.loads(response.read())
+    assert message == TOKEN_WRONG_FORMAT
 
 
 @pytest.mark.parametrize(
@@ -134,6 +148,9 @@ def test_profile_change_email_400(
     response = http_con.getresponse()
     assert response.status == response_status
 
+    message = json.loads(response.read())
+    assert message == WRONG_EMAIL
+
 
 def test_profile_change_password_200(http_con, clear_databases):
     """Проверка функционала смены пароля пользователя"""
@@ -157,7 +174,7 @@ def test_profile_change_password_200(http_con, clear_databases):
     assert response.status == HTTPStatus.OK
 
     response_data = json.loads(response.read())
-    assert response_data.get("message") == "password changed"
+    assert response_data == PASSWORD_CHANGE
 
 
 def test_profile_change_password_401(http_con):
@@ -197,5 +214,6 @@ def test_profile_change_password_400(
         ),
     )
     response = http_con.getresponse()
-
     assert response.status == response_status
+    response_message = json.loads(response.read())
+    assert response_message == SHORT_PASSWORD

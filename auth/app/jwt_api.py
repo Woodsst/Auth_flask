@@ -60,13 +60,12 @@ def decode_refresh_token(token: str):
 
 def get_token_time_to_end(token: str) -> int:
     """Функция получения остатка времени работы токена"""
-
     try:
         payload = decode_refresh_token(token)
     except jwt.exceptions.InvalidSignatureError:
         payload = decode_access_token(token)
     except jwt.exceptions.DecodeError:
-        return False
+        return
     end_time = payload["end_time"]
     end_time = datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S.%f")
     time_for_exited = (
