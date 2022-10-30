@@ -20,6 +20,7 @@ def login_user():
     request_data = json.loads(request.data)
     login = request_data.get("login")
     password = request_data.get("password")
+    user_agent = request.user_agent.string
 
     if login_api().wrong_request_data(login, 2):
         return jsonify(WRONG_LOGIN), 400
@@ -27,7 +28,7 @@ def login_user():
     if login_api().wrong_request_data(password, 7):
         return jsonify(SHORT_PASSWORD), 400
 
-    response = login_api().login(login, password)
+    response = login_api().login(login, password, user_agent)
     return response
 
 

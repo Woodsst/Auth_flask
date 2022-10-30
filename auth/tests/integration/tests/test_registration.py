@@ -20,7 +20,6 @@ def test_registration_200(clear_databases, http_con):
         "POST",
         "/api/v1/registration",
         body=json.dumps(USERS[0]),
-        headers={"user-agent": "python"},
     )
     response = http_con.getresponse()
     assert response.status == HTTPStatus.CREATED
@@ -34,15 +33,13 @@ def test_registration_401(http_con, clear_databases):
     http_con.request(
         "POST",
         "/api/v1/registration",
-        body=json.dumps(USERS[0]),
-        headers={"user-agent": "python"},
+        body=json.dumps(USERS[0])
     )
     http_con.getresponse()
     http_con.request(
         "POST",
         "/api/v1/registration",
-        body=json.dumps(USERS[0]),
-        headers={"user-agent": "python"},
+        body=json.dumps(USERS[0])
     )
     response = http_con.getresponse()
     assert response.status == HTTPStatus.CONFLICT
@@ -63,8 +60,7 @@ def test_registration_401(http_con, clear_databases):
                         "password": "asdasdsssada",
                         "email": "lupa@gmail.com",
                     }
-                ),
-                "headers": {"user-agent": "python"},
+                )
             },
             HTTPStatus.BAD_REQUEST,
             WRONG_LOGIN,
@@ -79,8 +75,7 @@ def test_registration_401(http_con, clear_databases):
                         "password": "",
                         "email": "lupa@gmail.com",
                     }
-                ),
-                "headers": {"user-agent": "python"},
+                )
             },
             HTTPStatus.BAD_REQUEST,
             SHORT_PASSWORD,
@@ -95,8 +90,7 @@ def test_registration_401(http_con, clear_databases):
                         "password": "asdasdaaaaa",
                         "email": "lupagmail.com",
                     }
-                ),
-                "headers": {"user-agent": "python"},
+                )
             },
             HTTPStatus.BAD_REQUEST,
             WRONG_EMAIL,

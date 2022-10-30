@@ -26,8 +26,6 @@ def registration_user():
     if registration_api().wrong_request_data(user_data.get("password"), 8):
         return jsonify(SHORT_PASSWORD), 400
 
-    user_data["device"] = request.environ.get("HTTP_USER_AGENT")
-
     if registration_api().wrong_request_data(user_data.get("login"), 2):
         return jsonify(WRONG_LOGIN), 400
 

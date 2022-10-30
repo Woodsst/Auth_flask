@@ -33,7 +33,7 @@ def registration_admin(con):
     con.commit()
 
 
-def get_user_id(con):
+def get_user_id(con) -> str:
     """Получение ид пользователя"""
 
     login = USERS[0].get("login")

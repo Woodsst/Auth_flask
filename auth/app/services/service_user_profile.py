@@ -12,7 +12,7 @@ from werkzeug.security import generate_password_hash
 
 
 class ProfileService(ServiceBase):
-    def get_all_user_info(self, request: Request):
+    def get_all_user_info(self, request: Request) -> dict:
         """Получение данных пользователя"""
 
         user_id = self.get_user_id_from_token(request)
@@ -34,7 +34,7 @@ class ProfileService(ServiceBase):
             }
         )
 
-    def get_devices_user_history(self, request: Request):
+    def get_devices_user_history(self, request: Request) -> dict:
         """Получение устройств с которых входили в профиль"""
 
         user_id = self.get_user_id_from_token(request)
@@ -61,8 +61,8 @@ class ProfileService(ServiceBase):
         self._change_user_email(user_id, new_email)
 
     def change_password(
-        self, request: Request, password: str, new_password: str
-    ):
+            self, request: Request, password: str, new_password: str
+    ) -> bool:
         """Изменение пароля пользователя"""
 
         user_id = self.get_user_id_from_token(request)
