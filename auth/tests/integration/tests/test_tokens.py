@@ -3,6 +3,7 @@ from http import HTTPStatus
 
 import pytest
 
+from ..testdata.responses import TOKEN_WRONG_FORMAT
 from ..utils.http_requests import registration, login, get_access_token
 from ..testdata.data_for_test import USERS, LOGIN, OUT_TIME_TOKEN
 
@@ -34,6 +35,8 @@ def test_update_tokens_401(http_con, clear_databases):
     )
     response = http_con.getresponse()
     assert response.status == HTTPStatus.UNAUTHORIZED
+    message = json.loads(response.read())
+    assert message == TOKEN_WRONG_FORMAT
 
 
 def test_check_token_200(http_con, clear_databases):
@@ -59,3 +62,5 @@ def test_check_token_401(http_con, token, http_status):
     http_con.request("GET", "/api/v1/check", headers={"Authorization": token})
     response = http_con.getresponse()
     assert response.status == http_status
+    message = json.loads(response.read())
+    assert message == TOKEN_WRONG_FORMAT

@@ -42,15 +42,15 @@ class ServiceBase:
             return True
         return False
 
-    def get_user_password(self, user_id: str):
+    def get_user_password(self, user_id: str) -> str:
         """Получение пароля клиента из базы данных"""
         return (
             self.orm.query(User.password).filter(User.id == user_id).first()
         )[0]
 
     @staticmethod
-    def wrong_request_data(data: Optional[str], lenght: int):
+    def wrong_request_data(data: Optional[str], lenght: int) -> bool:
         """Проверка существования и соответствия данных"""
-        if len(data) <= lenght or data is None:
+        if data is None or len(data) <= lenght:
             return True
         return False

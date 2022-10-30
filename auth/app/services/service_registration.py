@@ -3,7 +3,7 @@ import uuid
 import sqlalchemy
 
 from services.service_base import ServiceBase
-from storages.postgres.db_models import Device, UserDevice, User
+from storages.postgres.db_models import User
 from werkzeug.security import generate_password_hash
 from services.crud import DefaultRole
 
@@ -26,22 +26,12 @@ class Registration(ServiceBase):
                 id=user_id,
                 role=DefaultRole.USER_KEY.value,
             )
-            self._set_device(user_data.get("device"), user_id)
             self.orm.add(user)
             self.orm.commit()
         except sqlalchemy.exc.IntegrityError:
             self.orm.rollback()
             return False
         return True
-
-    def _set_device(self, device: str, user_id: str):
-        """Добавление нового устройства с которого клиент зашел в аккаунт"""
-
-        id = uuid.uuid4()
-        device = Device(id=id, device=device)
-        user_device = UserDevice(device_id=id, user_id=user_id)
-        self.orm.add(device)
-        self.orm.add(user_device)
 
 
 def registration_api():

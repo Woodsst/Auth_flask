@@ -1,4 +1,5 @@
 from functools import wraps
+from typing import Union
 
 import jwt
 
@@ -21,7 +22,7 @@ from core.responses import (
 class TokensService(ServiceBase):
     """Сервис для работы с обновлением и проверкой токенов"""
 
-    def update_tokens(self, token: str) -> dict:
+    def update_tokens(self, token: str) -> Union[dict, bool]:
         """Функция обновления токена.
         Проводится проврка наличия токена среди отработаных токенов
         и выдача новой пары токенов, refresh токен с действующим временем
@@ -42,12 +43,11 @@ class TokensService(ServiceBase):
             payload = decode_refresh_token(token)
             return self.generate_tokens(payload)
 
-    def check_token(self, token: str):
+    def check_token(self, token: str) -> bool:
         """Функция проверки состояния токена"""
 
         if self.cash.get_token(token):
             return False
-
         token_time = get_token_time_to_end(token)
         if token_time:
             if token_time > 0:
@@ -83,8 +83,11 @@ def token_required(admin=False):
                     return jsonify(ACCESS_DENIED), 403
             try:
                 token_time = get_token_time_to_end(token)
-                if token_time <= 0:
-                    return jsonify(TOKEN_OUTDATED), 401
+                if token_time:
+                    if token_time <= 0:
+                        return jsonify(TOKEN_OUTDATED), 401
+                else:
+                    return jsonify(TOKEN_WRONG_FORMAT), 401
             except jwt.exceptions.InvalidSignatureError:
                 return jsonify(TOKEN_WRONG_FORMAT), 401
             except jwt.exceptions.DecodeError:

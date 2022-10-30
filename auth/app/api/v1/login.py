@@ -20,14 +20,15 @@ def login_user():
     request_data = json.loads(request.data)
     login = request_data.get("login")
     password = request_data.get("password")
+    user_agent = request.user_agent.string
 
     if login_api().wrong_request_data(login, 2):
         return jsonify(WRONG_LOGIN), 400
 
-    if login_api().wrong_request_data(password, 8):
+    if login_api().wrong_request_data(password, 7):
         return jsonify(SHORT_PASSWORD), 400
 
-    response = login_api().login(login, password)
+    response = login_api().login(login, password, user_agent)
     return response
 
 
@@ -43,6 +44,7 @@ def logout_user():
     if len(access_token) != 2:
         return jsonify(TOKEN_WRONG_FORMAT), 400
 
-    login_api().logout(access_token[1])
+    if login_api().logout(access_token[1]):
+        return jsonify(LOGOUT)
 
-    return jsonify(LOGOUT)
+    return jsonify(TOKEN_WRONG_FORMAT), 400
