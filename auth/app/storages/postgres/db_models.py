@@ -2,36 +2,27 @@ import datetime
 import uuid
 from copy import copy
 
-from sqlalchemy import Column, String, DateTime, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import validates, relationship
-from storages.db_connect import Base
-from exceptions import LoginException
+from sqlalchemy.orm import relationship
+from storages.db_connect import db
 
 
-class User(Base):
+class User(db.Model):
     __tablename__ = "users"
 
-    id = Column(
+    id = db.Column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
         unique=True,
         nullable=False,
     )
-    login = Column(String, unique=True, nullable=False)
-    password = Column(String, nullable=False, unique=True)
-    role = Column(
-        ForeignKey("roles.role_id", ondelete="CASCADE"), nullable=False
+    login = db.Column(db.String, unique=True, nullable=False)
+    password = db.Column(db.String, nullable=False, unique=True)
+    role = db.Column(
+        db.ForeignKey("roles.role_id", ondelete="CASCADE"), nullable=False
     )
-    email = Column(String, nullable=False, unique=True)
-
-    @validates("login", "password")
-    def validate_login(self, key, field) -> str:
-        if key == "login":
-            if len(field) <= 2:
-                raise LoginException()
-        return field
+    email = db.Column(db.String, nullable=False, unique=True)
 
     social = relationship("UserSocial", cascade="all, delete")
     device = relationship("UserDevice", cascade="all, delete")
@@ -46,51 +37,51 @@ class User(Base):
         return d
 
 
-class UserSocial(Base):
+class UserSocial(db.Model):
     __tablename__ = "user_social"
 
-    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    user_id = Column(
-        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    user_id = db.Column(
+        db.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    social_id = Column(
-        ForeignKey("socials.id", ondelete="CASCADE"), primary_key=True
+    social_id = db.Column(
+        db.ForeignKey("socials.id", ondelete="CASCADE"), primary_key=True
     )
-    url = Column(String, nullable=False, unique=True)
+    url = db.Column(db.String, nullable=False, unique=True)
     social = relationship("Social", cascade="all, delete")
 
 
-class Social(Base):
+class Social(db.Model):
     __tablename__ = "socials"
 
-    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    name = Column(String, nullable=False, unique=True)
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
 
 
-class UserDevice(Base):
+class UserDevice(db.Model):
     __tablename__ = "user_device"
 
-    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    user_id = Column(
-        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    user_id = db.Column(
+        db.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    device_id = Column(
-        ForeignKey("devices.id", ondelete="CASCADE"), primary_key=True
+    device_id = db.Column(
+        db.ForeignKey("devices.id", ondelete="CASCADE"), primary_key=True
     )
-    entry_time = Column(DateTime, default=datetime.datetime.utcnow())
+    entry_time = db.Column(db.DateTime, default=datetime.datetime.utcnow())
     device = relationship("Device", cascade="all, delete")
 
 
-class Device(Base):
+class Device(db.Model):
     __tablename__ = "devices"
 
-    id = Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    device = Column(String, nullable=False)
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
+    device = db.Column(db.String, nullable=False)
 
 
-class Role(Base):
+class Role(db.Model):
     __tablename__ = "roles"
 
-    role_id = Column(Integer, primary_key=True)
-    role = Column(String, nullable=False, unique=True)
-    description = Column(String, nullable=False)
+    role_id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String, nullable=False, unique=True)
+    description = db.Column(db.String, nullable=False)

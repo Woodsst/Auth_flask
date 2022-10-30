@@ -1,11 +1,11 @@
 from typing import Optional
 
 from flask import Request
-from sqlalchemy.orm import scoped_session
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
 
 import jwt_api as jwt
-from storages.db_connect import redis_conn, db_session
+from storages.db_connect import redis_conn, db
 from storages.postgres.db_models import User
 from storages.redis.redis_api import Redis
 
@@ -13,10 +13,8 @@ from storages.redis.redis_api import Redis
 class ServiceBase:
     """Родительский класс для сервисов"""
 
-    def __init__(
-        self, orm: scoped_session = db_session, cash: Redis = Redis(redis_conn)
-    ):
-        self.orm: Optional[scoped_session] = orm
+    def __init__(self, orm: SQLAlchemy = db, cash: Redis = Redis(redis_conn)):
+        self.orm: Optional[SQLAlchemy] = orm
         self.cash: Optional[Redis] = cash
 
     @staticmethod
@@ -45,7 +43,9 @@ class ServiceBase:
     def get_user_password(self, user_id: str) -> str:
         """Получение пароля клиента из базы данных"""
         return (
-            self.orm.query(User.password).filter(User.id == user_id).first()
+            self.orm.session.query(User.password)
+            .filter(User.id == user_id)
+            .first()
         )[0]
 
     @staticmethod

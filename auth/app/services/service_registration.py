@@ -26,10 +26,10 @@ class Registration(ServiceBase):
                 id=user_id,
                 role=DefaultRole.USER_KEY.value,
             )
-            self.orm.add(user)
-            self.orm.commit()
+            self.orm.session.add(user)
+            self.orm.session.commit()
         except sqlalchemy.exc.IntegrityError:
-            self.orm.rollback()
+            self.orm.session.rollback()
             return False
         return True
 

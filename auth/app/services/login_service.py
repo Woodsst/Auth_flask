@@ -31,9 +31,9 @@ class LoginAPI(ServiceBase):
         id = uuid.uuid4()
         device = Device(id=id, device=device)
         user_device = UserDevice(device_id=id, user_id=user_id)
-        self.orm.add(device)
-        self.orm.add(user_device)
-        self.orm.commit()
+        self.orm.session.add(device)
+        self.orm.session.add(user_device)
+        self.orm.session.commit()
 
     def logout(self, access_token: str):
         """Записывает токен в базу как невалидный"""

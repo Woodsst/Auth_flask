@@ -21,10 +21,10 @@ class Crud(ServiceBase):
     def _create_role(self, role: str, description: str):
         try:
             role = Role(role=role, description=description)
-            self.orm.add(role)
-            self.orm.commit()
+            self.orm.session.add(role)
+            self.orm.session.commit()
         except sqlalchemy.exc.IntegrityError:
-            self.orm.rollback()
+            self.orm.session.rollback()
             return False
         return True
 
@@ -35,16 +35,18 @@ class Crud(ServiceBase):
 
     def _delete_role(self, role: str):
         role_id = (
-            self.orm.query(Role.role_id).filter(Role.role == role).first()
+            self.orm.session.query(Role.role_id)
+            .filter(Role.role == role)
+            .first()
         )
         if role_id is None:
             return False
         role_id = role_id[0]
-        self.orm.query(User).filter(User.role == role_id).update(
+        self.orm.session.query(User).filter(User.role == role_id).update(
             {"role": DefaultRole.USER_KEY.value}, synchronize_session="fetch"
         )
-        self.orm.query(Role).filter(Role.role == role).delete()
-        self.orm.commit()
+        self.orm.session.query(Role).filter(Role.role == role).delete()
+        self.orm.session.commit()
 
         return True
 
@@ -59,25 +61,25 @@ class Crud(ServiceBase):
         self, role: str, change_for_description: str, change_for_role: str
     ) -> bool:
         if len(change_for_description) > 0:
-            self.orm.query(Role).filter(Role.role == role).update(
+            self.orm.session.query(Role).filter(Role.role == role).update(
                 {"description": change_for_description},
                 synchronize_session="fetch",
             )
         if len(change_for_role) > 0:
             result = (
-                self.orm.query(Role)
+                self.orm.session.query(Role)
                 .filter(Role.role == role)
                 .update({"role": change_for_role}, synchronize_session="fetch")
             )
             if result == 0:
                 return False
-        self.orm.commit()
+        self.orm.session.commit()
         return True
 
     def all_role(self) -> dict:
         """Возвращает список всех ролей"""
 
-        roles = self.orm.query(Role).all()
+        roles = self.orm.session.query(Role).all()
         return {role.role: role.description for role in roles}
 
     def set_user_role(self, user_id: str, role: str) -> bool:
@@ -87,19 +89,21 @@ class Crud(ServiceBase):
 
     def _set_user_role(self, user_id: str, role: str) -> bool:
         role = (
-            self.orm.query(Role.role_id).filter(Role.role == role).first()[0]
+            self.orm.session.query(Role.role_id)
+            .filter(Role.role == role)
+            .first()[0]
         )
         try:
             result = (
-                self.orm.query(User)
+                self.orm.session.query(User)
                 .filter(User.id == user_id)
                 .update({"role": role}, synchronize_session="fetch")
             )
             if result == 0:
                 return False
-            self.orm.commit()
+            self.orm.session.commit()
         except sqlalchemy.exc.IntegrityError:
-            self.orm.rollback()
+            self.orm.session.rollback()
             return False
         return True
 
@@ -107,7 +111,7 @@ class Crud(ServiceBase):
         """Получить роль пользователя"""
 
         user_role = (
-            self.orm.query(User.login, Role.role)
+            self.orm.session.query(User.login, Role.role)
             .join(Role)
             .filter(User.id == user_id)
             .all()

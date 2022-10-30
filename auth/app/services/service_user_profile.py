@@ -76,24 +76,24 @@ class ProfileService(ServiceBase):
     def _change_user_email(self, user_id: str, email: str):
         """Запрос в базу для изменения почты клиента"""
 
-        self.orm.query(User).filter(User.id == user_id).update(
+        self.orm.session.query(User).filter(User.id == user_id).update(
             {"email": email}, synchronize_session="fetch"
         )
-        self.orm.commit()
+        self.orm.session.commit()
 
     def _change_user_password(self, user_id, password: str):
         """Запрос в базу для изменения пароля клиента"""
 
-        self.orm.query(User).filter(User.id == user_id).update(
+        self.orm.session.query(User).filter(User.id == user_id).update(
             {"password": password}, synchronize_session="fetch"
         )
-        self.orm.commit()
+        self.orm.session.commit()
 
     def _get_user_data(self, user_id: str) -> dict:
         """Получение данных о клиенте"""
 
         user_data = (
-            self.orm.query(User, Role.role)
+            self.orm.session.query(User, Role.role)
             .join(Role)
             .filter(User.id == user_id)
             .first()
@@ -108,7 +108,7 @@ class ProfileService(ServiceBase):
         на которых клиент логинился в сервис"""
 
         device_history = (
-            self.orm.query(Device.device, UserDevice.entry_time)
+            self.orm.session.query(Device.device, UserDevice.entry_time)
             .join(User)
             .join(Device)
             .filter(UserDevice.user_id == user_id)

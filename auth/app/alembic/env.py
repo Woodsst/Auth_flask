@@ -4,14 +4,19 @@ from sqlalchemy import engine_from_config
 
 from alembic import context
 
+from storages.db_connect import postgres_init
+from app import app
+
+postgres_init(app)
+
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from storages.postgres.db_models import Base
+from storages.postgres.db_models import db
 
-target_metadata = Base.metadata
+target_metadata = db.metadata
 
 
 def run_migrations_offline() -> None:

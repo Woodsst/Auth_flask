@@ -1,18 +1,27 @@
-import redis
+from typing import Optional
+
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from redis import Redis
+
 from config.settings import default_settings
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 
-redis_conn = redis.Redis(
-    host=default_settings.redis_host,
-    port=default_settings.redis_port,
-    db=0,
-)
+redis_conn: Optional[Redis] = None
 
-engine = create_engine(default_settings.postgres, convert_unicode=True)
-db_session = scoped_session(
-    sessionmaker(autocommit=False, autoflush=False, bind=engine)
-)
-Base = declarative_base()
-Base.query = db_session.query_property()
+db: Optional[SQLAlchemy] = None
+
+
+def postgres_init(app: Flask):
+    app.config["SQLALCHEMY_DATABASE_URI"] = default_settings.postgres
+    global db
+    db = SQLAlchemy()
+    db.init_app(app)
+
+
+def redis_init():
+    global redis_conn
+    redis_conn = Redis(
+        host=default_settings.redis_host,
+        port=default_settings.redis_port,
+        db=0,
+    )
