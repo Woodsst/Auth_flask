@@ -1,6 +1,11 @@
 import json
 
+from flasgger import swag_from
 from flask import Blueprint, request, jsonify
+
+from documentation.crud_pages import (add_role_dict, delete_role_dict,
+                                      change_role_dict, roles_dict,
+                                      set_role_dict)
 from services.crud import crud, DefaultRole
 from services.tokens_service import token_required
 from core.responses import (
@@ -16,6 +21,7 @@ from core.responses import (
 crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
 
 
+@swag_from(add_role_dict)
 @crud_pages.route("/add_role", methods=["POST"])
 @token_required(admin=True)
 def add_role():
@@ -35,6 +41,7 @@ def add_role():
     return jsonify(ROLE_EXISTS), 400
 
 
+@swag_from(delete_role_dict)
 @crud_pages.route("/delete_role", methods=["POST"])
 @token_required(admin=True)
 def delete_role():
@@ -56,6 +63,7 @@ def delete_role():
     return jsonify(ROLE_NOT_EXIST), 400
 
 
+@swag_from(change_role_dict)
 @crud_pages.route("/change_role", methods=["POST"])
 @token_required(admin=True)
 def change_role():
@@ -84,11 +92,12 @@ def change_role():
 
     if crud().change_role(role, change_for_description, change_for_role):
 
-        return jsonify(ROLE_CHANGE)
+        return jsonify(ROLE_CHANGE), 200
 
     return jsonify(ROLE_NOT_EXIST), 400
 
 
+@swag_from(roles_dict)
 @crud_pages.route("/roles", methods=["GET"])
 @token_required(admin=True)
 def get_roles():
@@ -97,6 +106,7 @@ def get_roles():
     return jsonify(roles)
 
 
+@swag_from(set_role_dict)
 @crud_pages.route("/set_user_role", methods=["POST"])
 @token_required(admin=True)
 def set_user_role():
@@ -112,6 +122,6 @@ def set_user_role():
         return jsonify(BAD_REQUEST), 400
 
     if crud().set_user_role(user_id, role):
-        return jsonify(ROLE_CHANGE)
+        return jsonify(ROLE_CHANGE), 200
 
     return jsonify(BAD_REQUEST), 400

@@ -1,7 +1,10 @@
 import json
 
+from flasgger import swag_from
 import email_validator
 from flask import Blueprint, jsonify, request
+
+from documentation.registrtion_page import registrtion_dict
 from services.service_registration import registration_api
 from email_validator import validate_email
 from core.responses import (
@@ -17,6 +20,7 @@ registration_page = Blueprint(
 )
 
 
+@swag_from(registrtion_dict)
 @registration_page.route("/registration", methods=["POST"])
 def registration_user():
     """Ендпоинт регистрации клиента, принимает POST запрос с данными клиента

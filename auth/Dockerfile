@@ -4,6 +4,8 @@ COPY . auth
 
 RUN apt-get update && apt-get install -y netcat
 
+RUN pip install -U setuptools
+
 RUN pip install -r /auth/app/requirements.txt
 
 WORKDIR /auth/app

@@ -1,7 +1,11 @@
 import json
 
 import email_validator
+from flasgger import swag_from
 from flask import Blueprint, request, jsonify
+
+from documentation.profile_pages import (user_dict, device_dict, email_dict,
+                                         password_dict)
 from services.service_user_profile import profile_service
 from services.tokens_service import token_required
 from core.responses import (
@@ -16,6 +20,7 @@ from core.responses import (
 profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
 
 
+@swag_from(user_dict)
 @profile.route("/", methods=["GET"])
 @token_required()
 def user_full_information():
@@ -25,6 +30,7 @@ def user_full_information():
     return user_data
 
 
+@swag_from(device_dict)
 @profile.route("/devices", methods=["GET"])
 @token_required()
 def user_device_history():
@@ -34,6 +40,7 @@ def user_device_history():
     return user_devices_data
 
 
+@swag_from(email_dict)
 @profile.route("/change/email", methods=["POST"])
 @token_required()
 def change_user_email():
@@ -50,6 +57,7 @@ def change_user_email():
     return jsonify(EMAIL_CHANGE)
 
 
+@swag_from(password_dict)
 @profile.route("/change/password", methods=["POST"])
 @token_required()
 def change_user_password():
