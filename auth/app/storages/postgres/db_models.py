@@ -1,15 +1,12 @@
 import datetime
-import sys
 import uuid
 from copy import copy
 
-import sqlalchemy
 from sqlalchemy import Column, String, DateTime, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import validates, relationship
-from storages.db_connect import Base, db_session
+from storages.db_connect import Base
 from exceptions import LoginException
-from config.logger import logger
 
 
 class User(Base):
@@ -97,17 +94,3 @@ class Role(Base):
     role_id = Column(Integer, primary_key=True)
     role = Column(String, nullable=False, unique=True)
     description = Column(String, nullable=False)
-
-
-def added_default_roles():
-    try:
-        if len(Role.query.all()) > 0:
-            return
-        admin = Role(role="Admin", description="full access")
-        user = Role(role="User", description="default access")
-        db_session.add(admin)
-        db_session.add(user)
-        db_session.commit()
-    except sqlalchemy.exc.ProgrammingError:
-        logger.warn("app start without migrations!")
-        sys.exit(1)

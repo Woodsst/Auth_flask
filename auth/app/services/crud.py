@@ -1,6 +1,6 @@
 import enum
 
-import sqlalchemy
+import sqlalchemy.exc
 
 from services.service_base import ServiceBase
 from storages.postgres.db_models import Role, User
@@ -53,9 +53,7 @@ class Crud(ServiceBase):
     ) -> bool:
         """Изменение роли или описания роли в базе, при отсутствии роли
         возвращает False"""
-        return self._change_role(
-            role, change_for_description, change_for_role
-        )
+        return self._change_role(role, change_for_description, change_for_role)
 
     def _change_role(
         self, role: str, change_for_description: str, change_for_role: str

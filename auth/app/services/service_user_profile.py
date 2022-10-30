@@ -61,7 +61,7 @@ class ProfileService(ServiceBase):
         self._change_user_email(user_id, new_email)
 
     def change_password(
-            self, request: Request, password: str, new_password: str
+        self, request: Request, password: str, new_password: str
     ) -> bool:
         """Изменение пароля пользователя"""
 

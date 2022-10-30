@@ -1,6 +1,6 @@
 import uuid
 
-import sqlalchemy
+import sqlalchemy.exc
 
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User

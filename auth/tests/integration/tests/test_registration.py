@@ -30,17 +30,9 @@ def test_registration_200(clear_databases, http_con):
 def test_registration_401(http_con, clear_databases):
     """Проверка ошибки регистрации при уже существующем клиенте"""
 
-    http_con.request(
-        "POST",
-        "/api/v1/registration",
-        body=json.dumps(USERS[0])
-    )
+    http_con.request("POST", "/api/v1/registration", body=json.dumps(USERS[0]))
     http_con.getresponse()
-    http_con.request(
-        "POST",
-        "/api/v1/registration",
-        body=json.dumps(USERS[0])
-    )
+    http_con.request("POST", "/api/v1/registration", body=json.dumps(USERS[0]))
     response = http_con.getresponse()
     assert response.status == HTTPStatus.CONFLICT
     response = json.loads(response.read())
@@ -60,7 +52,7 @@ def test_registration_401(http_con, clear_databases):
                         "password": "asdasdsssada",
                         "email": "lupa@gmail.com",
                     }
-                )
+                ),
             },
             HTTPStatus.BAD_REQUEST,
             WRONG_LOGIN,
@@ -75,7 +67,7 @@ def test_registration_401(http_con, clear_databases):
                         "password": "",
                         "email": "lupa@gmail.com",
                     }
-                )
+                ),
             },
             HTTPStatus.BAD_REQUEST,
             SHORT_PASSWORD,
@@ -90,7 +82,7 @@ def test_registration_401(http_con, clear_databases):
                         "password": "asdasdaaaaa",
                         "email": "lupagmail.com",
                     }
-                )
+                ),
             },
             HTTPStatus.BAD_REQUEST,
             WRONG_EMAIL,

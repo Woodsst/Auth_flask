@@ -7,7 +7,6 @@ from api.v1.registration import registration_page
 from api.v1.tokens_work import tokens_work
 from config.logger import logger
 from config.settings import default_settings
-from storages.postgres.db_models import added_default_roles
 
 app = Flask(__name__)
 
@@ -16,7 +15,6 @@ app.register_blueprint(registration_page)
 app.register_blueprint(login_page)
 app.register_blueprint(profile)
 app.register_blueprint(crud_pages)
-added_default_roles()
 
 
 def main():

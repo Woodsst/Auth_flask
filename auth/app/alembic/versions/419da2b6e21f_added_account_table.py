@@ -78,6 +78,14 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", "user_id", "social_id"),
         sa.UniqueConstraint("url"),
     )
+    op.execute(
+        "INSERT INTO roles (role_id, role, description) "
+        "VALUES (1, 'Admin', 'full access')"
+    )
+    op.execute(
+        "INSERT INTO roles (role_id, role, description) "
+        "VALUES (2, 'User', 'default access')"
+    )
 
 
 def downgrade() -> None:
