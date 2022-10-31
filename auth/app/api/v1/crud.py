@@ -35,7 +35,7 @@ def add_role():
     return jsonify(ROLE_EXISTS), 400
 
 
-@crud_pages.route("/delete_role", methods=["POST"])
+@crud_pages.route("/delete_role", methods=["DELETE"])
 @token_required(admin=True)
 def delete_role():
     """Удаление роли, если были пользователи с удаляемой ролью, они получают

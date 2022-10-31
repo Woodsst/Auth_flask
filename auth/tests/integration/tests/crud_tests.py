@@ -99,7 +99,7 @@ def test_delete_role_200(http_con, postgres_con, clear_databases):
     http_con.getresponse()
 
     http_con.request(
-        "POST",
+        "DELETE",
         f"{CRUD_URL}delete_role",
         body=json.dumps({"role": NEW_ROLE}),
         headers={"Authorization": token},
@@ -142,7 +142,7 @@ def test_delete_role_400(
     token = f"Bearer {token['access-token']}"
 
     http_con.request(
-        "POST",
+        "DELETE",
         f"{CRUD_URL}delete_role",
         body=json.dumps({"role": role}),
         headers={"Authorization": token},

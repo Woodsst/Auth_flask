@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.tokens_service import tokens_service
-from core.responses import TOKEN_WRONG_FORMAT, TOKEN_CORRECT
+from core.responses import TOKEN_WRONG_FORMAT, TOKEN_CORRECT, TOKEN_MISSING
 
 tokens_work = Blueprint("tokens_work", __name__, url_prefix="/api/v1")
 
@@ -21,7 +21,9 @@ def update_token():
 def check():
     """Ендпоинт для проверки состояния токена клиента,
     принимает access токен, возвращает информацию о состоянии токена"""
-    token = request.headers["Authorization"]
+    token = request.headers.get("Authorization")
+    if token is None:
+        return jsonify(TOKEN_MISSING), 400
     token = token.split(" ")
     if len(token) > 1:
         token = token[1]

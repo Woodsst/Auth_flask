@@ -40,4 +40,5 @@ services:
     entrypoint: >
       sh -c "python3 utils/wait_for_postgres.py
       && python3 utils/wait_for_redis.py
+      && python3 utils/wait_for_app.py
       && pytest -v"
