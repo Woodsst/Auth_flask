@@ -1,3 +1,5 @@
+from ..settings import default_settings
+
 USERS = [
     {
         "login": "user1",
@@ -26,15 +28,35 @@ ADD_ROLE = {"role": "new_role", "description": "new description"}
 
 USER_AGENT = {"user-agent": "python"}
 
-REGISTRATION_URL = "/api/v1/registration"
+REGISTRATION_URL = (
+    f"http://{default_settings.host_app}:"
+    f"{default_settings.port_app}/api/v1/registration"
+)
 
-PROFILE_URL = "/api/v1/profile/"
+PROFILE_URL = (
+    f"http://{default_settings.host_app}:"
+    f"{default_settings.port_app}/api/v1/profile/"
+)
 
-CRUD_URL = "api/v1/crud/"
+CRUD_URL = (
+    f"http://{default_settings.host_app}:"
+    f"{default_settings.port_app}/api/v1/crud/"
+)
 
-LOGIN_URL = "/api/v1/login"
+LOGIN_URL = (
+    f"http://{default_settings.host_app}:"
+    f"{default_settings.port_app}/api/v1/login"
+)
 
-LOGOUT_URL = "/api/v1/logout"
+LOGOUT_URL = (
+    f"http://{default_settings.host_app}:"
+    f"{default_settings.port_app}/api/v1/logout"
+)
+
+TOKEN_URL = (
+    f"http://{default_settings.host_app}:"
+    f"{default_settings.port_app}/api/v1/"
+)
 
 OUT_TIME_TOKEN = (
     "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFlZj"

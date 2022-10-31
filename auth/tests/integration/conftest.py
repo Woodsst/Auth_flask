@@ -1,5 +1,4 @@
-import http.client
-
+import requests
 import psycopg2
 from pytest import fixture
 from redis import Redis
@@ -32,9 +31,7 @@ def redis_con():
 def http_con():
     """http клиент"""
 
-    con = http.client.HTTPConnection(
-        host=default_settings.host_app, port=default_settings.port_app
-    )
+    con = requests.Session()
     yield con
     con.close()
 

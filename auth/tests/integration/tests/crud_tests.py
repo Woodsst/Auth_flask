@@ -32,16 +32,14 @@ def test_add_role_200(http_con, clear_databases, postgres_con):
     registration_admin(postgres_con)
     token = login(http_con, ADMIN_LOGIN)
     token = f"Bearer {token['access-token']}"
-    add_new_role(http_con, token)
+    response = add_new_role(http_con, token)
 
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK
 
-    http_con.request(
-        "GET", f"{CRUD_URL}roles", headers={"Authorization": token}
+    response = http_con.get(
+        f"{CRUD_URL}roles", headers={"Authorization": token}
     )
-    response = json.loads(http_con.getresponse().read())
-
+    response = response.json()
     assert isinstance(response, dict)
     assert len(response) == 3
     assert response.get(NEW_ROLE) == DESCRIPTION
@@ -65,15 +63,13 @@ def test_add_role_400(
     token = login(http_con, ADMIN_LOGIN)
     token = f"Bearer {token['access-token']}"
 
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{CRUD_URL}add_role",
-        body=json.dumps({"role": role, "description": description}),
+        data=json.dumps({"role": role, "description": description}),
         headers={"Authorization": token},
     )
-    response = http_con.getresponse()
-    assert response.status == status_code
-    message = json.loads(response.read())
+    assert response.status_code == status_code
+    message = response.json()
     assert message == BAD_REQUEST
 
 
@@ -86,40 +82,35 @@ def test_delete_role_200(http_con, postgres_con, clear_databases):
     token = f"Bearer {token['access-token']}"
 
     add_new_role(http_con, token)
-    http_con.getresponse()
     registration(http_con, USERS[0])
     user_id = get_user_id(postgres_con)
 
-    http_con.request(
-        "POST",
+    http_con.post(
         f"{CRUD_URL}set_user_role",
-        body=json.dumps({"role": NEW_ROLE, "user_id": user_id}),
+        data=json.dumps({"role": NEW_ROLE, "user_id": user_id}),
         headers={"Authorization": token},
     )
-    http_con.getresponse()
 
-    http_con.request(
-        "DELETE",
+    response = http_con.delete(
         f"{CRUD_URL}delete_role",
-        body=json.dumps({"role": NEW_ROLE}),
+        data=json.dumps({"role": NEW_ROLE}),
         headers={"Authorization": token},
     )
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK
 
-    message = json.loads(response.read())
+    message = response.json()
     assert message == ROLE_DELETE
 
-    http_con.request(
-        "GET", f"{CRUD_URL}roles", headers={"Authorization": token}
+    response = http_con.get(
+        f"{CRUD_URL}roles", headers={"Authorization": token}
     )
-    response_data = json.loads(http_con.getresponse().read())
+    response_data = response.json()
     assert response_data.get(NEW_ROLE) is None
     token = login(http_con, USERS[0])
     token = f"Bearer {token['access-token']}"
 
-    http_con.request("GET", PROFILE_URL, headers={"Authorization": token})
-    response_data = json.loads(http_con.getresponse().read())
+    response = http_con.get(PROFILE_URL, headers={"Authorization": token})
+    response_data = response.json()
 
     assert response_data.get("role") == "User"
 
@@ -141,18 +132,13 @@ def test_delete_role_400(
     token = login(http_con, ADMIN_LOGIN)
     token = f"Bearer {token['access-token']}"
 
-    http_con.request(
-        "DELETE",
+    response = http_con.delete(
         f"{CRUD_URL}delete_role",
-        body=json.dumps({"role": role}),
+        data=json.dumps({"role": role}),
         headers={"Authorization": token},
     )
-
-    response = http_con.getresponse()
-    assert response.status == status_code
-
-    message = json.loads(response.read())
-    assert message == message
+    assert response.status_code == status_code
+    assert response.json() == message
 
 
 def test_change_role_200(postgres_con, http_con, clear_databases):
@@ -162,13 +148,11 @@ def test_change_role_200(postgres_con, http_con, clear_databases):
     token = login(http_con, ADMIN_LOGIN)
     token = f"Bearer {token['access-token']}"
     add_new_role(http_con, token)
-    http_con.getresponse()
     change_role = "change_role"
     change_desc = "change_description"
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{CRUD_URL}change_role",
-        body=json.dumps(
+        data=json.dumps(
             {
                 "role": NEW_ROLE,
                 "change_role": change_role,
@@ -178,16 +162,15 @@ def test_change_role_200(postgres_con, http_con, clear_databases):
         headers={"Authorization": token},
     )
 
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK
 
-    message = json.loads(response.read())
+    message = response.json()
     assert message == ROLE_CHANGE
 
-    http_con.request(
-        "GET", f"{CRUD_URL}roles", headers={"Authorization": token}
+    response = http_con.get(
+        f"{CRUD_URL}roles", headers={"Authorization": token}
     )
-    response_data = json.loads(http_con.getresponse().read())
+    response_data = response.json()
     assert response_data.get(change_role) == change_desc
 
 
@@ -209,21 +192,18 @@ def test_change_role_400(
     token = login(http_con, ADMIN_LOGIN)
     token = f"Bearer {token['access-token']}"
     add_new_role(http_con, token)
-    http_con.getresponse()
 
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{CRUD_URL}change_role",
-        body=json.dumps(
+        data=json.dumps(
             {"role": NEW_ROLE, "change_role": role, "change_description": desc}
         ),
         headers={"Authorization": token},
     )
 
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.BAD_REQUEST
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
-    r_message = json.loads(response.read())
+    r_message = response.json()
     assert r_message == message
 
 
@@ -235,28 +215,24 @@ def test_set_user_role_200(http_con, postgres_con, clear_databases):
     token = f"Bearer {token['access-token']}"
 
     add_new_role(http_con, token)
-    http_con.getresponse()
     registration(http_con, USERS[0])
     user_id = get_user_id(postgres_con)
 
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{CRUD_URL}set_user_role",
-        body=json.dumps({"role": NEW_ROLE, "user_id": user_id}),
+        data=json.dumps({"role": NEW_ROLE, "user_id": user_id}),
         headers={"Authorization": token},
     )
-    response = http_con.getresponse()
+    assert response.status_code == HTTPStatus.OK
 
-    assert response.status == HTTPStatus.OK
-
-    r_message = json.loads(response.read())
-    assert r_message == ROLE_CHANGE
+    message = response.json()
+    assert message == ROLE_CHANGE
 
     token = login(http_con, USERS[0])
     token = f"Bearer {token['access-token']}"
 
-    http_con.request("GET", PROFILE_URL, headers={"Authorization": token})
-    response_data = json.loads(http_con.getresponse().read())
+    response = http_con.get(PROFILE_URL, headers={"Authorization": token})
+    response_data = response.json()
 
     assert response_data.get("role") == NEW_ROLE
 
@@ -278,17 +254,15 @@ def test_set_user_role_400(
     token = login(http_con, ADMIN_LOGIN)
     token = f"Bearer {token['access-token']}"
 
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{CRUD_URL}set_user_role",
-        body=json.dumps({"role": role, "user_id": user_id}),
+        data=json.dumps({"role": role, "user_id": user_id}),
         headers={"Authorization": token},
     )
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.BAD_REQUEST
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
-    r_message = json.loads(response.read())
-    assert r_message == BAD_REQUEST
+    message = response.json()
+    assert message == BAD_REQUEST
 
 
 def test_get_all_roles(http_con, postgres_con, clear_databases):
@@ -298,13 +272,12 @@ def test_get_all_roles(http_con, postgres_con, clear_databases):
     token = login(http_con, ADMIN_LOGIN)
     token = f"Bearer {token['access-token']}"
 
-    http_con.request(
-        "GET", f"{CRUD_URL}roles", headers={"Authorization": token}
+    response = http_con.get(
+        f"{CRUD_URL}roles", headers={"Authorization": token}
     )
-    response = http_con.getresponse()
 
-    assert response.status == HTTPStatus.OK
-    response_data = json.loads(response.read())
+    assert response.status_code == HTTPStatus.OK
+    response_data = response.json()
     assert len(response_data) == 2
     assert response_data.get("Admin") == "full access"
     assert response_data.get("User") == "default access"
@@ -315,12 +288,11 @@ def test_get_add_roles_400(http_con, postgres_con, clear_databases):
 
     token = get_access_token(http_con)
 
-    http_con.request(
-        "GET", f"{CRUD_URL}roles", headers={"Authorization": token}
+    response = http_con.get(
+        f"{CRUD_URL}roles", headers={"Authorization": token}
     )
-    response = http_con.getresponse()
 
-    assert response.status == HTTPStatus.FORBIDDEN
+    assert response.status_code == HTTPStatus.FORBIDDEN
 
-    r_message = json.loads(response.read())
-    assert r_message == ACCESS_DENIED
+    message = response.json()
+    assert message == ACCESS_DENIED

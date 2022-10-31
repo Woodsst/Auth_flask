@@ -17,7 +17,7 @@ services:
       - ../../app/config/.dev.env
     ports:
       - "5000:5000"
-    entrypoint: ["/auth/app/entry_for_test.sh"]
+    entrypoint: ["/auth/app/entry.sh"]
 
   postgres:
     image: postgres:13

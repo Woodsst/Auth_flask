@@ -18,14 +18,11 @@ def test_profile_data_200(http_con, clear_databases):
     """Проверка получаемых данных при запросе данных профиля"""
     access_token = get_access_token(http_con)
 
-    http_con.request(
-        "GET", PROFILE_URL, headers={"Authorization": access_token}
+    response = http_con.get(
+        PROFILE_URL, headers={"Authorization": access_token}
     )
-
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.OK
-
-    response_data = json.loads(response.read())
+    assert response.status_code == HTTPStatus.OK
+    response_data = response.json()
 
     assert len(response_data) == 3
     assert isinstance(response_data, dict)
@@ -38,12 +35,11 @@ def test_profile_data_401(http_con, clear_databases):
     """Проверка доступа к профилю по невалидному токену"""
 
     access_token = "bad token"
-    http_con.request(
-        "GET", PROFILE_URL, headers={"Authorization": access_token}
+    response = http_con.get(
+        PROFILE_URL, headers={"Authorization": access_token}
     )
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.UNAUTHORIZED
-    message = json.loads(response.read())
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    message = response.json()
     assert message == TOKEN_WRONG_FORMAT
 
 
@@ -51,16 +47,14 @@ def test_profile_devices_200(http_con, clear_databases):
     """Проверка получаемых данных
     при запросе устройств с которых был вход в профиль"""
     access_token = get_access_token(http_con)
-    http_con.request(
-        "GET",
+    response = http_con.get(
         f"{PROFILE_URL}devices",
         headers={"Authorization": access_token},
     )
 
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK
 
-    response_data = json.loads(response.read())
+    response_data = response.json()
 
     assert isinstance(response_data, list)
     first_device = response_data[0]
@@ -72,14 +66,12 @@ def test_profile_devices_200(http_con, clear_databases):
 def test_profile_devices_401(http_con, clear_databases):
     """Проверка доступа к получению устройств в профиле"""
     access_token = "bad token"
-    http_con.request(
-        "GET",
+    response = http_con.get(
         f"{PROFILE_URL}devices",
         headers={"Authorization": access_token},
     )
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.UNAUTHORIZED
-    message = json.loads(response.read())
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    message = response.json()
     assert message == TOKEN_WRONG_FORMAT
 
 
@@ -88,24 +80,22 @@ def test_profile_change_email_200(http_con, clear_databases):
 
     access_token = get_access_token(http_con)
     new_email = "iaimnew@gmail.com"
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{PROFILE_URL}change/email",
         headers={"Authorization": access_token},
-        body=json.dumps({"new_email": new_email}),
+        data=json.dumps({"new_email": new_email}),
     )
 
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK
 
-    message = json.loads(response.read())
+    message = response.json()
     assert message == EMAIL_CHANGE
 
-    http_con.request(
-        "GET", PROFILE_URL, headers={"Authorization": access_token}
+    response = http_con.get(
+        PROFILE_URL, headers={"Authorization": access_token}
     )
 
-    response_data = json.loads(http_con.getresponse().read())
+    response_data = response.json()
     assert response_data.get("email") == new_email
 
 
@@ -113,15 +103,13 @@ def test_profile_change_email_401(http_con):
     """Проверка доступа к функционалу смены почты в профиле пользователя"""
 
     access_token = "bad token"
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{PROFILE_URL}change/email",
         headers={"Authorization": access_token},
     )
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.UNAUTHORIZED
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
 
-    message = json.loads(response.read())
+    message = response.json()
     assert message == TOKEN_WRONG_FORMAT
 
 
@@ -139,16 +127,14 @@ def test_profile_change_email_400(
     """Проверка передачи не валидных адресов почты"""
 
     access_token = get_access_token(http_con)
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{PROFILE_URL}change/email",
         headers={"Authorization": access_token},
-        body=json.dumps({"new_email": bad_email}),
+        data=json.dumps({"new_email": bad_email}),
     )
-    response = http_con.getresponse()
-    assert response.status == response_status
+    assert response.status_code == response_status
 
-    message = json.loads(response.read())
+    message = response.json()
     assert message == WRONG_EMAIL
 
 
@@ -157,11 +143,10 @@ def test_profile_change_password_200(http_con, clear_databases):
 
     access_token = get_access_token(http_con)
 
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{PROFILE_URL}change/password",
         headers={"Authorization": access_token},
-        body=json.dumps(
+        data=json.dumps(
             {
                 "password": USERS[0].get("password"),
                 "new_password": "iamnewpassword",
@@ -169,11 +154,9 @@ def test_profile_change_password_200(http_con, clear_databases):
         ),
     )
 
-    response = http_con.getresponse()
+    assert response.status_code == HTTPStatus.OK
 
-    assert response.status == HTTPStatus.OK
-
-    response_data = json.loads(response.read())
+    response_data = response.json()
     assert response_data == PASSWORD_CHANGE
 
 
@@ -181,13 +164,11 @@ def test_profile_change_password_401(http_con):
     """Проверка доступа к функционалу смены пароля в профиле пользователя"""
 
     access_token = "bad token"
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{PROFILE_URL}change/password",
         headers={"Authorization": access_token},
     )
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.UNAUTHORIZED
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 @pytest.mark.parametrize(
@@ -205,15 +186,13 @@ def test_profile_change_password_400(
     неправильного пароля пользователя"""
 
     access_token = get_access_token(http_con)
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{PROFILE_URL}change/password",
         headers={"Authorization": access_token},
-        body=json.dumps(
+        data=json.dumps(
             {"password": user_password, "new_password": bad_password}
         ),
     )
-    response = http_con.getresponse()
-    assert response.status == response_status
-    response_message = json.loads(response.read())
+    assert response.status_code == response_status
+    response_message = response.json()
     assert response_message == SHORT_PASSWORD

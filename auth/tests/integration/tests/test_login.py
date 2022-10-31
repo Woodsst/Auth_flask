@@ -28,13 +28,11 @@ def test_login_200(http_con, clear_databases):
 
     registration(http_con, USERS[0])
 
-    http_con.request("POST", LOGIN_URL, body=json.dumps(LOGIN))
+    response = http_con.post(LOGIN_URL, data=json.dumps(LOGIN))
 
-    response = http_con.getresponse()
+    assert response.status_code == HTTPStatus.OK
 
-    assert response.status == HTTPStatus.OK
-
-    tokens = json.loads(response.read())
+    tokens = response.json()
 
     assert len(tokens) == 2
 
@@ -93,12 +91,10 @@ def test_login_400(http_con, clear_databases, status_code, body, message):
     """Проверка ошибок при входе пользователя"""
     registration(http_con, USERS[0])
 
-    http_con.request("POST", LOGIN_URL, body=json.dumps(body))
-    response = http_con.getresponse()
-    assert response.status == status_code
+    response = http_con.post(LOGIN_URL, data=json.dumps(body))
+    assert response.status_code == status_code
 
-    response_message = json.loads(response.read())
-    assert response_message == message
+    assert response.json() == message
 
 
 def test_logout_200(http_con, clear_databases):
@@ -106,17 +102,14 @@ def test_logout_200(http_con, clear_databases):
 
     token = get_access_token(http_con)
 
-    http_con.request("GET", LOGOUT_URL, headers={"Authorization": token})
-    response = http_con.getresponse()
+    response = http_con.get(LOGOUT_URL, headers={"Authorization": token})
 
-    assert response.status == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK
 
-    response_message = json.loads(response.read())
-    assert response_message == LOGOUT
+    assert response.json() == LOGOUT
 
-    http_con.request("GET", PROFILE_URL, headers={"Authorization": token})
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.FORBIDDEN
+    response = http_con.get(PROFILE_URL, headers={"Authorization": token})
+    assert response.status_code == HTTPStatus.FORBIDDEN
 
 
 @pytest.mark.parametrize(
@@ -126,10 +119,8 @@ def test_logout_200(http_con, clear_databases):
 def test_logout_400(http_con, clear_databases, token, status_code):
     """Проверка невалидного токена для выхода из аккаунта"""
 
-    http_con.request("GET", LOGOUT_URL, headers={"Authorization": token})
-    response = http_con.getresponse()
+    response = http_con.get(LOGOUT_URL, headers={"Authorization": token})
 
-    assert response.status == HTTPStatus.BAD_REQUEST
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
-    response_message = json.loads(response.read())
-    assert response_message == TOKEN_WRONG_FORMAT
+    assert response.json() == TOKEN_WRONG_FORMAT

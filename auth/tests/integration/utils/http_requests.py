@@ -1,5 +1,6 @@
 import json
 from http.client import HTTPConnection
+from requests import Session
 from ..testdata.data_for_test import (
     USER_AGENT,
     REGISTRATION_URL,
@@ -12,25 +13,23 @@ from ..testdata.data_for_test import (
 )
 
 
-def registration(http_con: HTTPConnection, registration_payload: dict):
+def registration(http_con: Session, registration_payload: dict):
     """Регистрация пользователя"""
 
-    http_con.request(
-        "POST", REGISTRATION_URL, body=json.dumps(registration_payload)
-    )
-    response = http_con.getresponse()
+    s = http_con.post(REGISTRATION_URL, data=json.dumps(registration_payload))
+    print(s.json())
 
-    return response
+    return s
 
 
-def login(http_con: HTTPConnection, login_payload: dict):
+def login(http_con: Session, login_payload: dict):
     """Вход в аккаунт"""
 
-    http_con.request(
-        "POST", LOGIN_URL, body=json.dumps(login_payload), headers=USER_AGENT
+    response = http_con.post(
+        LOGIN_URL, data=json.dumps(login_payload), headers=USER_AGENT
     )
 
-    return json.loads(http_con.getresponse().read())
+    return response.json()
 
 
 def get_access_token(http_con: HTTPConnection):
@@ -42,11 +41,11 @@ def get_access_token(http_con: HTTPConnection):
     return f"Bearer {tokens.get('access-token')}"
 
 
-def add_new_role(http_con: HTTPConnection, token: str):
+def add_new_role(http_con: Session, token: str):
 
-    http_con.request(
-        "POST",
+    response = http_con.post(
         f"{CRUD_URL}add_role",
-        body=json.dumps({"role": NEW_ROLE, "description": DESCRIPTION}),
+        data=json.dumps({"role": NEW_ROLE, "description": DESCRIPTION}),
         headers={"Authorization": token},
     )
+    return response

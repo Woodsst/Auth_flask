@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 import pytest
 
-from ..testdata.data_for_test import USERS
+from ..testdata.data_for_test import USERS, REGISTRATION_URL
 from ..testdata.responses import (
     REGISTRATION_COMPLETE,
     WRONG_EMAIL,
@@ -16,37 +16,34 @@ from ..testdata.responses import (
 def test_registration_200(clear_databases, http_con):
     """Проверка регистрации клиента"""
 
-    http_con.request(
-        "POST",
-        "/api/v1/registration",
-        body=json.dumps(USERS[0]),
+    response = http_con.post(
+        REGISTRATION_URL,
+        data=json.dumps(USERS[0]),
     )
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.CREATED
-    message = json.loads(response.read())
+
+    assert response.status_code == HTTPStatus.CREATED
+    message = response.json()
     assert message == REGISTRATION_COMPLETE
 
 
 def test_registration_401(http_con, clear_databases):
     """Проверка ошибки регистрации при уже существующем клиенте"""
 
-    http_con.request("POST", "/api/v1/registration", body=json.dumps(USERS[0]))
-    http_con.getresponse()
-    http_con.request("POST", "/api/v1/registration", body=json.dumps(USERS[0]))
-    response = http_con.getresponse()
-    assert response.status == HTTPStatus.CONFLICT
-    response = json.loads(response.read())
+    http_con.post(REGISTRATION_URL, data=json.dumps(USERS[0]))
+    response = http_con.post(REGISTRATION_URL, data=json.dumps(USERS[0]))
+    assert response.status_code == HTTPStatus.CONFLICT
+
+    response = response.json()
     assert response == REGISTRATION_FAILED
 
 
 @pytest.mark.parametrize(
-    "bad_request, status_code, response_body",
+    "bad_request, status_code, response_data",
     [
         (
             {
-                "method": "POST",
-                "url": "/api/v1/registration",
-                "body": json.dumps(
+                "url": REGISTRATION_URL,
+                "data": json.dumps(
                     {
                         "login": "",
                         "password": "asdasdsssada",
@@ -59,9 +56,8 @@ def test_registration_401(http_con, clear_databases):
         ),
         (
             {
-                "method": "POST",
-                "url": "/api/v1/registration",
-                "body": json.dumps(
+                "url": REGISTRATION_URL,
+                "data": json.dumps(
                     {
                         "login": "pupa",
                         "password": "",
@@ -74,9 +70,8 @@ def test_registration_401(http_con, clear_databases):
         ),
         (
             {
-                "method": "POST",
-                "url": "/api/v1/registration",
-                "body": json.dumps(
+                "url": REGISTRATION_URL,
+                "data": json.dumps(
                     {
                         "login": "pupa",
                         "password": "asdasdaaaaa",
@@ -90,10 +85,9 @@ def test_registration_401(http_con, clear_databases):
     ],
 )
 def test_registration_400(
-    http_con, clear_databases, bad_request, status_code, response_body
+    http_con, clear_databases, bad_request, status_code, response_data
 ):
     """Проверка ошибок валидации логина пароля и почты"""
-    http_con.request(**bad_request)
-    response = http_con.getresponse()
-    assert response.status == status_code
-    assert json.loads(response.read()) == response_body
+    response = http_con.post(**bad_request)
+    assert response.status_code == status_code
+    assert response.json() == response_data

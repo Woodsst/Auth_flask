@@ -1,24 +1,21 @@
 import logging
-import http.client
 import backoff
+import requests
 
 logger = logging.getLogger(__name__)
 
 
 @backoff.on_exception(
     backoff.expo,
-    ConnectionRefusedError,
+    requests.exceptions.ConnectionError,
     max_tries=10,
     max_time=20,
     logger=logger.warning("Пытаемся соединится с приложением"),
 )
 def connect_app():
     logger.warning("Повторная попытка соединения с приложением")
-    con = http.client.HTTPConnection(
-        host="flask", port=5000
-    )
-    con.request("GET", "/api/v1/check")
-    con.getresponse()
+    con = requests.Session()
+    con.get("http://flask:5000/api/v1/check")
 
 
 if __name__ == "__main__":
