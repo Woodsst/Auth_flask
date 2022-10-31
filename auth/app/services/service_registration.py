@@ -5,7 +5,7 @@ import sqlalchemy.exc
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User
 from werkzeug.security import generate_password_hash
-from services.crud import DefaultRole
+from core.defaultrole import DefaultRole
 
 
 class Registration(ServiceBase):

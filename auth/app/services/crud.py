@@ -1,16 +1,8 @@
-import enum
-
 import sqlalchemy.exc
 
 from services.service_base import ServiceBase
 from storages.postgres.db_models import Role, User
-
-
-class DefaultRole(enum.Enum):
-    ADMIN = "Admin"
-    ADMIN_KEY = 1
-    USER = "User"
-    USER_KEY = 2
+from core.defaultrole import DefaultRole
 
 
 class Crud(ServiceBase):
