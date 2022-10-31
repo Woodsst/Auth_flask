@@ -72,3 +72,17 @@ def get_token_time_to_end(token: str) -> int:
         end_time.timestamp() - datetime.datetime.utcnow().timestamp()
     )
     return int(time_for_exited)
+
+
+def generate_tokens(payload: dict) -> dict:
+    """Генерация токенов"""
+
+    access = encode_access_token(payload)
+    refresh = encode_refresh_token(payload)
+
+    return {"access-token": access, "refresh-token": refresh}
+
+
+def get_user_id_from_token(token: str) -> str:
+    """Получение id пользователя из токена"""
+    return decode_access_token(token).get("id")

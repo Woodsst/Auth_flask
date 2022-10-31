@@ -16,10 +16,11 @@ from ..testdata.data_for_test import (
 def registration(http_con: Session, registration_payload: dict):
     """Регистрация пользователя"""
 
-    s = http_con.post(REGISTRATION_URL, data=json.dumps(registration_payload))
-    print(s.json())
+    response = http_con.post(
+        REGISTRATION_URL, data=json.dumps(registration_payload)
+    )
 
-    return s
+    return response
 
 
 def login(http_con: Session, login_payload: dict):

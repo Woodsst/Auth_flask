@@ -3,10 +3,12 @@ from typing import Union
 
 import jwt
 
+from core.defaultrole import DefaultRole
 from jwt_api import (
     get_token_time_to_end,
     decode_refresh_token,
     decode_access_token,
+    generate_tokens,
 )
 from services.service_base import ServiceBase
 from storages.db_connect import redis_conn
@@ -41,7 +43,7 @@ class TokensService(ServiceBase):
                 exited=time_to_end_token,
             )
             payload = decode_refresh_token(token)
-            return self.generate_tokens(payload)
+            return generate_tokens(payload)
 
     def check_token(self, token: str) -> bool:
         """Функция проверки состояния токена"""
@@ -75,12 +77,15 @@ def token_required(admin=False):
                     token = token[1]
             if not token:
                 return jsonify(TOKEN_MISSING), 401
+
             if redis_conn.get(token):
                 return jsonify(TOKEN_OUTDATED), 403
+
             if admin:
                 payload = decode_access_token(token)
-                if int(payload.get("role")) != 1:
+                if int(payload.get("role")) != DefaultRole.ADMIN_KEY.value:
                     return jsonify(ACCESS_DENIED), 403
+
             try:
                 token_time = get_token_time_to_end(token)
                 if token_time:
@@ -88,10 +93,13 @@ def token_required(admin=False):
                         return jsonify(TOKEN_OUTDATED), 401
                 else:
                     return jsonify(TOKEN_WRONG_FORMAT), 401
+
             except jwt.exceptions.InvalidSignatureError:
                 return jsonify(TOKEN_WRONG_FORMAT), 401
+
             except jwt.exceptions.DecodeError:
                 return jsonify(TOKEN_WRONG_FORMAT), 401
+
             return f(*args, **kwargs)
 
         return decorated

@@ -1,5 +1,3 @@
-import json
-
 from flask import Blueprint, request, jsonify
 from services.crud import crud, DefaultRole
 from services.tokens_service import token_required
@@ -21,7 +19,10 @@ crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
 def add_role():
     """Ендпоинт добавления роли, доступ только у администратора"""
 
-    request_data = json.loads(request.data)
+    request_data = crud().data_exist(request)
+    if not request_data:
+        return jsonify(BAD_REQUEST), 400
+
     role = request_data.get("role")
     description = request_data.get("description")
 
@@ -41,7 +42,10 @@ def delete_role():
     """Удаление роли, если были пользователи с удаляемой ролью, они получают
     стандартную роль User"""
 
-    request_data = json.loads(request.data)
+    request_data = crud().data_exist(request)
+    if not request_data:
+        return jsonify(BAD_REQUEST), 400
+
     role = request_data.get("role")
 
     if crud().wrong_request_data(role, 1):
@@ -62,7 +66,10 @@ def change_role():
     """Изменение роли или описания роли, изменить можно как только роль
     так и только описание"""
 
-    request_data = json.loads(request.data)
+    request_data = crud().data_exist(request)
+    if not request_data:
+        return jsonify(BAD_REQUEST), 400
+
     role = request_data.get("role")
     change_for_description = request_data.get("change_description")
     change_for_role = request_data.get("change_role")
@@ -83,7 +90,6 @@ def change_role():
         return jsonify(BAD_REQUEST), 400
 
     if crud().change_role(role, change_for_description, change_for_role):
-
         return jsonify(ROLE_CHANGE)
 
     return jsonify(ROLE_NOT_EXIST), 400
@@ -102,7 +108,10 @@ def get_roles():
 def set_user_role():
     """Назначить пользователю роль, задает любую из возможных ролей"""
 
-    request_data = json.loads(request.data)
+    request_data = crud().data_exist(request)
+    if not request_data:
+        return jsonify(BAD_REQUEST), 400
+
     user_id = request_data.get("user_id")
     role = request_data.get("role")
 

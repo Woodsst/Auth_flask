@@ -1,5 +1,6 @@
 import json
 
+from jwt_api import get_user_id_from_token
 from services.service_base import ServiceBase
 from storages.postgres.db_models import (
     User,
@@ -7,15 +8,14 @@ from storages.postgres.db_models import (
     UserDevice,
     Role,
 )
-from flask import Request
 from werkzeug.security import generate_password_hash
 
 
 class ProfileService(ServiceBase):
-    def get_all_user_info(self, request: Request) -> dict:
+    def get_all_user_info(self, token: str) -> dict:
         """Получение данных пользователя"""
 
-        user_id = self.get_user_id_from_token(request)
+        user_id = get_user_id_from_token(token)
 
         user_data = self._get_user_data(user_id)
         return self._format_user_data(user_data)
@@ -34,10 +34,10 @@ class ProfileService(ServiceBase):
             }
         )
 
-    def get_devices_user_history(self, request: Request) -> dict:
+    def get_devices_user_history(self, token: str) -> dict:
         """Получение устройств с которых входили в профиль"""
 
-        user_id = self.get_user_id_from_token(request)
+        user_id = get_user_id_from_token(token)
         raw_history = self._get_user_device_history(user_id)
         history = self._format_devices_history(raw_history)
         return history
@@ -54,18 +54,18 @@ class ProfileService(ServiceBase):
             history.append(entry)
         return history
 
-    def change_email(self, request: Request, new_email: str):
+    def change_email(self, token: str, new_email: str):
         """Изменение почты пользователя"""
 
-        user_id = self.get_user_id_from_token(request)
+        user_id = get_user_id_from_token(token)
         self._change_user_email(user_id, new_email)
 
     def change_password(
-        self, request: Request, password: str, new_password: str
+        self, token: str, password: str, new_password: str
     ) -> bool:
         """Изменение пароля пользователя"""
 
-        user_id = self.get_user_id_from_token(request)
+        user_id = get_user_id_from_token(token)
 
         if self.check_password(password, user_id):
             new_password = generate_password_hash(new_password)

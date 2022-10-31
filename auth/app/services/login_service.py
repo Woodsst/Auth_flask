@@ -4,12 +4,14 @@ from flask import jsonify, make_response, Response
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User, Device, UserDevice
 from werkzeug.security import check_password_hash
-from jwt_api import get_token_time_to_end
+from jwt_api import get_token_time_to_end, generate_tokens
 from core.responses import USER_NOT_FOUND, PASSWORD_NOT_MATCH
 
 
 class LoginAPI(ServiceBase):
     def login(self, login: str, password: str, user_agent: str) -> Response:
+        """Проверка введенных данных пользователя"""
+
         try:
             user = User.query.filter_by(login=login).first()
             if check_password_hash(user.password, password):
@@ -18,7 +20,7 @@ class LoginAPI(ServiceBase):
                     "role": str(user.role),
                 }
                 self._set_device(user_agent, user.id)
-                return self.generate_tokens(payload)
+                return generate_tokens(payload)
             responseObject = PASSWORD_NOT_MATCH
             return make_response(jsonify(responseObject)), 401
         except AttributeError:

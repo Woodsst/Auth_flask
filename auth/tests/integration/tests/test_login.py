@@ -6,9 +6,12 @@ import pytest
 
 from ..testdata.responses import (
     WRONG_LOGIN,
-    SHORT_PASSWORD,
     LOGOUT,
     TOKEN_WRONG_FORMAT,
+    BAD_REQUEST,
+    USER_NOT_FOUND,
+    PASSWORD_NOT_MATCH,
+    TOKEN_MISSING,
 )
 from ..testdata.data_for_test import (
     USERS,
@@ -74,16 +77,16 @@ def test_login_200(http_con, clear_databases):
     "body, status_code, message",
     [
         ({"login": "", "password": ""}, HTTPStatus.BAD_REQUEST, WRONG_LOGIN),
-        ({}, HTTPStatus.BAD_REQUEST, WRONG_LOGIN),
+        ({}, HTTPStatus.BAD_REQUEST, BAD_REQUEST),
         (
             {"login": "asd", "password": "sss"},
-            HTTPStatus.BAD_REQUEST,
-            SHORT_PASSWORD,
+            HTTPStatus.UNAUTHORIZED,
+            USER_NOT_FOUND,
         ),
         (
             {"login": "user1", "password": "sss"},
-            HTTPStatus.BAD_REQUEST,
-            SHORT_PASSWORD,
+            HTTPStatus.UNAUTHORIZED,
+            PASSWORD_NOT_MATCH,
         ),
     ],
 )
@@ -113,14 +116,17 @@ def test_logout_200(http_con, clear_databases):
 
 
 @pytest.mark.parametrize(
-    "token, status_code",
-    [("bad token", HTTPStatus.BAD_REQUEST), ("", HTTPStatus.BAD_REQUEST)],
+    "token, status_code, message",
+    [
+        ("bad token", HTTPStatus.UNAUTHORIZED, TOKEN_WRONG_FORMAT),
+        ("", HTTPStatus.UNAUTHORIZED, TOKEN_MISSING),
+    ],
 )
-def test_logout_400(http_con, clear_databases, token, status_code):
+def test_logout_400(http_con, clear_databases, token, status_code, message):
     """Проверка невалидного токена для выхода из аккаунта"""
 
     response = http_con.get(LOGOUT_URL, headers={"Authorization": token})
 
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.status_code == status_code
 
-    assert response.json() == TOKEN_WRONG_FORMAT
+    assert response.json() == message

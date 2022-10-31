@@ -1,5 +1,3 @@
-import json
-
 import email_validator
 from flask import Blueprint, jsonify, request
 from services.service_registration import registration_api
@@ -10,6 +8,7 @@ from core.responses import (
     WRONG_LOGIN,
     REGISTRATION_COMPLETE,
     REGISTRATION_FAILED,
+    BAD_REQUEST,
 )
 
 registration_page = Blueprint(
@@ -21,7 +20,11 @@ registration_page = Blueprint(
 def registration_user():
     """Ендпоинт регистрации клиента, принимает POST запрос с данными клиента
     в теле запроса"""
-    user_data = json.loads(request.data)
+
+    user_data = registration_api().data_exist(request)
+
+    if not user_data:
+        return jsonify(BAD_REQUEST), 400
 
     if registration_api().wrong_request_data(user_data.get("password"), 8):
         return jsonify(SHORT_PASSWORD), 400
