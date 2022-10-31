@@ -16,3 +16,4 @@ gevent==22.10.1
 alembic==1.8.1
 backoff==2.2.1
 flasgger==0.9.5
+spectree==0.12.0
