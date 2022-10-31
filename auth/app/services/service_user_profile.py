@@ -34,11 +34,13 @@ class ProfileService(ServiceBase):
             }
         )
 
-    def get_devices_user_history(self, token: str) -> dict:
+    def get_devices_user_history(
+        self, token: str, page: int, page_size: int
+    ) -> dict:
         """Получение устройств с которых входили в профиль"""
 
         user_id = get_user_id_from_token(token)
-        raw_history = self._get_user_device_history(user_id)
+        raw_history = self._get_user_device_history(user_id, page, page_size)
         history = self._format_devices_history(raw_history)
         return history
 
@@ -103,7 +105,9 @@ class ProfileService(ServiceBase):
 
         return user_data
 
-    def _get_user_device_history(self, user_id: str) -> list:
+    def _get_user_device_history(
+        self, user_id: str, page: int, page_size: int
+    ) -> list:
         """Получение данных о времени и устройствах
         на которых клиент логинился в сервис"""
 
@@ -112,7 +116,7 @@ class ProfileService(ServiceBase):
             .join(User)
             .join(Device)
             .filter(UserDevice.user_id == user_id)
-            .all()
+            .paginate(page=page, per_page=page_size, count=False)
         )
         return device_history
 

@@ -98,7 +98,7 @@ def change_role():
 @crud_pages.route("/roles", methods=["GET"])
 @token_required(admin=True)
 def get_roles():
-    """Получение списка всех возможных ролей и их индексов"""
+    """Получение всех возможных ролей и их индексов"""
     roles = crud().all_role()
     return jsonify(roles)
 

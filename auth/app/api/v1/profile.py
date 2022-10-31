@@ -25,13 +25,28 @@ def user_full_information():
     return user_data
 
 
-@profile.route("/devices", methods=["GET"])
+@profile.route("/devices/", methods=["GET"])
+@profile.route(
+    "/devices?page=<int:page>&page_size=<int:page_size>", methods=["GET"]
+)
 @token_required()
 def user_device_history():
     """Ендпоинт для запроса истории девайсов с которых была авторизация"""
-    token = request.headers.get("Authorization").split(" ")
 
-    user_devices_data = profile_service().get_devices_user_history(token[1])
+    token = request.headers.get("Authorization").split(" ")
+    page = request.args.get("page")
+    if page is None or len(page) == 0:
+        page = 1
+    page = int(page)
+
+    page_size = request.args.get("page_size")
+    if page_size is None or len(page_size) == 0:
+        page_size = 5
+    page_size = int(page_size)
+
+    user_devices_data = profile_service().get_devices_user_history(
+        token[1], page, page_size
+    )
     return user_devices_data
 
 
