@@ -3,7 +3,12 @@ import json
 from flask import Blueprint, request
 from spectree import Response
 
-from core.models import RegistrationReqeust, RouteResponse, spec
+from core.spec_core import RouteResponse, spec
+from core.schemas.registration_schemas import (
+    RegistrationFailed,
+    RegistrationReqeust,
+)
+
 from core.responses import (
     REGISTRATION_COMPLETE,
     REGISTRATION_FAILED,
@@ -18,7 +23,7 @@ registration_page = Blueprint(
 @registration_page.route("/registration", methods=["POST"])
 @spec.validate(
     json=RegistrationReqeust,
-    resp=Response(HTTP_201=RouteResponse, HTTP_409=RouteResponse),
+    resp=Response(HTTP_201=RouteResponse, HTTP_409=RegistrationFailed),
     tags=["Registration"],
 )
 def registration_user():
@@ -30,4 +35,4 @@ def registration_user():
     if response:
         return RouteResponse(result=REGISTRATION_COMPLETE), 201
 
-    return RouteResponse(result=REGISTRATION_FAILED), 409
+    return RegistrationFailed(result=REGISTRATION_FAILED), 409

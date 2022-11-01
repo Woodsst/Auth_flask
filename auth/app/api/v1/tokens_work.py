@@ -1,17 +1,18 @@
 from flask import Blueprint, request
 from spectree import Response
 
-from core.models import Token, spec, RouteResponse
+from core.spec_core import spec, RouteResponse
+from core.schemas.token_schemas import TokenOutDate, TokenRequest
 from services.tokens_service import tokens_service
-from core.responses import TOKEN_WRONG_FORMAT, TOKEN_CORRECT, TOKEN_OUTDATED
+from core.responses import TOKEN_CORRECT, TOKEN_OUTDATED
 
 tokens_work = Blueprint("tokens_work", __name__, url_prefix="/api/v1")
 
 
 @tokens_work.route("/token", methods=["GET"])
 @spec.validate(
-    headers=Token,
-    resp=Response(HTTP_200=RouteResponse, HTTP_401=RouteResponse),
+    headers=TokenRequest,
+    resp=Response(HTTP_200=RouteResponse, HTTP_401=TokenOutDate),
     tags=["Token"],
 )
 def update_token():
@@ -24,13 +25,13 @@ def update_token():
     if tokens:
         return RouteResponse(result=tokens)
 
-    return RouteResponse(result=TOKEN_OUTDATED), 401
+    return TokenOutDate(result=TOKEN_OUTDATED), 401
 
 
 @tokens_work.route("/check", methods=["GET"])
 @spec.validate(
-    headers=Token,
-    resp=Response(HTTP_200=RouteResponse, HTTP_401=RouteResponse),
+    headers=TokenRequest,
+    resp=Response(HTTP_200=RouteResponse, HTTP_401=TokenOutDate),
     tags=["Token"],
 )
 def check():
@@ -43,4 +44,4 @@ def check():
     if tokens_service().check_token(token):
         return RouteResponse(result=TOKEN_CORRECT)
 
-    return RouteResponse(result=TOKEN_WRONG_FORMAT), 401
+    return TokenOutDate(result=TOKEN_OUTDATED), 401

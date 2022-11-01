@@ -1,13 +1,18 @@
 from flask import Blueprint, request, jsonify
 from spectree import Response
 
-from core.models import (
+from core.schemas.crud_schemas import (
+    AddRoleRequest,
+    AddRoleExist,
+    DeleteRoleRequest,
+    DeleteRoleDefaultRole,
+    DeleteRoleNotExist,
+    ChangeRoleRequest,
+    UserRoleRequest,
+)
+from core.spec_core import (
     spec,
-    AddRole,
     RouteResponse,
-    DeleteRole,
-    ChangeRole,
-    UserRole,
 )
 from services.crud import crud, DefaultRole
 from services.tokens_service import token_required
@@ -27,8 +32,8 @@ crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
 @crud_pages.route("/add_role", methods=["POST"])
 @token_required(admin=True)
 @spec.validate(
-    json=AddRole,
-    resp=Response(HTTP_200=RouteResponse, HTTP_400=RouteResponse),
+    json=AddRoleRequest,
+    resp=Response(HTTP_200=RouteResponse, HTTP_400=AddRoleExist),
     tags=["CRUD"],
 )
 def add_role():
@@ -39,14 +44,18 @@ def add_role():
 
     if crud().add_role(role, description):
         return RouteResponse(result=ROLE_CREATE)
-    return RouteResponse(result=ROLE_EXISTS), 400
+    return AddRoleExist(result=ROLE_EXISTS), 400
 
 
 @crud_pages.route("/delete_role", methods=["DELETE"])
 @token_required(admin=True)
 @spec.validate(
-    json=DeleteRole,
-    resp=Response(HTTP_200=RouteResponse, HTTP_400=RouteResponse),
+    json=DeleteRoleRequest,
+    resp=Response(
+        HTTP_200=RouteResponse,
+        HTTP_400=DeleteRoleNotExist,
+        HTTP_409=DeleteRoleDefaultRole,
+    ),
     tags=["CRUD"],
 )
 def delete_role():
@@ -56,19 +65,23 @@ def delete_role():
     role = request.get_json().get("role")
 
     if role == DefaultRole.USER.value or role == DefaultRole.ADMIN.value:
-        return RouteResponse(result=DEFAULT_ROLE_NOT_DELETE), 400
+        return DeleteRoleDefaultRole(result=DEFAULT_ROLE_NOT_DELETE), 409
 
     if crud().delete_role(role):
         return RouteResponse(result=ROLE_DELETE)
 
-    return RouteResponse(result=ROLE_NOT_EXIST), 400
+    return DeleteRoleNotExist(result=ROLE_NOT_EXIST), 400
 
 
 @crud_pages.route("/change_role", methods=["POST"])
 @token_required(admin=True)
 @spec.validate(
-    json=ChangeRole,
-    resp=Response(HTTP_200=RouteResponse, HTTP_400=RouteResponse),
+    json=ChangeRoleRequest,
+    resp=Response(
+        HTTP_200=RouteResponse,
+        HTTP_409=DeleteRoleDefaultRole,
+        HTTP_400=DeleteRoleNotExist,
+    ),
     tags=["CRUD"],
 )
 def change_role():
@@ -82,18 +95,18 @@ def change_role():
     change_for_role = request_data.get("change_role")
 
     if role == DefaultRole.USER.value or role == DefaultRole.ADMIN.value:
-        return RouteResponse(result=DEFAULT_ROLE_NOT_DELETE), 400
+        return DeleteRoleDefaultRole(result=DEFAULT_ROLE_NOT_DELETE), 409
 
     if (
         change_for_role == DefaultRole.USER.value
         or change_for_role == DefaultRole.ADMIN.value
     ):
-        return RouteResponse(result=DEFAULT_ROLE_NOT_DELETE), 400
+        return DeleteRoleDefaultRole(result=DEFAULT_ROLE_NOT_DELETE), 409
 
     if crud().change_role(role, change_for_description, change_for_role):
         return RouteResponse(result=ROLE_CHANGE)
 
-    return RouteResponse(result=ROLE_NOT_EXIST), 400
+    return DeleteRoleNotExist(result=ROLE_NOT_EXIST), 400
 
 
 @crud_pages.route("/roles", methods=["GET"])
@@ -108,7 +121,7 @@ def get_roles():
 @crud_pages.route("/set_user_role", methods=["POST"])
 @token_required(admin=True)
 @spec.validate(
-    json=UserRole,
+    json=UserRoleRequest,
     resp=Response(HTTP_200=RouteResponse, HTTP_400=RouteResponse),
     tags=["CRUD"],
 )

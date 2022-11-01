@@ -117,8 +117,8 @@ def test_delete_role_200(http_con, postgres_con, clear_databases):
     "role, status_code, message",
     [
         ("", HTTPStatus.BAD_REQUEST, ROLE_NOT_EXIST),
-        ("Admin", HTTPStatus.BAD_REQUEST, DEFAULT_ROLE_NOT_DELETE),
-        ("User", HTTPStatus.BAD_REQUEST, DEFAULT_ROLE_NOT_DELETE),
+        ("Admin", HTTPStatus.CONFLICT, DEFAULT_ROLE_NOT_DELETE),
+        ("User", HTTPStatus.CONFLICT, DEFAULT_ROLE_NOT_DELETE),
     ],
 )
 def test_delete_role_400(
@@ -177,8 +177,8 @@ def test_change_role_200(postgres_con, http_con, clear_databases):
 @pytest.mark.parametrize(
     "role, desc, status_code",
     [
-        ("Admin", "", HTTPStatus.BAD_REQUEST),
-        ("User", "", HTTPStatus.BAD_REQUEST),
+        ("Admin", "", HTTPStatus.CONFLICT),
+        ("User", "", HTTPStatus.CONFLICT),
         (None, "", HTTPStatus.UNPROCESSABLE_ENTITY),
         ("", None, HTTPStatus.UNPROCESSABLE_ENTITY),
     ],

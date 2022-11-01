@@ -6,7 +6,7 @@ from storages.db_connect import postgres_init, redis_init
 postgres_init(app)
 redis_init()
 
-from core.models import spec
+from core.spec_core import spec
 
 spec.register(app)
 

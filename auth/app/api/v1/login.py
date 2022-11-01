@@ -1,7 +1,12 @@
 from flask import Blueprint, request
 from spectree import Response
 
-from core.models import spec, LoginRequest, RouteResponse
+from core.schemas.login_schemas import (
+    LoginRequest,
+    LoginPasswordNotMatch,
+    LoginUserNotMatch,
+)
+from core.spec_core import spec, RouteResponse
 from core.responses import (
     LOGOUT,
     TOKEN_WRONG_FORMAT,
@@ -16,7 +21,9 @@ login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
 @spec.validate(
     json=LoginRequest,
     resp=Response(
-        HTTP_200=RouteResponse, HTTP_400=RouteResponse, HTTP_401=RouteResponse
+        HTTP_200=RouteResponse,
+        HTTP_403=LoginPasswordNotMatch,
+        HTTP_401=LoginUserNotMatch,
     ),
     tags=["Login"],
 )

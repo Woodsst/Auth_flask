@@ -1,17 +1,20 @@
 from functools import wraps
 from typing import Union
 
-import jwt
 from flask import request
 from spectree import Response
 
 from core.defaultrole import DefaultRole
-from core.models import spec, RouteResponse, Token
 from core.responses import (
     TOKEN_OUTDATED,
     ACCESS_DENIED,
-    TOKEN_WRONG_FORMAT,
 )
+from core.schemas.token_schemas import (
+    TokenRequest,
+    TokenOutDate,
+    TokenAccessDenied,
+)
+from core.spec_core import spec, RouteResponse
 from jwt_api import (
     get_token_time_to_end,
     decode_refresh_token,
@@ -70,33 +73,23 @@ def token_required(admin=False):
     def f_wrapper(f):
         @wraps(f)
         @spec.validate(
-            headers=Token,
+            headers=TokenRequest,
             resp=Response(HTTP_403=RouteResponse, HTTP_401=RouteResponse),
         )
         def decorated(*args, **kwargs):
             token = request.headers.get("Authorization").split(" ")
             token = token[1]
             if redis_conn.get(token):
-                return RouteResponse(result=TOKEN_OUTDATED), 403
+                return TokenOutDate(result=TOKEN_OUTDATED), 401
 
             if admin:
                 payload = decode_access_token(token)
                 if int(payload.get("role")) != DefaultRole.ADMIN_KEY.value:
-                    return RouteResponse(result=ACCESS_DENIED), 403
+                    return TokenAccessDenied(result=ACCESS_DENIED), 403
 
-            try:
-                token_time = get_token_time_to_end(token)
-                if token_time:
-                    if token_time <= 0:
-                        return RouteResponse(result=TOKEN_OUTDATED), 401
-                else:
-                    return RouteResponse(result=TOKEN_WRONG_FORMAT), 401
-
-            except jwt.exceptions.InvalidSignatureError:
-                return RouteResponse(result=TOKEN_WRONG_FORMAT), 401
-
-            except jwt.exceptions.DecodeError:
-                return RouteResponse(result=TOKEN_WRONG_FORMAT), 401
+            token_time = get_token_time_to_end(token)
+            if token_time and token_time <= 0:
+                return TokenOutDate(result=TOKEN_OUTDATED), 401
 
             return f(*args, **kwargs)
 

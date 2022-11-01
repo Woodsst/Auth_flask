@@ -1,14 +1,16 @@
 from spectree import Response
 from flask import Blueprint, request
 
-from core.models import (
+from core.spec_core import (
     spec,
-    EmailChangeReqeust,
-    PasswordChangeReqeust,
-    ProfileResponse,
+)
+from core.schemas.profile_schemas import (
     DeviceRequest,
     DeviceResponse,
+    ProfileResponse,
     EmailChangeResponse,
+    EmailChangeReqeust,
+    PasswordChangeReqeust,
     PasswordChangeResponse,
     PasswordEquals,
     PasswordNotMatch,
@@ -88,7 +90,7 @@ def change_user_email():
 def change_user_password():
     """Ендпоинт для изменения пароля пользователя"""
 
-    user_data = profile_service().data_exist(request)
+    user_data = request.get_json()
     password = user_data.get("password")
     new_password = user_data.get("new_password")
 

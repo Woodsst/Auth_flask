@@ -1,7 +1,5 @@
-import json
 from typing import Optional
 
-from flask import Request
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
 
@@ -17,14 +15,6 @@ class ServiceBase:
         self.orm: Optional[SQLAlchemy] = orm
         self.cash: Optional[Redis] = cash
 
-    @classmethod
-    def data_exist(cls, request: Request) -> dict:
-        try:
-            user_data = json.loads(request.get_data())
-        except json.decoder.JSONDecodeError:
-            return
-        return user_data
-
     def check_password(self, password: str, user_id: str) -> bool:
         """Проверка правильности введенного пользователем пароля"""
         db_password = self.get_user_password(user_id)
@@ -39,10 +29,3 @@ class ServiceBase:
             .filter(User.id == user_id)
             .first()
         )[0]
-
-    @staticmethod
-    def wrong_request_data(data: Optional[str], lenght: int) -> bool:
-        """Проверка существования и соответствия данных"""
-        if data is None or len(data) <= lenght:
-            return True
-        return False

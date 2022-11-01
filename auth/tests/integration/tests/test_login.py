@@ -82,7 +82,7 @@ def test_login_200(http_con, clear_databases):
         ),
         (
             {"login": "user1", "password": "sss"},
-            HTTPStatus.UNAUTHORIZED,
+            HTTPStatus.FORBIDDEN,
         ),
     ],
 )
@@ -110,7 +110,7 @@ def test_logout_200(http_con, clear_databases):
     assert response.json() == LOGOUT
 
     response = http_con.get(PROFILE_URL, headers={"Authorization": token})
-    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
 @pytest.mark.parametrize(

@@ -3,7 +3,10 @@ import uuid
 from flask import Response
 from werkzeug.security import check_password_hash
 
-from core.models import RouteResponse
+from core.schemas.login_schemas import LoginPasswordNotMatch, LoginUserNotMatch
+from core.spec_core import (
+    RouteResponse,
+)
 from core.responses import USER_NOT_FOUND, PASSWORD_NOT_MATCH
 from jwt_api import get_token_time_to_end, generate_tokens
 from services.service_base import ServiceBase
@@ -23,9 +26,9 @@ class LoginAPI(ServiceBase):
                 }
                 self._set_device(user_agent, user.id)
                 return RouteResponse(result=generate_tokens(payload))
-            return RouteResponse(result=PASSWORD_NOT_MATCH), 401
+            return LoginPasswordNotMatch(result=PASSWORD_NOT_MATCH), 403
         except AttributeError:
-            return RouteResponse(result=USER_NOT_FOUND), 401
+            return LoginUserNotMatch(result=USER_NOT_FOUND), 401
 
     def _set_device(self, device: str, user_id: str):
         """Добавление нового устройства с которого клиент зашел в аккаунт"""
