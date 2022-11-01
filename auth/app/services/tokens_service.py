@@ -6,7 +6,7 @@ from flask import request
 from spectree import Response
 
 from core.defaultrole import DefaultRole
-from core.models import spec, BearerToken, RouteResponse
+from core.models import spec, RouteResponse, Token
 from core.responses import (
     TOKEN_OUTDATED,
     ACCESS_DENIED,
@@ -36,7 +36,7 @@ class TokensService(ServiceBase):
             return False
         else:
             time_to_end_token = get_token_time_to_end(token)
-            if not time_to_end_token:
+            if not time_to_end_token or time_to_end_token <= 0:
                 return False
             self.cash.set_token(
                 key=token,
@@ -70,7 +70,7 @@ def token_required(admin=False):
     def f_wrapper(f):
         @wraps(f)
         @spec.validate(
-            headers=BearerToken,
+            headers=Token,
             resp=Response(HTTP_403=RouteResponse, HTTP_401=RouteResponse),
         )
         def decorated(*args, **kwargs):

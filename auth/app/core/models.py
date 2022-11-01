@@ -37,7 +37,7 @@ class RouteResponse(BaseModel):
         }
 
 
-class BearerToken(BaseModel):
+class Token(BaseModel):
     """access токен"""
 
     Authorization: constr(regex=r"(^Bearer\s[\w.\\w.\\w])")

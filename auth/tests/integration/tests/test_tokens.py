@@ -2,7 +2,6 @@ from http import HTTPStatus
 
 import pytest
 
-from ..testdata.responses import TOKEN_WRONG_FORMAT
 from ..utils.http_requests import registration, login, get_access_token
 from ..testdata.data_for_test import USERS, LOGIN, OUT_TIME_TOKEN, TOKEN_URL
 
@@ -15,25 +14,25 @@ def test_update_tokens_200(http_con, clear_databases):
 
     response = http_con.get(
         f"{TOKEN_URL}token",
-        headers={"Authorization": tokens.get("result").get("refresh-token")},
+        headers={"Authorization":
+                     f'Bearer {tokens.get("result").get("refresh-token")}'},
     )
     assert response.status_code == HTTPStatus.OK
     response_data = response.json()
     assert isinstance(response_data, dict)
+    response_data = response_data.get("result")
     assert len(response_data) == 2
     assert response_data.get("access-token") != tokens.get("access-token")
     assert response_data.get("refresh-token") != tokens.get("refresh-token")
 
 
-def test_update_tokens_401(http_con, clear_databases):
+def test_update_tokens_422(http_con, clear_databases):
     """Проверка ответа при передаче не корректного токена"""
 
     response = http_con.get(
         f"{TOKEN_URL}token", headers={"Authorization": "bad_token"}
     )
-    assert response.status_code == HTTPStatus.UNAUTHORIZED
-    message = response.json()
-    assert message == TOKEN_WRONG_FORMAT
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 def test_check_token_200(http_con, clear_databases):
@@ -50,7 +49,7 @@ def test_check_token_200(http_con, clear_databases):
 @pytest.mark.parametrize(
     "token, http_status",
     [
-        ("Bad Token", HTTPStatus.UNAUTHORIZED),
+        ("Bad Token", HTTPStatus.UNPROCESSABLE_ENTITY),
         (OUT_TIME_TOKEN, HTTPStatus.UNAUTHORIZED),
     ],
 )
@@ -61,6 +60,3 @@ def test_check_token_401(http_con, token, http_status):
         f"{TOKEN_URL}/check", headers={"Authorization": token}
     )
     assert response.status_code == http_status
-
-    message = response.json()
-    assert message == TOKEN_WRONG_FORMAT
