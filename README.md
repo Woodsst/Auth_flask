@@ -32,7 +32,7 @@ Refresh token необходим для обновления access токена
    ```commandline
     docker compose up --build -d
    ```
-3. Осуществить вход в **[flasagger](http://localhost/apidocs/)** для просмотра всех доступных эндпоинтов
+3. Осуществить вход в **[OpenAPI](http://localhost/apidoc/swagger/)** для просмотра всех доступных эндпоинтов
 
 #### Проект покрыт тестами, для их запуска необходимо перейти в auth/app/tests/integration и выполнить:
 ```commandline
