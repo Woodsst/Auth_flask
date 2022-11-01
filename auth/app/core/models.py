@@ -25,3 +25,16 @@ class RouteResponse(BaseModel):
 
 class BearerToken(BaseModel):
     Authorization: constr(regex=r"(^Bearer\s[\w.\\w.\\w])")
+
+
+class EmailChangeReqeust(BaseModel):
+    """Тело запроса для изменения почтового адреса пользователя"""
+
+    new_email: EmailStr
+
+
+class PasswordChangeReqeust(BaseModel):
+    """Тело запроса для изменения пароля пользователя"""
+
+    password: str
+    new_password: constr(min_length=8, max_length=36)
