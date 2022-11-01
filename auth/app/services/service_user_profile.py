@@ -1,5 +1,3 @@
-import json
-
 from jwt_api import get_user_id_from_token
 from services.service_base import ServiceBase
 from storages.postgres.db_models import (
@@ -26,13 +24,11 @@ class ProfileService(ServiceBase):
 
         role = user_data.get("role")
         user_data = user_data.get("User").to_dict()
-        return json.dumps(
-            {
-                "login": user_data.get("login"),
-                "email": user_data.get("email"),
-                "role": role,
-            }
-        )
+        return {
+            "login": user_data.get("login"),
+            "email": user_data.get("email"),
+            "role": role,
+        }
 
     def get_devices_user_history(
         self, token: str, page: int, page_size: int
