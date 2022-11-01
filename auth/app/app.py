@@ -21,5 +21,3 @@ app.register_blueprint(registration_page)
 app.register_blueprint(login_page)
 app.register_blueprint(profile)
 app.register_blueprint(crud_pages)
-
-app.run()

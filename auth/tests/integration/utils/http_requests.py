@@ -28,8 +28,9 @@ def login(http_con: Session, login_payload: dict):
     """Вход в аккаунт"""
 
     response = http_con.post(
-        LOGIN_URL, data=json.dumps(login_payload),
-        headers={"Content-Type": "application/json"}
+        LOGIN_URL,
+        data=json.dumps(login_payload),
+        headers={"Content-Type": "application/json"},
     )
 
     return response.json()

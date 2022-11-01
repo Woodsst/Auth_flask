@@ -1,13 +1,13 @@
 import uuid
 
-from flask import jsonify, make_response, Response
+from flask import Response
+from werkzeug.security import check_password_hash
 
 from core.models import RouteResponse
+from core.responses import USER_NOT_FOUND, PASSWORD_NOT_MATCH
+from jwt_api import get_token_time_to_end, generate_tokens
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User, Device, UserDevice
-from werkzeug.security import check_password_hash
-from jwt_api import get_token_time_to_end, generate_tokens
-from core.responses import USER_NOT_FOUND, PASSWORD_NOT_MATCH
 
 
 class LoginAPI(ServiceBase):

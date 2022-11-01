@@ -1,13 +1,13 @@
 from flask import Blueprint, request, jsonify
 from spectree import Response
 
-from services.login_service import login_api
+from core.models import spec, LoginRequest, RouteResponse
 from core.responses import (
     LOGOUT,
     TOKEN_WRONG_FORMAT,
 )
+from services.login_service import login_api
 from services.tokens_service import token_required
-from core.models import spec, LoginRequest, RouteResponse, Logout
 
 login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
 

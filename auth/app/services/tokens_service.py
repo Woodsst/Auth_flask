@@ -2,9 +2,16 @@ from functools import wraps
 from typing import Union
 
 import jwt
+from flask import request
+from spectree import Response
 
 from core.defaultrole import DefaultRole
-from core.models import spec, Logout
+from core.models import spec, BearerToken, RouteResponse
+from core.responses import (
+    TOKEN_OUTDATED,
+    ACCESS_DENIED,
+    TOKEN_WRONG_FORMAT,
+)
 from jwt_api import (
     get_token_time_to_end,
     decode_refresh_token,
@@ -13,13 +20,6 @@ from jwt_api import (
 )
 from services.service_base import ServiceBase
 from storages.db_connect import redis_conn
-from flask import request, jsonify
-from core.responses import (
-    TOKEN_MISSING,
-    TOKEN_OUTDATED,
-    ACCESS_DENIED,
-    TOKEN_WRONG_FORMAT,
-)
 
 
 class TokensService(ServiceBase):
@@ -63,47 +63,40 @@ def tokens_service():
     return TokensService()
 
 
-@spec.validate(
-    headers=Logout,
-    tags=["Login"],
-)
 def token_required(admin=False):
     """Декоратор для проверки access токена при запросах.
     Принимает параметр указывающий на допуск администратора"""
 
     def f_wrapper(f):
         @wraps(f)
+        @spec.validate(
+            headers=BearerToken,
+            resp=Response(HTTP_403=RouteResponse, HTTP_401=RouteResponse),
+        )
         def decorated(*args, **kwargs):
-            token = None
-            if request.headers.get("Authorization"):
-                token = request.headers["Authorization"]
-                token = token.split(" ")
-                if len(token) > 1:
-                    token = token[1]
-            if not token:
-                return jsonify(TOKEN_MISSING), 401
-
+            token = request.headers.get("Authorization").split(" ")
+            token = token[1]
             if redis_conn.get(token):
-                return jsonify(TOKEN_OUTDATED), 403
+                return RouteResponse(result=TOKEN_OUTDATED), 403
 
             if admin:
                 payload = decode_access_token(token)
                 if int(payload.get("role")) != DefaultRole.ADMIN_KEY.value:
-                    return jsonify(ACCESS_DENIED), 403
+                    return RouteResponse(result=ACCESS_DENIED), 403
 
             try:
                 token_time = get_token_time_to_end(token)
                 if token_time:
                     if token_time <= 0:
-                        return jsonify(TOKEN_OUTDATED), 401
+                        return RouteResponse(result=TOKEN_OUTDATED), 401
                 else:
-                    return jsonify(TOKEN_WRONG_FORMAT), 401
+                    return RouteResponse(result=TOKEN_WRONG_FORMAT), 401
 
             except jwt.exceptions.InvalidSignatureError:
-                return jsonify(TOKEN_WRONG_FORMAT), 401
+                return RouteResponse(result=TOKEN_WRONG_FORMAT), 401
 
             except jwt.exceptions.DecodeError:
-                return jsonify(TOKEN_WRONG_FORMAT), 401
+                return RouteResponse(result=TOKEN_WRONG_FORMAT), 401
 
             return f(*args, **kwargs)
 
