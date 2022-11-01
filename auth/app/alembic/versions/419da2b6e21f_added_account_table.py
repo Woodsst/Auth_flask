@@ -79,12 +79,12 @@ def upgrade() -> None:
         sa.UniqueConstraint("url"),
     )
     op.execute(
-        "INSERT INTO roles (role_id, role, description) "
-        "VALUES (1, 'Admin', 'full access')"
+        "INSERT INTO roles (role, description) "
+        "VALUES ('Admin', 'full access')"
     )
     op.execute(
-        "INSERT INTO roles (role_id, role, description) "
-        "VALUES (2, 'User', 'default access')"
+        "INSERT INTO roles (role, description) "
+        "VALUES ('User', 'default access')"
     )
 
 
