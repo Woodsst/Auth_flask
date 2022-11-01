@@ -27,7 +27,7 @@ def redis_con():
     con.close()
 
 
-@fixture(scope="function")
+@fixture(scope="session")
 def http_con():
     """http клиент"""
 

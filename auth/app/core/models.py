@@ -1,3 +1,5 @@
+import uuid
+
 from pydantic import BaseModel, constr, EmailStr
 from spectree import SpecTree
 
@@ -20,8 +22,50 @@ class LoginRequest(BaseModel):
 
 
 class RouteResponse(BaseModel):
+    """Схемат ответа"""
+
     result: dict
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "result": {
+                    "status": "succeeded",
+                    "message": "request completed",
+                }
+            }
+        }
 
 
 class BearerToken(BaseModel):
+    """access токен"""
+
     Authorization: constr(regex=r"(^Bearer\s[\w.\\w.\\w])")
+
+
+class AddRole(BaseModel):
+    """Схема для добавления роли"""
+
+    role: constr(min_length=2)
+    description: constr(min_length=2)
+
+
+class DeleteRole(BaseModel):
+    """Схема для удаления роли"""
+
+    role: str
+
+
+class ChangeRole(BaseModel):
+    """Схема для изменения роли"""
+
+    role: constr(min_length=2)
+    change_description: str
+    change_role: constr(min_length=2)
+
+
+class UserRole(BaseModel):
+    """Схема для изменения роли у пользователя"""
+
+    user_id: uuid.UUID
+    role: constr(min_length=2)
