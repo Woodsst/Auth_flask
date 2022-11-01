@@ -70,9 +70,6 @@ def change_user_email():
     """Ендпоинт для изменения почтового адреса пользователя"""
 
     user_data = profile_service().data_exist(request)
-    if not user_data:
-        return RouteResponse(result=BAD_REQUEST), 400
-
     new_email = user_data.get("new_email")
     token = request.headers.get("Authorization").split(" ")
     profile_service().change_email(token[1], new_email)
@@ -92,9 +89,6 @@ def change_user_password():
     """Ендпоинт для изменения пароля пользователя"""
 
     user_data = profile_service().data_exist(request)
-    if not user_data:
-        return RouteResponse(result=BAD_REQUEST), 400
-
     password = user_data.get("password")
     new_password = user_data.get("new_password")
 

@@ -32,9 +32,29 @@ class EmailChangeReqeust(BaseModel):
 
     new_email: EmailStr
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "result": {
+                    "message": "email changed",
+                    "status": "succeeded"
+                }
+            }
+        }
+
 
 class PasswordChangeReqeust(BaseModel):
     """Тело запроса для изменения пароля пользователя"""
 
     password: str
     new_password: constr(min_length=8, max_length=36)
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "result": {
+                    "message": "password changed",
+                    "status": "succeeded"
+                }
+            }
+        }
