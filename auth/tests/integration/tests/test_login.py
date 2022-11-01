@@ -31,11 +31,15 @@ def test_login_200(http_con, clear_databases):
 
     registration(http_con, USERS[0])
 
-    response = http_con.post(LOGIN_URL, data=json.dumps(LOGIN))
+    response = http_con.post(
+        LOGIN_URL,
+        data=json.dumps(LOGIN),
+        headers={"Content-Type": "application/json"},
+    )
 
     assert response.status_code == HTTPStatus.OK
 
-    tokens = response.json()
+    tokens = response.json().get("result")
 
     assert len(tokens) == 2
 
@@ -74,30 +78,30 @@ def test_login_200(http_con, clear_databases):
 
 
 @pytest.mark.parametrize(
-    "body, status_code, message",
+    "body, status_code",
     [
-        ({"login": "", "password": ""}, HTTPStatus.BAD_REQUEST, WRONG_LOGIN),
-        ({}, HTTPStatus.BAD_REQUEST, BAD_REQUEST),
+        ({"login": "", "password": ""}, HTTPStatus.UNAUTHORIZED),
+        ({}, HTTPStatus.UNPROCESSABLE_ENTITY),
         (
             {"login": "asd", "password": "sss"},
             HTTPStatus.UNAUTHORIZED,
-            USER_NOT_FOUND,
         ),
         (
             {"login": "user1", "password": "sss"},
             HTTPStatus.UNAUTHORIZED,
-            PASSWORD_NOT_MATCH,
         ),
     ],
 )
-def test_login_400(http_con, clear_databases, status_code, body, message):
+def test_login_400(http_con, clear_databases, status_code, body):
     """Проверка ошибок при входе пользователя"""
     registration(http_con, USERS[0])
 
-    response = http_con.post(LOGIN_URL, data=json.dumps(body))
+    response = http_con.post(
+        LOGIN_URL,
+        data=json.dumps(body),
+        headers={"Content-Type": "application/json"},
+    )
     assert response.status_code == status_code
-
-    assert response.json() == message
 
 
 def test_logout_200(http_con, clear_databases):
@@ -118,7 +122,7 @@ def test_logout_200(http_con, clear_databases):
 @pytest.mark.parametrize(
     "token, status_code, message",
     [
-        ("bad token", HTTPStatus.UNAUTHORIZED, TOKEN_WRONG_FORMAT),
+        ("badtoken", HTTPStatus.UNAUTHORIZED, TOKEN_WRONG_FORMAT),
         ("", HTTPStatus.UNAUTHORIZED, TOKEN_MISSING),
     ],
 )

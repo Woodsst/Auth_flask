@@ -4,6 +4,7 @@ from typing import Union
 import jwt
 
 from core.defaultrole import DefaultRole
+from core.models import spec, Logout
 from jwt_api import (
     get_token_time_to_end,
     decode_refresh_token,
@@ -62,6 +63,10 @@ def tokens_service():
     return TokensService()
 
 
+@spec.validate(
+    headers=Logout,
+    tags=["Login"],
+)
 def token_required(admin=False):
     """Декоратор для проверки access токена при запросах.
     Принимает параметр указывающий на допуск администратора"""

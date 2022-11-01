@@ -1,6 +1,8 @@
 import uuid
 
 from flask import jsonify, make_response, Response
+
+from core.models import RouteResponse
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User, Device, UserDevice
 from werkzeug.security import check_password_hash
@@ -20,12 +22,10 @@ class LoginAPI(ServiceBase):
                     "role": str(user.role),
                 }
                 self._set_device(user_agent, user.id)
-                return generate_tokens(payload)
-            responseObject = PASSWORD_NOT_MATCH
-            return make_response(jsonify(responseObject)), 401
+                return RouteResponse(result=generate_tokens(payload))
+            return RouteResponse(result=PASSWORD_NOT_MATCH), 401
         except AttributeError:
-            responseObject = USER_NOT_FOUND
-            return make_response(jsonify(responseObject)), 401
+            return RouteResponse(result=USER_NOT_FOUND), 401
 
     def _set_device(self, device: str, user_id: str):
         """Добавление нового устройства с которого клиент зашел в аккаунт"""
