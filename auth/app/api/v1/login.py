@@ -1,33 +1,31 @@
 from flask import Blueprint, request, jsonify
-from services.login_service import login_api
+from spectree import Response
+
+from core.models import spec, LoginRequest, RouteResponse
 from core.responses import (
     LOGOUT,
     TOKEN_WRONG_FORMAT,
-    BAD_REQUEST,
-    WRONG_LOGIN,
-    SHORT_PASSWORD,
 )
+from services.login_service import login_api
 from services.tokens_service import token_required
 
 login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
 
 
 @login_page.route("/login", methods=["POST"])
+@spec.validate(
+    json=LoginRequest,
+    resp=Response(
+        HTTP_200=RouteResponse, HTTP_400=RouteResponse, HTTP_401=RouteResponse
+    ),
+    tags=["Login"],
+)
 def login_user():
     """Обмен логина пароля на пару токенов access refresh"""
 
-    request_data = login_api().data_exist(request)
-    if not request_data:
-        return jsonify(BAD_REQUEST), 400
-
-    login = request_data.get("login")
-    if login_api().wrong_request_data(login, 0):
-        return jsonify(WRONG_LOGIN), 400
-
-    password = request_data.get("password")
-    if login_api().wrong_request_data(password, 0):
-        return jsonify(SHORT_PASSWORD), 400
     user_agent = request.user_agent.string
+    login = request.get_json().get("login")
+    password = request.get_json().get("password")
 
     response = login_api().login(login, password, user_agent)
     return response
