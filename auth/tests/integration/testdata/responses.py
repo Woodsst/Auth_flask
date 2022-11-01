@@ -26,7 +26,7 @@ REGISTRATION_FAILED = {
 }
 TOKEN_MISSING = {"message": "token is missing", "status": "fail"}
 TOKEN_WRONG_FORMAT = {"message": "wrong token format", "status": "fail"}
-LOGOUT = {"message": "logout", "status": "succeeded"}
+LOGOUT = {"result": {"message": "logout", "status": "succeeded"}}
 USER_NOT_FOUND = {
     "status": "fail",
     "message": "The user with such login and password was not found",

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from spectree import Response
 
 from core.models import spec, LoginRequest, RouteResponse
@@ -33,11 +33,15 @@ def login_user():
 
 @login_page.route("/logout", methods=["GET"])
 @token_required()
+@spec.validate(
+    resp=Response(HTTP_200=RouteResponse, HTTP_400=RouteResponse),
+    tags=["Login"],
+)
 def logout_user():
     """Логаут пользователя, вносит действующий access токен в невалидные"""
 
     access_token = request.headers.get("Authorization").split(" ")
     if login_api().logout(access_token[1]):
-        return jsonify(LOGOUT)
+        return RouteResponse(result=LOGOUT)
 
-    return jsonify(TOKEN_WRONG_FORMAT), 400
+    return RouteResponse(result=TOKEN_WRONG_FORMAT), 400

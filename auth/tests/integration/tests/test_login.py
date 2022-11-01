@@ -120,7 +120,7 @@ def test_logout_200(http_con, clear_databases):
         ("", HTTPStatus.UNPROCESSABLE_ENTITY),
     ],
 )
-def test_logout_400(http_con, clear_databases, token, status_code):
+def test_logout_422(http_con, clear_databases, token, status_code):
     """Проверка невалидного токена для выхода из аккаунта"""
 
     response = http_con.get(LOGOUT_URL, headers={"Authorization": token})
