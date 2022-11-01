@@ -9,6 +9,7 @@ from ..testdata.data_for_test import (
     CRUD_URL,
     DESCRIPTION,
     NEW_ROLE,
+    CONTENT_TYPE,
 )
 
 
@@ -18,7 +19,7 @@ def registration(http_con: Session, registration_payload: dict):
     response = http_con.post(
         REGISTRATION_URL,
         data=json.dumps(registration_payload),
-        headers={"Content-Type": "application/json"},
+        headers=CONTENT_TYPE,
     )
 
     return response
@@ -30,7 +31,7 @@ def login(http_con: Session, login_payload: dict):
     response = http_con.post(
         LOGIN_URL,
         data=json.dumps(login_payload),
-        headers={"Content-Type": "application/json"},
+        headers=CONTENT_TYPE,
     )
 
     return response.json()
@@ -50,6 +51,6 @@ def add_new_role(http_con: Session, token: str):
     response = http_con.post(
         f"{CRUD_URL}add_role",
         data=json.dumps({"role": NEW_ROLE, "description": DESCRIPTION}),
-        headers={"Authorization": token},
+        headers={"Authorization": token, "Content-Type": "application/json"},
     )
     return response

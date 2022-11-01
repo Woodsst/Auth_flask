@@ -28,6 +28,8 @@ ADD_ROLE = {"role": "new_role", "description": "new description"}
 
 USER_AGENT = {"user-agent": "python"}
 
+CONTENT_TYPE = {"Content-Type": "application/json"}
+
 REGISTRATION_URL = (
     f"http://{default_settings.host_app}:"
     f"{default_settings.port_app}/api/v1/registration"
@@ -70,5 +72,5 @@ OUT_TIME_TOKEN = (
 ACCESS_TOKEN_LIFE_TIME = 3600
 REFRESH_TOKEN_LIFE_TIME = 1210000
 
-NEW_ROLE = "new role"
+NEW_ROLE = "new_role"
 DESCRIPTION = "description"
