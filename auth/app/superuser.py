@@ -2,7 +2,7 @@ import argparse
 import uuid
 from core.defaultrole import DefaultRole
 import psycopg2
-
+from email_validator import validate_email
 from werkzeug.security import generate_password_hash
 
 from config.settings import default_settings
@@ -40,7 +40,9 @@ if args.createsuperuser:
     name = input("Name: ")
     password = input("Password: ")
     email = input("Email:")
-
+    validate_email(email)
+    if len(password) < 8:
+        raise ValueError("password too short")
     user_data = {
         "login": name,
         "password": password,
