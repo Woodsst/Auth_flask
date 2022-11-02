@@ -39,5 +39,5 @@ PASSWORD_CHANGE = {"message": "password changed", "status": "succeeded"}
 PASSWORDS_EQUALS = {"message": "passwords equals", "status": "fail"}
 TOKEN_CORRECT = {"message": "correct token", "status": "succeeded"}
 TOKEN_OUTDATED = {"message": "token is outdated", "status": "fail"}
-ACCESS_DENIED = {"result": {"message": "access denied", "status": "fail"}}
+ACCESS_DENIED = {"message": "access denied", "status": "fail"}
 EMAIL_CHANGE = {"message": "email changed", "status": "succeeded"}

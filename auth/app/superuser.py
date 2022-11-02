@@ -2,6 +2,7 @@ import uuid
 
 import sqlalchemy.exc
 from email_validator import validate_email
+from werkzeug.security import generate_password_hash
 
 from core.defaultrole import DefaultRole
 from storages.db_connect import db
@@ -18,7 +19,7 @@ def add_admin(login: str, password: str, email: str):
         user_id = uuid.uuid4()
         user = User(
             login=login,
-            password=password,
+            password=generate_password_hash(password),
             email=email,
             id=user_id,
             role=DefaultRole.ADMIN_KEY.value,

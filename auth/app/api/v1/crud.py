@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from spectree import Response
 
 from core.schemas.crud_schemas import (
@@ -9,6 +9,7 @@ from core.schemas.crud_schemas import (
     DeleteRoleNotExist,
     ChangeRoleRequest,
     UserRoleRequest,
+    RoleResponse,
 )
 from core.spec_core import (
     spec,
@@ -35,6 +36,7 @@ crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
     json=AddRoleRequest,
     resp=Response(HTTP_200=RouteResponse, HTTP_400=AddRoleExist),
     tags=["CRUD"],
+    security={"apiKey": []},
 )
 def add_role():
     """Ендпоинт добавления роли, доступ только у администратора"""
@@ -57,6 +59,7 @@ def add_role():
         HTTP_409=DeleteRoleDefaultRole,
     ),
     tags=["CRUD"],
+    security={"apiKey": []},
 )
 def delete_role():
     """Удаление роли, если были пользователи с удаляемой ролью, они получают
@@ -83,6 +86,7 @@ def delete_role():
         HTTP_400=DeleteRoleNotExist,
     ),
     tags=["CRUD"],
+    security={"apiKey": []},
 )
 def change_role():
     """Изменение роли или описания роли, изменить можно как только роль
@@ -111,11 +115,15 @@ def change_role():
 
 @crud_pages.route("/roles", methods=["GET"])
 @token_required(admin=True)
-@spec.validate(tags=["CRUD"])
+@spec.validate(
+    tags=["CRUD"],
+    security={"apiKey": []},
+    resp=Response(HTTP_200=RoleResponse),
+)
 def get_roles():
     """Получение всех возможных ролей и их индексов"""
     roles = crud().all_role()
-    return jsonify(roles)
+    return RoleResponse(roles=roles)
 
 
 @crud_pages.route("/set_user_role", methods=["POST"])
@@ -124,6 +132,7 @@ def get_roles():
     json=UserRoleRequest,
     resp=Response(HTTP_200=RouteResponse, HTTP_400=RouteResponse),
     tags=["CRUD"],
+    security={"apiKey": []},
 )
 def set_user_role():
     """Назначить пользователю роль, задает любую из возможных ролей"""

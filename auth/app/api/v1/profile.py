@@ -1,9 +1,7 @@
 from spectree import Response
 from flask import Blueprint, request
 
-from core.spec_core import (
-    spec,
-)
+from core.spec_core import spec
 from core.schemas.profile_schemas import (
     DeviceRequest,
     DeviceResponse,
@@ -33,6 +31,7 @@ profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
     query=DeviceRequest,
     tags=["Profile"],
     resp=Response(HTTP_200=DeviceResponse),
+    security={"apiKey": []},
 )
 def user_device_history():
     """Ендпоинт для запроса истории девайсов с которых была авторизация"""
@@ -49,7 +48,11 @@ def user_device_history():
 
 @profile.route("/", methods=["GET"])
 @token_required()
-@spec.validate(tags=["Profile"], resp=Response(HTTP_200=ProfileResponse))
+@spec.validate(
+    resp=Response(HTTP_200=ProfileResponse),
+    tags=["Profile"],
+    security={"apiKey": []},
+)
 def user_full_information():
     """Ендпоинт для запроса данных пользователя"""
     token = request.headers.get("Authorization").split(" ")
@@ -66,6 +69,7 @@ def user_full_information():
         HTTP_200=EmailChangeResponse,
     ),
     tags=["Profile"],
+    security={"apiKey": []},
 )
 def change_user_email():
     """Ендпоинт для изменения почтового адреса пользователя"""
@@ -86,6 +90,7 @@ def change_user_email():
         HTTP_403=PasswordNotMatch,
     ),
     tags=["Profile"],
+    security={"apiKey": []},
 )
 def change_user_password():
     """Ендпоинт для изменения пароля пользователя"""

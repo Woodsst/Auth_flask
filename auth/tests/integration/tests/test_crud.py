@@ -39,7 +39,7 @@ def test_add_role_200(http_con, clear_databases, postgres_con):
     response = http_con.get(
         f"{CRUD_URL}roles", headers={"Authorization": token}
     )
-    response = response.json()
+    response = response.json().get("roles")
     assert isinstance(response, dict)
     assert len(response) == 3
     assert response.get(NEW_ROLE) == DESCRIPTION
@@ -171,7 +171,7 @@ def test_change_role_200(postgres_con, http_con, clear_databases):
         f"{CRUD_URL}roles", headers={"Authorization": token}
     )
     response_data = response.json()
-    assert response_data.get(change_role) == change_desc
+    assert response_data.get("roles").get(change_role) == change_desc
 
 
 @pytest.mark.parametrize(
@@ -271,7 +271,7 @@ def test_get_all_roles(http_con, postgres_con, clear_databases):
     )
 
     assert response.status_code == HTTPStatus.OK
-    response_data = response.json()
+    response_data = response.json().get("roles")
     assert len(response_data) == 2
     assert response_data.get("Admin") == "full access"
     assert response_data.get("User") == "default access"

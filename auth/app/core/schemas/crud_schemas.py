@@ -72,3 +72,19 @@ class UserRoleRequest(BaseModel):
                 "role": "role",
             }
         }
+
+
+class RoleResponse(BaseModel):
+    """Схема ответа при запросе списка всех ролей"""
+
+    roles: dict
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "roles": {
+                    "role 1": "description1",
+                    "role 2": "description2",
+                },
+            }
+        }

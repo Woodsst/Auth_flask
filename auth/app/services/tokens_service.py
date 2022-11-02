@@ -1,20 +1,19 @@
 from functools import wraps
+from http import HTTPStatus
 from typing import Union
 
-from flask import request
-from spectree import Response
+import pydantic
+from flask import request, jsonify
 
 from core.defaultrole import DefaultRole
 from core.responses import (
     TOKEN_OUTDATED,
     ACCESS_DENIED,
+    TOKEN_WRONG_FORMAT,
 )
 from core.schemas.token_schemas import (
     TokenRequest,
-    TokenOutDate,
-    TokenAccessDenied,
 )
-from core.spec_core import spec, RouteResponse
 from jwt_api import (
     get_token_time_to_end,
     decode_refresh_token,
@@ -72,24 +71,29 @@ def token_required(admin=False):
 
     def f_wrapper(f):
         @wraps(f)
-        @spec.validate(
-            headers=TokenRequest,
-            resp=Response(HTTP_403=RouteResponse, HTTP_401=RouteResponse),
-        )
         def decorated(*args, **kwargs):
-            token = request.headers.get("Authorization").split(" ")
+            token = request.headers.get("Authorization")
+            try:
+                TokenRequest(Authorization=token)
+            except pydantic.error_wrappers.ValidationError:
+                return (
+                    jsonify(TOKEN_WRONG_FORMAT),
+                    HTTPStatus.UNPROCESSABLE_ENTITY,
+                )
+            token = request.headers["Authorization"]
+            token = token.split(" ")
             token = token[1]
             if redis_conn.get(token):
-                return TokenOutDate(result=TOKEN_OUTDATED), 401
+                return jsonify(TOKEN_OUTDATED), 401
 
             if admin:
                 payload = decode_access_token(token)
                 if int(payload.get("role")) != DefaultRole.ADMIN_KEY.value:
-                    return TokenAccessDenied(result=ACCESS_DENIED), 403
+                    return jsonify(ACCESS_DENIED), 403
 
             token_time = get_token_time_to_end(token)
             if token_time and token_time <= 0:
-                return TokenOutDate(result=TOKEN_OUTDATED), 401
+                return jsonify(TOKEN_OUTDATED), 401
 
             return f(*args, **kwargs)
 
