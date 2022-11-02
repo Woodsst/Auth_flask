@@ -65,7 +65,7 @@ Refresh token необходим для обновления access токена
 
 #### Для регистрации администратора:
 ```commandline
-    $ python superuser.py createsuperuser
+    $ flask createadmin
 ```
 Администратор имеет доступ к управлению ролями по которым организовывается доступ к контенту кинотеатра.
 
