@@ -1,10 +1,11 @@
-from flask import Blueprint, request
-from spectree import Response
+from http import HTTPStatus
 
-from core.spec_core import spec, RouteResponse
-from core.schemas.token_schemas import TokenOutDate, TokenRequest
-from services.tokens_service import tokens_service
 from core.responses import TOKEN_CORRECT, TOKEN_OUTDATED
+from core.schemas.token_schemas import TokenOutDate, TokenRequest
+from core.spec_core import RouteResponse, spec
+from flask import Blueprint, request
+from services.tokens_service import tokens_service
+from spectree import Response
 
 tokens_work = Blueprint("tokens_work", __name__, url_prefix="/api/v1")
 
@@ -25,7 +26,7 @@ def update_token():
     if tokens:
         return RouteResponse(result=tokens)
 
-    return TokenOutDate(result=TOKEN_OUTDATED), 401
+    return TokenOutDate(result=TOKEN_OUTDATED), HTTPStatus.UNAUTHORIZED
 
 
 @tokens_work.route("/check", methods=["GET"])
@@ -44,4 +45,4 @@ def check():
     if tokens_service().check_token(token):
         return RouteResponse(result=TOKEN_CORRECT)
 
-    return TokenOutDate(result=TOKEN_OUTDATED), 401
+    return TokenOutDate(result=TOKEN_OUTDATED), HTTPStatus.UNAUTHORIZED

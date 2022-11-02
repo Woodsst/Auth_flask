@@ -1,30 +1,18 @@
-from flask import Blueprint, request, jsonify
-from spectree import Response
+from http import HTTPStatus
 
-from core.schemas.crud_schemas import (
-    AddRoleRequest,
-    AddRoleExist,
-    DeleteRoleRequest,
-    DeleteRoleDefaultRole,
-    DeleteRoleNotExist,
-    ChangeRoleRequest,
-    UserRoleRequest,
-)
-from core.spec_core import (
-    spec,
-    RouteResponse,
-)
-from services.crud import crud, DefaultRole
+from core.responses import (BAD_REQUEST, DEFAULT_ROLE_NOT_DELETE, ROLE_CHANGE,
+                            ROLE_CREATE, ROLE_DELETE, ROLE_EXISTS,
+                            ROLE_NOT_EXIST)
+from core.schemas.crud_schemas import (AddRoleExist, AddRoleRequest,
+                                       ChangeRoleRequest,
+                                       DeleteRoleDefaultRole,
+                                       DeleteRoleNotExist, DeleteRoleRequest,
+                                       UserRoleRequest)
+from core.spec_core import RouteResponse, spec
+from flask import Blueprint, jsonify, request
+from services.crud import DefaultRole, crud
 from services.tokens_service import token_required
-from core.responses import (
-    BAD_REQUEST,
-    ROLE_EXISTS,
-    ROLE_CREATE,
-    ROLE_DELETE,
-    DEFAULT_ROLE_NOT_DELETE,
-    ROLE_NOT_EXIST,
-    ROLE_CHANGE,
-)
+from spectree import Response
 
 crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
 
@@ -44,7 +32,7 @@ def add_role():
 
     if crud().add_role(role, description):
         return RouteResponse(result=ROLE_CREATE)
-    return AddRoleExist(result=ROLE_EXISTS), 400
+    return AddRoleExist(result=ROLE_EXISTS), HTTPStatus.BAD_REQUEST
 
 
 @crud_pages.route("/delete_role", methods=["DELETE"])
@@ -65,12 +53,14 @@ def delete_role():
     role = request.get_json().get("role")
 
     if role == DefaultRole.USER.value or role == DefaultRole.ADMIN.value:
-        return DeleteRoleDefaultRole(result=DEFAULT_ROLE_NOT_DELETE), 409
+        return DeleteRoleDefaultRole(
+            result=DEFAULT_ROLE_NOT_DELETE
+        ), HTTPStatus.CONFLICT
 
     if crud().delete_role(role):
         return RouteResponse(result=ROLE_DELETE)
 
-    return DeleteRoleNotExist(result=ROLE_NOT_EXIST), 400
+    return DeleteRoleNotExist(result=ROLE_NOT_EXIST), HTTPStatus.BAD_REQUEST
 
 
 @crud_pages.route("/change_role", methods=["POST"])
@@ -95,18 +85,22 @@ def change_role():
     change_for_role = request_data.get("change_role")
 
     if role == DefaultRole.USER.value or role == DefaultRole.ADMIN.value:
-        return DeleteRoleDefaultRole(result=DEFAULT_ROLE_NOT_DELETE), 409
+        return DeleteRoleDefaultRole(
+            result=DEFAULT_ROLE_NOT_DELETE
+        ), HTTPStatus.CONFLICT
 
     if (
         change_for_role == DefaultRole.USER.value
         or change_for_role == DefaultRole.ADMIN.value
     ):
-        return DeleteRoleDefaultRole(result=DEFAULT_ROLE_NOT_DELETE), 409
+        return DeleteRoleDefaultRole(
+            result=DEFAULT_ROLE_NOT_DELETE
+        ), HTTPStatus.CONFLICT
 
     if crud().change_role(role, change_for_description, change_for_role):
         return RouteResponse(result=ROLE_CHANGE)
 
-    return DeleteRoleNotExist(result=ROLE_NOT_EXIST), 400
+    return DeleteRoleNotExist(result=ROLE_NOT_EXIST), HTTPStatus.BAD_REQUEST
 
 
 @crud_pages.route("/roles", methods=["GET"])
@@ -134,4 +128,4 @@ def set_user_role():
     if crud().set_user_role(user_id, role):
         return RouteResponse(result=ROLE_CHANGE)
 
-    return RouteResponse(result=BAD_REQUEST), 400
+    return RouteResponse(result=BAD_REQUEST), HTTPStatus.BAD_REQUEST
