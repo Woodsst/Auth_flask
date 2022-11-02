@@ -15,8 +15,8 @@ def test_update_tokens_200(http_con, clear_databases):
     response = http_con.get(
         f"{TOKEN_URL}token",
         headers={
-            "Authorization":
-                f'Bearer {tokens.get("result").get("refresh-token")}'
+            "Authorization": f"Bearer "
+            f'{tokens.get("result").get("refresh-token")}'
         },
     )
     assert response.status_code == HTTPStatus.OK

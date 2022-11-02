@@ -42,7 +42,7 @@ def encode_refresh_token(payload: dict) -> str:
     return token
 
 
-def decode_access_token(token: str):
+def decode_access_token(token: str) -> dict:
     return jwt.decode(
         token,
         key=default_settings.JWT_access_key,
@@ -50,7 +50,7 @@ def decode_access_token(token: str):
     )
 
 
-def decode_refresh_token(token: str):
+def decode_refresh_token(token: str) -> dict:
     return jwt.decode(
         token,
         key=default_settings.JWT_refresh_key,
@@ -75,10 +75,11 @@ def get_token_time_to_end(token: str) -> int:
 
 
 def generate_tokens(payload: dict) -> dict:
-    """Генерация токенов"""
+    """Генерация токенов, access токен, содержит refresh"""
 
-    access = encode_access_token(payload)
     refresh = encode_refresh_token(payload)
+    payload["refresh"] = refresh
+    access = encode_access_token(payload)
 
     return {"access-token": access, "refresh-token": refresh}
 

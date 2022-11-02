@@ -6,7 +6,6 @@ from core.schemas.login_schemas import (
     LoginPasswordNotMatch,
     LoginUserNotMatch,
 )
-from core.schemas.token_schemas import TokenRequest
 from core.spec_core import spec, RouteResponse
 from core.responses import (
     LOGOUT,
@@ -39,15 +38,15 @@ def login_user():
     return response
 
 
-@login_page.route("/logout", methods=["GET"])
+@login_page.route("/logout", methods=["DELETE"])
 @token_required()
 @spec.validate(
     resp=Response(HTTP_200=RouteResponse, HTTP_400=RouteResponse),
     tags=["Login"],
-    security={"apiKey": []}
+    security={"apiKey": []},
 )
 def logout_user():
-    """Логаут пользователя, вносит действующий access токен в невалидные"""
+    """Логаут пользователя, вносит действующие токены в невалидные"""
 
     access_token = request.headers.get("Authorization").split(" ")
     if login_api().logout(access_token[1]):

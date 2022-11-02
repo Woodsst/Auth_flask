@@ -8,7 +8,7 @@ from core.spec_core import (
     RouteResponse,
 )
 from core.responses import USER_NOT_FOUND, PASSWORD_NOT_MATCH
-from jwt_api import get_token_time_to_end, generate_tokens
+from jwt_api import get_token_time_to_end, generate_tokens, decode_access_token
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User, Device, UserDevice
 
@@ -41,10 +41,18 @@ class LoginAPI(ServiceBase):
         self.orm.session.commit()
 
     def logout(self, access_token: str):
-        """Записывает токен в базу как невалидный"""
-        time_to_end = get_token_time_to_end(access_token)
-        if time_to_end:
-            self.cash.set_token(key=access_token, value=1, exited=time_to_end)
+        """Записывает access и refresh токены в базу как невалидные"""
+
+        access_time_to_end = get_token_time_to_end(access_token)
+        if access_time_to_end:
+            refresh = decode_access_token(access_token).get("refresh")
+            refresh_time_to_end = get_token_time_to_end(refresh)
+            self.cash.set_token(
+                key=refresh, value=1, exited=refresh_time_to_end
+            )
+            self.cash.set_token(
+                key=access_token, value=1, exited=access_time_to_end
+            )
             return True
         return False
 

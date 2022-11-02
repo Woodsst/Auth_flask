@@ -44,7 +44,7 @@ def test_login_200(http_con, clear_databases):
 
     payload = decode_access_token(access_token)
 
-    assert len(payload) == 5
+    assert len(payload) == 6
     assert payload.get("token") == "access"
 
     end_time = payload["end_time"]
@@ -103,7 +103,7 @@ def test_logout_200(http_con, clear_databases):
 
     token = get_access_token(http_con)
 
-    response = http_con.get(LOGOUT_URL, headers={"Authorization": token})
+    response = http_con.delete(LOGOUT_URL, headers={"Authorization": token})
 
     assert response.status_code == HTTPStatus.OK
 
@@ -123,6 +123,6 @@ def test_logout_200(http_con, clear_databases):
 def test_logout_422(http_con, clear_databases, token, status_code):
     """Проверка невалидного токена для выхода из аккаунта"""
 
-    response = http_con.get(LOGOUT_URL, headers={"Authorization": token})
+    response = http_con.delete(LOGOUT_URL, headers={"Authorization": token})
 
     assert response.status_code == status_code
