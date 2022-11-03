@@ -1,19 +1,15 @@
 import json
+from http import HTTPStatus
 
-from flask import Blueprint, request
-from spectree import Response
-
-from core.spec_core import RouteResponse, spec
+from core.responses import REGISTRATION_COMPLETE, REGISTRATION_FAILED
 from core.schemas.registration_schemas import (
     RegistrationFailed,
     RegistrationReqeust,
 )
-
-from core.responses import (
-    REGISTRATION_COMPLETE,
-    REGISTRATION_FAILED,
-)
+from core.spec_core import RouteResponse, spec
+from flask import Blueprint, request
 from services.service_registration import registration_api
+from spectree import Response
 
 registration_page = Blueprint(
     "registration_page", __name__, url_prefix="/api/v1"
@@ -33,6 +29,6 @@ def registration_user():
     response = registration_api().registration(user_data)
 
     if response:
-        return RouteResponse(result=REGISTRATION_COMPLETE), 201
+        return RouteResponse(result=REGISTRATION_COMPLETE), HTTPStatus.CREATED
 
-    return RegistrationFailed(result=REGISTRATION_FAILED), 409
+    return RegistrationFailed(result=REGISTRATION_FAILED), HTTPStatus.CREATED

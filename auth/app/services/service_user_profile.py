@@ -1,3 +1,7 @@
+from typing import Union, Optional
+
+import werkzeug.exceptions
+
 from jwt_api import get_user_id_from_token
 from services.service_base import ServiceBase
 from storages.postgres.db_models import (
@@ -32,13 +36,15 @@ class ProfileService(ServiceBase):
 
     def get_devices_user_history(
         self, token: str, page: int, page_size: int
-    ) -> dict:
+    ) -> Union[dict, list]:
         """Получение устройств с которых входили в профиль"""
 
         user_id = get_user_id_from_token(token)
         raw_history = self._get_user_device_history(user_id, page, page_size)
-        history = self._format_devices_history(raw_history)
-        return history
+        if raw_history is not None:
+            history = self._format_devices_history(raw_history)
+            return history
+        return []
 
     @staticmethod
     def _format_devices_history(raw_history: list) -> dict:
@@ -103,18 +109,20 @@ class ProfileService(ServiceBase):
 
     def _get_user_device_history(
         self, user_id: str, page: int, page_size: int
-    ) -> list:
+    ) -> Optional[list]:
         """Получение данных о времени и устройствах
         на которых клиент логинился в сервис"""
-
-        device_history = (
-            self.orm.session.query(Device.device, UserDevice.entry_time)
-            .join(User)
-            .join(Device)
-            .filter(UserDevice.user_id == user_id)
-            .paginate(page=page, per_page=page_size, count=False)
-        )
-        return device_history
+        try:
+            device_history = (
+                self.orm.session.query(Device.device, UserDevice.entry_time)
+                .join(User)
+                .join(Device)
+                .filter(UserDevice.user_id == user_id)
+                .paginate(page=page, per_page=page_size, count=False)
+            )
+            return device_history
+        except werkzeug.exceptions.NotFound:
+            return
 
 
 def profile_service():

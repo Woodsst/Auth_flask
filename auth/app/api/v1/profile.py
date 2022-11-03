@@ -1,45 +1,56 @@
-from spectree import Response
-from flask import Blueprint, request
+from http import HTTPStatus
 
-from core.spec_core import spec
+from core.responses import (
+    EMAIL_CHANGE,
+    PASSWORD_CHANGE,
+    PASSWORD_NOT_MATCH,
+    PASSWORDS_EQUALS,
+)
 from core.schemas.profile_schemas import (
-    DeviceRequest,
     DeviceResponse,
-    ProfileResponse,
     EmailChangeResponse,
     EmailChangeReqeust,
     PasswordChangeReqeust,
     PasswordChangeResponse,
     PasswordEquals,
     PasswordNotMatch,
+    ProfileResponse,
+    DeviceRequest,
 )
+from core.spec_core import spec
+from flask import Blueprint, request
 from services.service_user_profile import profile_service
 from services.tokens_service import token_required
-from core.responses import (
-    PASSWORD_CHANGE,
-    PASSWORDS_EQUALS,
-    PASSWORD_NOT_MATCH,
-    EMAIL_CHANGE,
-)
+from spectree import Response
 
 profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
 
 
 @profile.route("/devices", methods=["GET"])
+@profile.route(
+    "/devices?page=<int:page>&page_size=<int:page_size>", methods=["GET"]
+)
 @token_required()
 @spec.validate(
     query=DeviceRequest,
     tags=["Profile"],
-    resp=Response(HTTP_200=DeviceResponse),
+    resp=Response(
+        HTTP_200=DeviceResponse,
+    ),
     security={"apiKey": []},
 )
 def user_device_history():
     """Ендпоинт для запроса истории девайсов с которых была авторизация"""
 
     token = request.headers.get("Authorization").split(" ")
-    page = int(request.args.get("page"))
-    page_size = int(request.args.get("page_size"))
-
+    page = request.args.get("page")
+    page_size = request.args.get("page_size")
+    if page is None:
+        page = 1
+    page = int(page)
+    if page_size is None:
+        page_size = 20
+    page_size = int(page_size)
     user_devices_data = profile_service().get_devices_user_history(
         token[1], page, page_size
     )
@@ -77,7 +88,7 @@ def change_user_email():
     new_email = request.get_json().get("new_email")
     token = request.headers.get("Authorization").split(" ")
     profile_service().change_email(token[1], new_email)
-    return EmailChangeResponse(result=EMAIL_CHANGE), 200
+    return EmailChangeResponse(result=EMAIL_CHANGE), HTTPStatus.OK
 
 
 @profile.route("/change/password", methods=["POST"])
@@ -100,9 +111,9 @@ def change_user_password():
     new_password = user_data.get("new_password")
 
     if new_password == password:
-        return PasswordEquals(result=PASSWORDS_EQUALS), 400
+        return PasswordEquals(result=PASSWORDS_EQUALS), HTTPStatus.BAD_REQUEST
 
     token = request.headers.get("Authorization").split(" ")
     if profile_service().change_password(token[1], password, new_password):
-        return PasswordChangeResponse(result=PASSWORD_CHANGE)
-    return PasswordNotMatch(result=PASSWORD_NOT_MATCH), 403
+        return PasswordChangeResponse(result=PASSWORD_CHANGE), HTTPStatus.OK
+    return PasswordNotMatch(result=PASSWORD_NOT_MATCH), HTTPStatus.FORBIDDEN

@@ -1,18 +1,16 @@
-from flask import Blueprint, request
-from spectree import Response
+from http import HTTPStatus
 
+from core.responses import LOGOUT, TOKEN_WRONG_FORMAT
 from core.schemas.login_schemas import (
-    LoginRequest,
     LoginPasswordNotMatch,
+    LoginRequest,
     LoginUserNotMatch,
 )
-from core.spec_core import spec, RouteResponse
-from core.responses import (
-    LOGOUT,
-    TOKEN_WRONG_FORMAT,
-)
+from core.spec_core import RouteResponse, spec
+from flask import Blueprint, request
 from services.login_service import login_api
 from services.tokens_service import token_required
+from spectree import Response
 
 login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
 
@@ -50,6 +48,6 @@ def logout_user():
 
     access_token = request.headers.get("Authorization").split(" ")
     if login_api().logout(access_token[1]):
-        return RouteResponse(result=LOGOUT)
+        return RouteResponse(result=LOGOUT), HTTPStatus.OK
 
-    return RouteResponse(result=TOKEN_WRONG_FORMAT), 400
+    return RouteResponse(result=TOKEN_WRONG_FORMAT), HTTPStatus.BAD_REQUEST
