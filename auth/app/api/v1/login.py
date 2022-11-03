@@ -1,8 +1,11 @@
 from http import HTTPStatus
 
 from core.responses import LOGOUT, TOKEN_WRONG_FORMAT
-from core.schemas.login_schemas import (LoginPasswordNotMatch, LoginRequest,
-                                        LoginUserNotMatch)
+from core.schemas.login_schemas import (
+    LoginPasswordNotMatch,
+    LoginRequest,
+    LoginUserNotMatch,
+)
 from core.spec_core import RouteResponse, spec
 from flask import Blueprint, request
 from services.login_service import login_api

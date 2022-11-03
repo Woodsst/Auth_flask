@@ -2,8 +2,10 @@ import json
 from http import HTTPStatus
 
 from core.responses import REGISTRATION_COMPLETE, REGISTRATION_FAILED
-from core.schemas.registration_schemas import (RegistrationFailed,
-                                               RegistrationReqeust)
+from core.schemas.registration_schemas import (
+    RegistrationFailed,
+    RegistrationReqeust,
+)
 from core.spec_core import RouteResponse, spec
 from flask import Blueprint, request
 from services.service_registration import registration_api

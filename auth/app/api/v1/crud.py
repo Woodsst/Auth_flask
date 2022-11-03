@@ -1,13 +1,23 @@
 from http import HTTPStatus
 
-from core.responses import (BAD_REQUEST, DEFAULT_ROLE_NOT_DELETE, ROLE_CHANGE,
-                            ROLE_CREATE, ROLE_DELETE, ROLE_EXISTS,
-                            ROLE_NOT_EXIST)
-from core.schemas.crud_schemas import (AddRoleExist, AddRoleRequest,
-                                       ChangeRoleRequest,
-                                       DeleteRoleDefaultRole,
-                                       DeleteRoleNotExist, DeleteRoleRequest,
-                                       UserRoleRequest)
+from core.responses import (
+    BAD_REQUEST,
+    DEFAULT_ROLE_NOT_DELETE,
+    ROLE_CHANGE,
+    ROLE_CREATE,
+    ROLE_DELETE,
+    ROLE_EXISTS,
+    ROLE_NOT_EXIST,
+)
+from core.schemas.crud_schemas import (
+    AddRoleExist,
+    AddRoleRequest,
+    ChangeRoleRequest,
+    DeleteRoleDefaultRole,
+    DeleteRoleNotExist,
+    DeleteRoleRequest,
+    UserRoleRequest,
+)
 from core.spec_core import RouteResponse, spec
 from flask import Blueprint, jsonify, request
 from services.crud import DefaultRole, crud
@@ -53,9 +63,10 @@ def delete_role():
     role = request.get_json().get("role")
 
     if role == DefaultRole.USER.value or role == DefaultRole.ADMIN.value:
-        return DeleteRoleDefaultRole(
-            result=DEFAULT_ROLE_NOT_DELETE
-        ), HTTPStatus.CONFLICT
+        return (
+            DeleteRoleDefaultRole(result=DEFAULT_ROLE_NOT_DELETE),
+            HTTPStatus.CONFLICT,
+        )
 
     if crud().delete_role(role):
         return RouteResponse(result=ROLE_DELETE)
@@ -85,17 +96,19 @@ def change_role():
     change_for_role = request_data.get("change_role")
 
     if role == DefaultRole.USER.value or role == DefaultRole.ADMIN.value:
-        return DeleteRoleDefaultRole(
-            result=DEFAULT_ROLE_NOT_DELETE
-        ), HTTPStatus.CONFLICT
+        return (
+            DeleteRoleDefaultRole(result=DEFAULT_ROLE_NOT_DELETE),
+            HTTPStatus.CONFLICT,
+        )
 
     if (
         change_for_role == DefaultRole.USER.value
         or change_for_role == DefaultRole.ADMIN.value
     ):
-        return DeleteRoleDefaultRole(
-            result=DEFAULT_ROLE_NOT_DELETE
-        ), HTTPStatus.CONFLICT
+        return (
+            DeleteRoleDefaultRole(result=DEFAULT_ROLE_NOT_DELETE),
+            HTTPStatus.CONFLICT,
+        )
 
     if crud().change_role(role, change_for_description, change_for_role):
         return RouteResponse(result=ROLE_CHANGE)

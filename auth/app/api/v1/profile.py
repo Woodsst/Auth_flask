@@ -1,13 +1,22 @@
 from http import HTTPStatus
 
-from core.responses import (EMAIL_CHANGE, PASSWORD_CHANGE, PASSWORD_NOT_MATCH,
-                            PASSWORDS_EQUALS)
-from core.schemas.profile_schemas import (DeviceResponse, EmailChangeReqeust,
-                                          EmailChangeResponse,
-                                          PasswordChangeReqeust,
-                                          PasswordChangeResponse,
-                                          PasswordEquals, PasswordNotMatch,
-                                          ProfileResponse)
+from core.responses import (
+    EMAIL_CHANGE,
+    PASSWORD_CHANGE,
+    PASSWORD_NOT_MATCH,
+    PASSWORDS_EQUALS,
+)
+from core.schemas.profile_schemas import (
+    DeviceResponse,
+    EmailChangeReqeust,
+    EmailChangeResponse,
+    PasswordChangeReqeust,
+    PasswordChangeResponse,
+    PasswordEquals,
+    PasswordNotMatch,
+    ProfileResponse,
+    DeviceRequest,
+)
 from core.spec_core import spec
 from flask import Blueprint, request
 from services.service_user_profile import profile_service
@@ -23,8 +32,11 @@ profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
 )
 @token_required()
 @spec.validate(
+    query=DeviceRequest,
     tags=["Profile"],
-    resp=Response(HTTP_200=DeviceResponse,),
+    resp=Response(
+        HTTP_200=DeviceResponse,
+    ),
 )
 def user_device_history():
     """Ендпоинт для запроса истории девайсов с которых была авторизация"""

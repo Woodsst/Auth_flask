@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, conint, EmailStr, constr
 
 from core.spec_core import RouteResponse
@@ -31,8 +33,8 @@ class ProfileResponse(BaseModel):
 class DeviceRequest(BaseModel):
     """Схема запроса списка устройств с которых был вход в профиль"""
 
-    page: conint(gt=0)
-    page_size: conint(gt=0)
+    page: Optional[conint(gt=0)] = None
+    page_size: Optional[conint(gt=0)] = None
 
 
 class DeviceResponse(BaseModel):

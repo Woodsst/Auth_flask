@@ -1,4 +1,6 @@
-import werkzeug
+from typing import Union, Optional
+
+import werkzeug.exceptions
 
 from jwt_api import get_user_id_from_token
 from services.service_base import ServiceBase
@@ -34,7 +36,7 @@ class ProfileService(ServiceBase):
 
     def get_devices_user_history(
         self, token: str, page: int, page_size: int
-    ) -> dict:
+    ) -> Union[dict, list]:
         """Получение устройств с которых входили в профиль"""
 
         user_id = get_user_id_from_token(token)
@@ -107,7 +109,7 @@ class ProfileService(ServiceBase):
 
     def _get_user_device_history(
         self, user_id: str, page: int, page_size: int
-    ) -> list:
+    ) -> Optional[list]:
         """Получение данных о времени и устройствах
         на которых клиент логинился в сервис"""
         try:
@@ -120,7 +122,7 @@ class ProfileService(ServiceBase):
             )
             return device_history
         except werkzeug.exceptions.NotFound:
-            return None
+            return
 
 
 def profile_service():
