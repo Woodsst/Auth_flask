@@ -48,18 +48,6 @@ class TokensService(ServiceBase):
             payload = decode_refresh_token(token)
             return generate_tokens(payload)
 
-    def check_token(self, token: str) -> bool:
-        """Функция проверки состояния токена"""
-
-        if self.cash.get_token(token):
-            return False
-        token_time = get_token_time_to_end(token)
-        if token_time:
-            if token_time > 0:
-                return True
-            return False
-        return False
-
 
 def tokens_service():
     return TokensService()
@@ -84,16 +72,16 @@ def token_required(admin=False):
             token = token.split(" ")
             token = token[1]
             if redis_conn.get(token):
-                return jsonify(TOKEN_OUTDATED), 401
+                return jsonify(TOKEN_OUTDATED), HTTPStatus.UNAUTHORIZED
 
             if admin:
                 payload = decode_access_token(token)
                 if int(payload.get("role")) != DefaultRole.ADMIN_KEY.value:
-                    return jsonify(ACCESS_DENIED), 403
+                    return jsonify(ACCESS_DENIED), HTTPStatus.FORBIDDEN
 
             token_time = get_token_time_to_end(token)
             if token_time and token_time <= 0:
-                return jsonify(TOKEN_OUTDATED), 401
+                return jsonify(TOKEN_OUTDATED), HTTPStatus.UNAUTHORIZED
 
             return f(*args, **kwargs)
 

@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from core.responses import TOKEN_CORRECT, TOKEN_OUTDATED
+from core.responses import TOKEN_OUTDATED
 from core.schemas.token_schemas import TokenOutDate, TokenRequest
 from core.spec_core import RouteResponse, spec
 from flask import Blueprint, request
@@ -25,24 +25,5 @@ def update_token():
     tokens = tokens_service().update_tokens(refresh)
     if tokens:
         return RouteResponse(result=tokens)
-
-    return TokenOutDate(result=TOKEN_OUTDATED), HTTPStatus.UNAUTHORIZED
-
-
-@tokens_work.route("/check", methods=["GET"])
-@spec.validate(
-    headers=TokenRequest,
-    resp=Response(HTTP_200=RouteResponse, HTTP_401=TokenOutDate),
-    tags=["Token"],
-)
-def check():
-    """Ендпоинт для проверки состояния токена клиента,
-    принимает access токен, возвращает информацию о состоянии токена"""
-
-    token = request.headers["Authorization"].split(" ")
-    token = token[1]
-
-    if tokens_service().check_token(token):
-        return RouteResponse(result=TOKEN_CORRECT)
 
     return TokenOutDate(result=TOKEN_OUTDATED), HTTPStatus.UNAUTHORIZED

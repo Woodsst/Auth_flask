@@ -31,4 +31,4 @@ def registration_user():
     if response:
         return RouteResponse(result=REGISTRATION_COMPLETE), HTTPStatus.CREATED
 
-    return RegistrationFailed(result=REGISTRATION_FAILED), HTTPStatus.CREATED
+    return RegistrationFailed(result=REGISTRATION_FAILED), HTTPStatus.CONFLICT
