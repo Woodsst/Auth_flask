@@ -1,10 +1,13 @@
+import uuid
 from typing import Optional
 
+import sqlalchemy.exc
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
 
+from core.defaultrole import DefaultRole
 from storages.db_connect import redis_conn, db
-from storages.postgres.db_models import User
+from storages.postgres.db_models import User, Social, UserSocial
 from storages.redis.redis_api import Redis
 
 
@@ -29,3 +32,32 @@ class ServiceBase:
             .filter(User.id == user_id)
             .first()
         )[0]
+
+    def _set_user(self, user_data: dict):
+        """Добавление данных нового пользователя"""
+        try:
+            user_id = uuid.uuid4()
+            user = User(
+                login=user_data.get("login"),
+                password=user_data.get("password"),
+                email=user_data.get("email"),
+                id=user_id,
+                role=DefaultRole.USER_KEY.value,
+            )
+            self.orm.session.add(user)
+            self.orm.session.commit()
+        except sqlalchemy.exc.IntegrityError:
+            self.orm.session.rollback()
+            return False
+        return True
+
+    def _set_social(self, login: str, social_name: str, social_url: str):
+        user_id = User.query.filter_by(login=login).first()
+        id = uuid.uuid4()
+        social = Social(id=id, name=social_name)
+        user_social = UserSocial(
+            social_id=id, user_id=user_id.id, url=social_url
+        )
+        self.orm.session.add(social)
+        self.orm.session.add(user_social)
+        self.orm.session.commit()

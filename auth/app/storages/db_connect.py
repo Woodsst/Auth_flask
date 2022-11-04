@@ -4,7 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from redis import Redis
 
-from config.settings import default_settings
+from config.settings import settings
 
 redis_conn: Optional[Redis] = None
 
@@ -12,7 +12,7 @@ db: Optional[SQLAlchemy] = None
 
 
 def postgres_init(app: Flask):
-    app.config["SQLALCHEMY_DATABASE_URI"] = default_settings.postgres
+    app.config["SQLALCHEMY_DATABASE_URI"] = settings.postgres
     global db
     db = SQLAlchemy()
     db.init_app(app)
@@ -21,7 +21,7 @@ def postgres_init(app: Flask):
 def redis_init():
     global redis_conn
     redis_conn = Redis(
-        host=default_settings.redis_host,
-        port=default_settings.redis_port,
+        host=settings.redis_host,
+        port=settings.redis_port,
         db=0,
     )

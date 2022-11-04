@@ -1,7 +1,7 @@
 import datetime
 
 import jwt
-from config.settings import default_settings
+from config.settings import settings
 
 
 def encode_access_token(payload: dict) -> str:
@@ -17,8 +17,8 @@ def encode_access_token(payload: dict) -> str:
 
     token = jwt.encode(
         payload=payload,
-        key=default_settings.JWT_access_key,
-        algorithm=default_settings.JWT_algorithm,
+        key=settings.JWT_access_key,
+        algorithm=settings.JWT_algorithm,
     )
     return token
 
@@ -36,8 +36,8 @@ def encode_refresh_token(payload: dict) -> str:
 
     token = jwt.encode(
         payload=payload,
-        key=default_settings.JWT_refresh_key,
-        algorithm=default_settings.JWT_algorithm,
+        key=settings.JWT_refresh_key,
+        algorithm=settings.JWT_algorithm,
     )
     return token
 
@@ -45,16 +45,16 @@ def encode_refresh_token(payload: dict) -> str:
 def decode_access_token(token: str) -> dict:
     return jwt.decode(
         token,
-        key=default_settings.JWT_access_key,
-        algorithms=default_settings.JWT_algorithm,
+        key=settings.JWT_access_key,
+        algorithms=settings.JWT_algorithm,
     )
 
 
 def decode_refresh_token(token: str) -> dict:
     return jwt.decode(
         token,
-        key=default_settings.JWT_refresh_key,
-        algorithms=default_settings.JWT_algorithm,
+        key=settings.JWT_refresh_key,
+        algorithms=settings.JWT_algorithm,
     )
 
 
@@ -87,3 +87,9 @@ def generate_tokens(payload: dict) -> dict:
 def get_user_id_from_token(token: str) -> str:
     """Получение id пользователя из токена"""
     return decode_access_token(token).get("id")
+
+
+def decode_yandex_jwt(token: str):
+    return jwt.decode(
+        token, key=settings.yandex_client_secret, algorithms="HS256"
+    )

@@ -1,5 +1,9 @@
 from http import HTTPStatus
 
+from flask import Blueprint, request, redirect
+from spectree import Response
+
+from config.settings import settings
 from core.responses import LOGOUT, TOKEN_WRONG_FORMAT
 from core.schemas.login_schemas import (
     LoginPasswordNotMatch,
@@ -7,10 +11,8 @@ from core.schemas.login_schemas import (
     LoginUserNotMatch,
 )
 from core.spec_core import RouteResponse, spec
-from flask import Blueprint, request
 from services.login_service import login_api
 from services.tokens_service import token_required
-from spectree import Response
 
 login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
 
@@ -34,6 +36,31 @@ def login_user():
 
     response = login_api().login(login, password, user_agent)
     return response
+
+
+@login_page.route("/login/yandex_oauth", methods=["GET"])
+@spec.validate(tags=["Login"])
+def yandex_oauth():
+    """Перенаправление клиента на страницу yandex
+    для предоставления доступа к его данным"""
+
+    redir = redirect(
+        settings.yandex_oauth_authorize,
+    )
+    return redir
+
+
+@login_page.route("/oauth", methods=["GET"])
+@spec.validate(resp=Response(HTTP_200=RouteResponse), tags=["Login"])
+def oauth():
+    """Аутентификация или регистрация пользователя через yandex"""
+
+    code = request.url.split("=")
+    tokens = login_api().get_tokens(code[1])
+    result = login_api().oauth(
+        tokens=tokens, user_agent=request.user_agent.string
+    )
+    return result
 
 
 @login_page.route("/logout", methods=["DELETE"])
