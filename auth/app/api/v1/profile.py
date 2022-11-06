@@ -14,7 +14,8 @@ from core.schemas.profile_schemas import (
     PasswordChangeResponse,
     PasswordEquals,
     PasswordNotMatch,
-    ProfileResponse, DeviceRequest,
+    ProfileResponse,
+    DeviceRequest,
 )
 from core.spec_core import spec
 from flask import Blueprint, request
@@ -25,9 +26,7 @@ from spectree import Response
 profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
 
 
-@profile.route(
-    "/devices", methods=["GET"]
-)
+@profile.route("/devices", methods=["GET"])
 @token_required()
 @spec.validate(
     query=DeviceRequest,
