@@ -16,7 +16,7 @@ registration_page = Blueprint(
 
 
 @registration_page.route("/registration", methods=["POST"])
-@limiter.limit("1/second", override_defaults=False)
+@limiter.limit("10/second", override_defaults=False)
 @spec.validate(
     json=RegistrationReqeust,
     resp=Response(HTTP_201=RouteResponse, HTTP_409=RegistrationFailed),

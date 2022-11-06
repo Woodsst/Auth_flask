@@ -23,7 +23,7 @@ profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
     "/devices", methods=["GET"]
 )
 @token_required()
-@limiter.limit("1/second", override_defaults=False)
+@limiter.limit("10/second", override_defaults=False)
 @spec.validate(
     query=DeviceRequest,
     tags=["Profile"],
@@ -52,7 +52,7 @@ def user_device_history():
 
 @profile.route("/", methods=["GET"])
 @token_required()
-@limiter.limit("1/second", override_defaults=False)
+@limiter.limit("10/second", override_defaults=False)
 @spec.validate(
     resp=Response(HTTP_200=ProfileResponse),
     tags=["Profile"],
@@ -68,7 +68,7 @@ def user_full_information():
 
 @profile.route("/change/email", methods=["POST"])
 @token_required()
-@limiter.limit("1/second", override_defaults=False)
+@limiter.limit("10/second", override_defaults=False)
 @spec.validate(
     json=EmailChangeReqeust,
     resp=Response(
@@ -88,7 +88,7 @@ def change_user_email():
 
 @profile.route("/change/password", methods=["POST"])
 @token_required()
-@limiter.limit("1/second", override_defaults=False)
+@limiter.limit("10/second", override_defaults=False)
 @spec.validate(
     json=PasswordChangeReqeust,
     resp=Response(

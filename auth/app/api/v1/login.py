@@ -14,7 +14,7 @@ login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
 
 
 @login_page.route("/login", methods=["POST"])
-@limiter.limit("1/second", override_defaults=False)
+@limiter.limit("10/second", override_defaults=False)
 @spec.validate(
     json=LoginRequest,
     resp=Response(
@@ -37,7 +37,7 @@ def login_user():
 
 @login_page.route("/logout", methods=["DELETE"])
 @token_required()
-@limiter.limit("1/second", override_defaults=False)
+@limiter.limit("10/second", override_defaults=False)
 @spec.validate(
     resp=Response(HTTP_200=RouteResponse, HTTP_400=RouteResponse),
     tags=["Login"],
