@@ -43,11 +43,7 @@ def login_user():
 def yandex_oauth():
     """Перенаправление клиента на страницу yandex
     для предоставления доступа к его данным"""
-
-    redir = redirect(
-        settings.yandex_oauth_authorize,
-    )
-    return redir
+    return redirect(settings.yandex_oauth_authorize)
 
 
 @login_page.route("/oauth", methods=["GET"])
