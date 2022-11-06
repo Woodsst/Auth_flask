@@ -2,9 +2,12 @@ from flask import Flask
 
 app = Flask(__name__)
 from storages.db_connect import postgres_init, redis_init
+from config.limiter import limiter_init
 
 postgres_init(app)
 redis_init()
+limiter_init(app)
+
 
 from core.spec_core import spec
 

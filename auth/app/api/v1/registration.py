@@ -1,11 +1,10 @@
 import json
 from http import HTTPStatus
 
+from config.limiter import limiter
 from core.responses import REGISTRATION_COMPLETE, REGISTRATION_FAILED
-from core.schemas.registration_schemas import (
-    RegistrationFailed,
-    RegistrationReqeust,
-)
+from core.schemas.registration_schemas import (RegistrationFailed,
+                                               RegistrationReqeust)
 from core.spec_core import RouteResponse, spec
 from flask import Blueprint, request
 from services.service_registration import registration_api
@@ -17,6 +16,7 @@ registration_page = Blueprint(
 
 
 @registration_page.route("/registration", methods=["POST"])
+@limiter.limit("10/second", override_defaults=False)
 @spec.validate(
     json=RegistrationReqeust,
     resp=Response(HTTP_201=RouteResponse, HTTP_409=RegistrationFailed),
