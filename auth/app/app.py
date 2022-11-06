@@ -2,9 +2,12 @@ from flask import Flask
 
 app = Flask(__name__)
 from storages.db_connect import postgres_init, redis_init
+from config.limiter import limiter_init
 
 postgres_init(app)
 redis_init()
+limiter_init(app)
+
 
 from core.spec_core import spec
 
@@ -33,3 +36,7 @@ def create_admin():
     email = input("Email:")
 
     add_admin(login, password, email)
+
+
+if __name__ == "__main__":
+    app.run()

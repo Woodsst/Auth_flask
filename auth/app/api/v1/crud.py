@@ -1,32 +1,18 @@
-from flask import Blueprint, request
-from spectree import Response
 from http import HTTPStatus
 
-from core.schemas.crud_schemas import (
-    AddRoleRequest,
-    AddRoleExist,
-    DeleteRoleRequest,
-    DeleteRoleDefaultRole,
-    DeleteRoleNotExist,
-    ChangeRoleRequest,
-    UserRoleRequest,
-    RoleResponse,
-)
-from core.spec_core import (
-    spec,
-    RouteResponse,
-)
-from services.crud import crud, DefaultRole
+from core.responses import (BAD_REQUEST, DEFAULT_ROLE_NOT_DELETE, ROLE_CHANGE,
+                            ROLE_CREATE, ROLE_DELETE, ROLE_EXISTS,
+                            ROLE_NOT_EXIST)
+from core.schemas.crud_schemas import (AddRoleExist, AddRoleRequest,
+                                       ChangeRoleRequest,
+                                       DeleteRoleDefaultRole,
+                                       DeleteRoleNotExist, DeleteRoleRequest,
+                                       RoleResponse, UserRoleRequest)
+from core.spec_core import RouteResponse, spec
+from flask import Blueprint, request
+from services.crud import DefaultRole, crud
 from services.tokens_service import token_required
-from core.responses import (
-    BAD_REQUEST,
-    ROLE_EXISTS,
-    ROLE_CREATE,
-    ROLE_DELETE,
-    DEFAULT_ROLE_NOT_DELETE,
-    ROLE_NOT_EXIST,
-    ROLE_CHANGE,
-)
+from spectree import Response
 
 crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
 

@@ -9,3 +9,7 @@ class Redis(BaseCash):
     def set_token(self, key: str, value: str, exited: int):
         """Внести данные"""
         self.con.set(key, value, ex=exited)
+
+    def pipeline(self, **kwargs):
+        """Создает Pipeline"""
+        return self.con.pipeline()

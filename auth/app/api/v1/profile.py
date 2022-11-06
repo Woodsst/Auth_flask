@@ -1,21 +1,15 @@
 from http import HTTPStatus
 
-from core.responses import (
-    EMAIL_CHANGE,
-    PASSWORD_CHANGE,
-    PASSWORD_NOT_MATCH,
-    PASSWORDS_EQUALS,
-)
-from core.schemas.profile_schemas import (
-    DeviceResponse,
-    EmailChangeResponse,
-    EmailChangeReqeust,
-    PasswordChangeReqeust,
-    PasswordChangeResponse,
-    PasswordEquals,
-    PasswordNotMatch,
-    ProfileResponse, DeviceRequest,
-)
+from config.limiter import limiter
+from core.responses import (EMAIL_CHANGE, PASSWORD_CHANGE, PASSWORD_NOT_MATCH,
+                            PASSWORDS_EQUALS)
+from core.schemas.profile_schemas import (DeviceRequest, DeviceResponse,
+                                          EmailChangeReqeust,
+                                          EmailChangeResponse,
+                                          PasswordChangeReqeust,
+                                          PasswordChangeResponse,
+                                          PasswordEquals, PasswordNotMatch,
+                                          ProfileResponse)
 from core.spec_core import spec
 from flask import Blueprint, request
 from services.service_user_profile import profile_service
@@ -29,6 +23,7 @@ profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
     "/devices", methods=["GET"]
 )
 @token_required()
+@limiter.limit("1/second", override_defaults=False)
 @spec.validate(
     query=DeviceRequest,
     tags=["Profile"],
@@ -57,6 +52,7 @@ def user_device_history():
 
 @profile.route("/", methods=["GET"])
 @token_required()
+@limiter.limit("1/second", override_defaults=False)
 @spec.validate(
     resp=Response(HTTP_200=ProfileResponse),
     tags=["Profile"],
@@ -72,6 +68,7 @@ def user_full_information():
 
 @profile.route("/change/email", methods=["POST"])
 @token_required()
+@limiter.limit("1/second", override_defaults=False)
 @spec.validate(
     json=EmailChangeReqeust,
     resp=Response(
@@ -91,6 +88,7 @@ def change_user_email():
 
 @profile.route("/change/password", methods=["POST"])
 @token_required()
+@limiter.limit("1/second", override_defaults=False)
 @spec.validate(
     json=PasswordChangeReqeust,
     resp=Response(

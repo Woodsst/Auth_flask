@@ -16,3 +16,7 @@ class BaseCash(abc.ABC):
     def set_token(self, key: str, value: str, exited: int):
         """Внести данные"""
         pass
+
+    @abc.abstractmethod
+    def pipeline(self, **kwargs):
+        pass
