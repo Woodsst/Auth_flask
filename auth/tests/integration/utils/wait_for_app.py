@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def connect_app():
     logger.warning("Повторная попытка соединения с приложением")
     con = requests.Session()
-    con.get("http://flask:5000/api/v1/check", headers={"X-request-Id": 'asd'})
+    con.get("http://flask:5000/api/v1/check", headers={"X-request-Id": "asd"})
 
 
 if __name__ == "__main__":

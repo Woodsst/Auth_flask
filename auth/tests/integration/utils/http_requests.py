@@ -52,7 +52,10 @@ def add_new_role(http_con: Session, token: str):
     response = http_con.post(
         f"{CRUD_URL}add_role",
         data=json.dumps({"role": NEW_ROLE, "description": DESCRIPTION}),
-        headers={"Authorization": token, "Content-Type": "application/json",
-                 "X-request-Id": str(uuid.uuid4())},
+        headers={
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     return response

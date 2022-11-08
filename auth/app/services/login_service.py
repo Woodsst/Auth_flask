@@ -9,7 +9,11 @@ from core.spec_core import (
     RouteResponse,
 )
 from core.responses import USER_NOT_FOUND, PASSWORD_NOT_MATCH
-from core.jwt_api import get_token_time_to_end, generate_tokens, decode_access_token
+from core.jwt_api import (
+    get_token_time_to_end,
+    generate_tokens,
+    decode_access_token,
+)
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User, Device, UserDevice
 

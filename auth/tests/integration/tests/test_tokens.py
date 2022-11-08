@@ -16,7 +16,7 @@ def test_update_tokens_200(http_con, clear_databases):
         headers={
             "Authorization": f"Bearer "
             f'{tokens.get("result").get("refresh-token")}',
-            "X-request-Id": str(uuid.uuid4())
+            "X-request-Id": str(uuid.uuid4()),
         },
     )
     assert response.status_code == HTTPStatus.OK
@@ -32,7 +32,10 @@ def test_update_tokens_422(http_con, clear_databases):
     """Проверка ответа при передаче не корректного токена"""
 
     response = http_con.get(
-        f"{TOKEN_URL}token", headers={"Authorization": "bad_token",
-                                      "X-request-Id": str(uuid.uuid4())}
+        f"{TOKEN_URL}token",
+        headers={
+            "Authorization": "bad_token",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

@@ -17,8 +17,11 @@ def test_profile_data_200(http_con, clear_databases):
     access_token = get_access_token(http_con)
 
     response = http_con.get(
-        PROFILE_URL, headers={"Authorization": access_token,
-                              "X-request-Id": str(uuid.uuid4())}
+        PROFILE_URL,
+        headers={
+            "Authorization": access_token,
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == HTTPStatus.OK
     response_data = response.json()
@@ -35,8 +38,11 @@ def test_profile_data_401(http_con, clear_databases):
 
     access_token = "bad token"
     response = http_con.get(
-        PROFILE_URL, headers={"Authorization": access_token,
-                              "X-request-Id": str(uuid.uuid4())}
+        PROFILE_URL,
+        headers={
+            "Authorization": access_token,
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
@@ -50,7 +56,7 @@ def test_profile_devices_200(http_con, clear_databases):
         headers={
             "Authorization": access_token,
             "Content-Type": "application/json",
-            "X-request-Id": str(uuid.uuid4())
+            "X-request-Id": str(uuid.uuid4()),
         },
     )
 
@@ -70,8 +76,10 @@ def test_profile_devices_422(http_con, clear_databases):
     access_token = "bad token"
     response = http_con.get(
         f"{PROFILE_URL}devices",
-        headers={"Authorization": access_token,
-                 "X-request-Id": str(uuid.uuid4())},
+        headers={
+            "Authorization": access_token,
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
@@ -86,7 +94,7 @@ def test_profile_change_email_200(http_con, clear_databases):
         headers={
             "Authorization": access_token,
             "Content-Type": "application/json",
-            "X-request-Id": str(uuid.uuid4())
+            "X-request-Id": str(uuid.uuid4()),
         },
         data=json.dumps({"new_email": new_email}),
     )
@@ -97,8 +105,11 @@ def test_profile_change_email_200(http_con, clear_databases):
     assert message == EMAIL_CHANGE
 
     response = http_con.get(
-        PROFILE_URL, headers={"Authorization": access_token,
-                              "X-request-Id": str(uuid.uuid4())}
+        PROFILE_URL,
+        headers={
+            "Authorization": access_token,
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
 
     response_data = response.json()
@@ -111,8 +122,10 @@ def test_profile_change_email_401(http_con):
     access_token = "bad token"
     response = http_con.post(
         f"{PROFILE_URL}change/email",
-        headers={"Authorization": access_token,
-                 "X-request-Id": str(uuid.uuid4())},
+        headers={
+            "Authorization": access_token,
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
@@ -133,8 +146,10 @@ def test_profile_change_email_400(
     access_token = get_access_token(http_con)
     response = http_con.post(
         f"{PROFILE_URL}change/email",
-        headers={"Authorization": access_token,
-                 "X-request-Id": str(uuid.uuid4())},
+        headers={
+            "Authorization": access_token,
+            "X-request-Id": str(uuid.uuid4()),
+        },
         data=json.dumps({"new_email": bad_email}),
     )
     assert response.status_code == response_status
@@ -150,7 +165,7 @@ def test_profile_change_password_200(http_con, clear_databases):
         headers={
             "Authorization": access_token,
             "Content-Type": "application/json",
-            "X-request-Id": str(uuid.uuid4())
+            "X-request-Id": str(uuid.uuid4()),
         },
         data=json.dumps(
             {
@@ -183,8 +198,10 @@ def test_profile_change_password_422(
     access_token = get_access_token(http_con)
     response = http_con.post(
         f"{PROFILE_URL}change/password",
-        headers={"Authorization": access_token,
-                 "X-request-Id": str(uuid.uuid4())},
+        headers={
+            "Authorization": access_token,
+            "X-request-Id": str(uuid.uuid4()),
+        },
         data=json.dumps(
             {"password": user_password, "new_password": bad_password}
         ),
