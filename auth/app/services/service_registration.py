@@ -1,6 +1,5 @@
-from werkzeug.security import generate_password_hash
-
 from services.service_base import ServiceBase
+from werkzeug.security import generate_password_hash
 
 
 class Registration(ServiceBase):

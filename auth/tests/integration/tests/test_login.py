@@ -1,5 +1,6 @@
 import datetime
 import json
+import uuid
 from http import HTTPStatus
 
 import pytest
@@ -28,7 +29,10 @@ def test_login_200(http_con, clear_databases):
     response = http_con.post(
         LOGIN_URL,
         data=json.dumps(LOGIN),
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
 
     assert response.status_code == HTTPStatus.OK
@@ -93,7 +97,10 @@ def test_login_400(http_con, clear_databases, status_code, body):
     response = http_con.post(
         LOGIN_URL,
         data=json.dumps(body),
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == status_code
 
@@ -103,13 +110,19 @@ def test_logout_200(http_con, clear_databases):
 
     token = get_access_token(http_con)
 
-    response = http_con.delete(LOGOUT_URL, headers={"Authorization": token})
+    response = http_con.delete(
+        LOGOUT_URL,
+        headers={"Authorization": token, "X-request-Id": str(uuid.uuid4())},
+    )
 
     assert response.status_code == HTTPStatus.OK
 
     assert response.json() == LOGOUT
 
-    response = http_con.get(PROFILE_URL, headers={"Authorization": token})
+    response = http_con.get(
+        PROFILE_URL,
+        headers={"Authorization": token, "X-request-Id": str(uuid.uuid4())},
+    )
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
 
@@ -123,6 +136,9 @@ def test_logout_200(http_con, clear_databases):
 def test_logout_422(http_con, clear_databases, token, status_code):
     """Проверка невалидного токена для выхода из аккаунта"""
 
-    response = http_con.delete(LOGOUT_URL, headers={"Authorization": token})
+    response = http_con.delete(
+        LOGOUT_URL,
+        headers={"Authorization": token, "X-request-Id": str(uuid.uuid4())},
+    )
 
     assert response.status_code == status_code

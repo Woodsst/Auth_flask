@@ -7,6 +7,7 @@ from requests import post, get
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from config.settings import settings
+from core.jaeger_tracer import d_trace
 from core.schemas.login_schemas import LoginPasswordNotMatch, LoginUserNotMatch
 from core.spec_core import (
     RouteResponse,
@@ -46,6 +47,7 @@ class LoginAPI(ServiceBase):
                 HTTPStatus.UNAUTHORIZED,
             )
 
+    @d_trace
     def _set_device(self, device: str, user_id: str):
         """Добавление нового устройства с которого клиент зашел в аккаунт"""
 

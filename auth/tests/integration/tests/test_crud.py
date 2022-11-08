@@ -1,4 +1,5 @@
 import json
+import uuid
 from http import HTTPStatus
 
 import pytest
@@ -37,7 +38,8 @@ def test_add_role_200(http_con, clear_databases, postgres_con):
     assert response.status_code == HTTPStatus.OK
 
     response = http_con.get(
-        f"{CRUD_URL}roles", headers={"Authorization": token}
+        f"{CRUD_URL}roles",
+        headers={"Authorization": token, "X-request-Id": str(uuid.uuid4())},
     )
     response = response.json().get("roles")
     assert isinstance(response, dict)
@@ -66,7 +68,11 @@ def test_add_role_422(
     response = http_con.post(
         f"{CRUD_URL}add_role",
         data=json.dumps({"role": role, "description": description}),
-        headers={"Authorization": token, "Content-Type": "application/json"},
+        headers={
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == status_code
 
@@ -86,13 +92,21 @@ def test_delete_role_200(http_con, postgres_con, clear_databases):
     http_con.post(
         f"{CRUD_URL}set_user_role",
         data=json.dumps({"role": NEW_ROLE, "user_id": user_id}),
-        headers={"Authorization": token, "Content-Type": "application/json"},
+        headers={
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
 
     response = http_con.delete(
         f"{CRUD_URL}delete_role",
         data=json.dumps({"role": NEW_ROLE}),
-        headers={"Authorization": token, "Content-Type": "application/json"},
+        headers={
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == HTTPStatus.OK
 
@@ -100,14 +114,18 @@ def test_delete_role_200(http_con, postgres_con, clear_databases):
     assert message == ROLE_DELETE
 
     response = http_con.get(
-        f"{CRUD_URL}roles", headers={"Authorization": token}
+        f"{CRUD_URL}roles",
+        headers={"Authorization": token, "X-request-Id": str(uuid.uuid4())},
     )
     response_data = response.json()
     assert response_data.get(NEW_ROLE) is None
     token = login(http_con, USERS[0])
     token = f"Bearer {token.get('result').get('access-token')}"
 
-    response = http_con.get(PROFILE_URL, headers={"Authorization": token})
+    response = http_con.get(
+        PROFILE_URL,
+        headers={"Authorization": token, "X-request-Id": str(uuid.uuid4())},
+    )
     response_data = response.json()
 
     assert response_data.get("role") == "User"
@@ -133,7 +151,11 @@ def test_delete_role_400(
     response = http_con.delete(
         f"{CRUD_URL}delete_role",
         data=json.dumps({"role": role}),
-        headers={"Authorization": token, "Content-Type": "application/json"},
+        headers={
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == status_code
     assert response.json() == message
@@ -159,7 +181,11 @@ def test_change_role_200(postgres_con, http_con, clear_databases):
                 "change_description": change_desc,
             }
         ),
-        headers={"Authorization": token, "Content-Type": "application/json"},
+        headers={
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
 
     assert response.status_code == HTTPStatus.OK
@@ -168,7 +194,8 @@ def test_change_role_200(postgres_con, http_con, clear_databases):
     assert message == ROLE_CHANGE
 
     response = http_con.get(
-        f"{CRUD_URL}roles", headers={"Authorization": token}
+        f"{CRUD_URL}roles",
+        headers={"Authorization": token, "X-request-Id": str(uuid.uuid4())},
     )
     response_data = response.json()
     assert response_data.get("roles").get(change_role) == change_desc
@@ -198,7 +225,11 @@ def test_change_role_400(
         data=json.dumps(
             {"role": NEW_ROLE, "change_role": role, "change_description": desc}
         ),
-        headers={"Authorization": token, "Content-Type": "application/json"},
+        headers={
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
 
     assert response.status_code == status_code
@@ -218,7 +249,11 @@ def test_set_user_role_200(http_con, postgres_con, clear_databases):
     response = http_con.post(
         f"{CRUD_URL}set_user_role",
         data=json.dumps({"role": NEW_ROLE, "user_id": user_id}),
-        headers={"Authorization": token, "Content-Type": "application/json"},
+        headers={
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == HTTPStatus.OK
 
@@ -228,7 +263,10 @@ def test_set_user_role_200(http_con, postgres_con, clear_databases):
     token = login(http_con, USERS[0])
     token = f"Bearer {token.get('result').get('access-token')}"
 
-    response = http_con.get(PROFILE_URL, headers={"Authorization": token})
+    response = http_con.get(
+        PROFILE_URL,
+        headers={"Authorization": token, "X-request-Id": str(uuid.uuid4())},
+    )
     response_data = response.json()
 
     assert response_data.get("role") == NEW_ROLE
@@ -254,7 +292,11 @@ def test_set_user_role_400(
     response = http_con.post(
         f"{CRUD_URL}set_user_role",
         data=json.dumps({"role": role, "user_id": user_id}),
-        headers={"Authorization": token, "Content-Type": "application/json"},
+        headers={
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "X-request-Id": str(uuid.uuid4()),
+        },
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
@@ -267,7 +309,8 @@ def test_get_all_roles(http_con, postgres_con, clear_databases):
     token = f"Bearer {token.get('result').get('access-token')}"
 
     response = http_con.get(
-        f"{CRUD_URL}roles", headers={"Authorization": token}
+        f"{CRUD_URL}roles",
+        headers={"Authorization": token, "X-request-Id": str(uuid.uuid4())},
     )
 
     assert response.status_code == HTTPStatus.OK
@@ -283,7 +326,8 @@ def test_get_add_roles_400(http_con, postgres_con, clear_databases):
     token = get_access_token(http_con)
 
     response = http_con.get(
-        f"{CRUD_URL}roles", headers={"Authorization": token}
+        f"{CRUD_URL}roles",
+        headers={"Authorization": token, "X-request-Id": str(uuid.uuid4())},
     )
 
     assert response.status_code == HTTPStatus.FORBIDDEN

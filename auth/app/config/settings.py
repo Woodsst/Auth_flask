@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     debug: bool = Field(False, env="DEBUG")
     host_app: str = Field("0.0.0.0", env="HOST_APP")
 
+    jaeger_host: str = Field("localhost")
+    jaeger_port: int = Field(6831)
+
     yandex_client_id: str = "5bdb6d7a8bbc4fd9beae90ab0741f54a"
     yandex_client_secret: str = "99863bf05fab4deea5f5c2a7df890c02"
     yandex_baseurl: str = "https://oauth.yandex.ru/"

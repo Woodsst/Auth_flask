@@ -10,4 +10,4 @@ while ! nc -z -v redis 6379; do
 
 cd /auth/app/
 alembic upgrade head
-uwsgi --http 0.0.0.0:5000 --master -p 4 -w wsgi:app
+uwsgi --ini uwsgi.ini

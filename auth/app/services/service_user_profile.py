@@ -2,7 +2,8 @@ from typing import Union, Optional
 
 import werkzeug.exceptions
 
-from jwt_api import get_user_id_from_token
+from core.jaeger_tracer import d_trace
+from core.jwt_api import get_user_id_from_token
 from services.service_base import ServiceBase
 from storages.postgres.db_models import (
     User,
@@ -76,6 +77,7 @@ class ProfileService(ServiceBase):
             return True
         return False
 
+    @d_trace
     def _change_user_email(self, user_id: str, email: str):
         """Запрос в базу для изменения почты клиента"""
 
@@ -84,6 +86,7 @@ class ProfileService(ServiceBase):
         )
         self.orm.session.commit()
 
+    @d_trace
     def _change_user_password(self, user_id, password: str):
         """Запрос в базу для изменения пароля клиента"""
 
@@ -92,6 +95,22 @@ class ProfileService(ServiceBase):
         )
         self.orm.session.commit()
 
+    @d_trace
+    def _get_user_data(self, user_id: str) -> dict:
+        """Получение данных о клиенте"""
+
+        user_data = (
+            self.orm.session.query(User, Role.role)
+            .join(Role)
+            .filter(User.id == user_id)
+            .first()
+        )
+
+        user_data = user_data._asdict()
+
+        return user_data
+
+    @d_trace
     def _get_user_device_history(
         self, user_id: str, page: int, page_size: int
     ) -> Optional[list]:

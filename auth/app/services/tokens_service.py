@@ -14,7 +14,7 @@ from core.responses import (
 from core.schemas.token_schemas import (
     TokenRequest,
 )
-from jwt_api import (
+from core.jwt_api import (
     get_token_time_to_end,
     decode_refresh_token,
     decode_access_token,
