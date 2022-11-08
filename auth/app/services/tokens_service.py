@@ -76,7 +76,7 @@ def token_required(admin=False):
 
             if admin:
                 payload = decode_access_token(token)
-                if int(payload.get("role")) != DefaultRole.ADMIN_KEY.value:
+                if payload.get("role") != DefaultRole.ADMIN.value:
                     return jsonify(ACCESS_DENIED), HTTPStatus.FORBIDDEN
 
             token_time = get_token_time_to_end(token)
