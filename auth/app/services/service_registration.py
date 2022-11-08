@@ -1,7 +1,7 @@
 import uuid
 
 import sqlalchemy.exc
-
+from core.jaeger_tracer import d_trace
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User
 from werkzeug.security import generate_password_hash
@@ -15,6 +15,7 @@ class Registration(ServiceBase):
         user_data["password"] = generate_password_hash(user_data["password"])
         return self.set_user(user_data)
 
+    @d_trace
     def set_user(self, user_data: dict):
         """Добавление данных нового пользователя"""
         try:

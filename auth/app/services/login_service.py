@@ -3,12 +3,13 @@ import uuid
 from flask import Response
 from werkzeug.security import check_password_hash
 
+from core.jaeger_tracer import d_trace
 from core.schemas.login_schemas import LoginPasswordNotMatch, LoginUserNotMatch
 from core.spec_core import (
     RouteResponse,
 )
 from core.responses import USER_NOT_FOUND, PASSWORD_NOT_MATCH
-from jwt_api import get_token_time_to_end, generate_tokens, decode_access_token
+from core.jwt_api import get_token_time_to_end, generate_tokens, decode_access_token
 from services.service_base import ServiceBase
 from storages.postgres.db_models import User, Device, UserDevice
 
@@ -30,6 +31,7 @@ class LoginAPI(ServiceBase):
         except AttributeError:
             return LoginUserNotMatch(result=USER_NOT_FOUND), 401
 
+    @d_trace
     def _set_device(self, device: str, user_id: str):
         """Добавление нового устройства с которого клиент зашел в аккаунт"""
 

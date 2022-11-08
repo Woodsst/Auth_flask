@@ -1,3 +1,5 @@
+import uuid
+
 from ..settings import default_settings
 
 USERS = [
@@ -28,7 +30,8 @@ ADD_ROLE = {"role": "new_role", "description": "new description"}
 
 USER_AGENT = {"user-agent": "python"}
 
-CONTENT_TYPE = {"Content-Type": "application/json"}
+CONTENT_TYPE = {"Content-Type": "application/json",
+                "X-request-Id": str(uuid.uuid4())}
 
 REGISTRATION_URL = (
     f"http://{default_settings.host_app}:"

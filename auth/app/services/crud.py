@@ -1,5 +1,6 @@
 import sqlalchemy.exc
 
+from core.jaeger_tracer import d_trace
 from services.service_base import ServiceBase
 from storages.postgres.db_models import Role, User
 from core.defaultrole import DefaultRole
@@ -10,6 +11,7 @@ class Crud(ServiceBase):
         """Добавление новой роли в базу"""
         return self._create_role(role, description)
 
+    @d_trace
     def _create_role(self, role: str, description: str):
         try:
             role = Role(role=role, description=description)
@@ -25,6 +27,7 @@ class Crud(ServiceBase):
         они получают базовую роль user"""
         return self._delete_role(role)
 
+    @d_trace
     def _delete_role(self, role: str):
         role_id = (
             self.orm.session.query(Role.role_id)
@@ -49,6 +52,7 @@ class Crud(ServiceBase):
         возвращает False"""
         return self._change_role(role, change_for_description, change_for_role)
 
+    @d_trace
     def _change_role(
         self, role: str, change_for_description: str, change_for_role: str
     ) -> bool:
@@ -68,6 +72,7 @@ class Crud(ServiceBase):
         self.orm.session.commit()
         return True
 
+    @d_trace
     def all_role(self) -> dict:
         """Возвращает список всех ролей"""
 
@@ -79,6 +84,7 @@ class Crud(ServiceBase):
         возвращает False"""
         return self._set_user_role(user_id, role)
 
+    @d_trace
     def _set_user_role(self, user_id: str, role: str) -> bool:
         role = (
             self.orm.session.query(Role.role_id)
@@ -99,6 +105,7 @@ class Crud(ServiceBase):
             return False
         return True
 
+    @d_trace
     def get_user_role(self, user_id: str) -> list:
         """Получить роль пользователя"""
 

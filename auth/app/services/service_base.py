@@ -3,6 +3,7 @@ from typing import Optional
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
 
+from core.jaeger_tracer import d_trace
 from storages.db_connect import redis_conn, db
 from storages.postgres.db_models import User
 from storages.redis.redis_api import Redis
@@ -22,6 +23,7 @@ class ServiceBase:
             return True
         return False
 
+    @d_trace
     def get_user_password(self, user_id: str) -> str:
         """Получение пароля клиента из базы данных"""
         return (

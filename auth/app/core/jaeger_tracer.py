@@ -1,3 +1,5 @@
+import functools
+
 from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
@@ -18,3 +20,15 @@ def configure_tracer():
             )
         )
     )
+
+
+tracer = trace.get_tracer(__name__)
+
+
+def d_trace(f):
+    """Декоратор для трассировки"""
+
+    def decor(*args, **kwargs):
+        with tracer.start_as_current_span(f.__name__):
+            return f(*args, **kwargs)
+    return decor

@@ -1,7 +1,7 @@
 from flask import Flask, request
 
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from jaeger_tracer import configure_tracer
+from core.jaeger_tracer import configure_tracer
 
 configure_tracer()
 
@@ -23,7 +23,7 @@ from api.v1.login import login_page
 from api.v1.profile import profile
 from api.v1.registration import registration_page
 from api.v1.tokens_work import tokens_work
-from superuser import add_admin
+from core.superuser import add_admin
 
 app.register_blueprint(tokens_work)
 app.register_blueprint(registration_page)
