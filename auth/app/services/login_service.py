@@ -28,10 +28,11 @@ class LoginAPI(ServiceBase):
 
         try:
             user = User.query.filter_by(login=login).first()
+            user_data = self._get_user_data(user.id)
             if check_password_hash(user.password, password):
                 payload = {
                     "id": str(user.id),
-                    "role": str(user.role),
+                    "role": str(user_data.get("role")),
                 }
                 self._set_device(user_agent, user.id)
                 return RouteResponse(result=generate_tokens(payload))

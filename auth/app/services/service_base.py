@@ -7,7 +7,7 @@ from werkzeug.security import check_password_hash
 
 from core.defaultrole import DefaultRole
 from storages.db_connect import redis_conn, db
-from storages.postgres.db_models import User, Social, UserSocial
+from storages.postgres.db_models import User, Social, UserSocial, Role
 from storages.redis.redis_api import Redis
 
 
@@ -32,6 +32,20 @@ class ServiceBase:
             .filter(User.id == user_id)
             .first()
         )[0]
+
+    def _get_user_data(self, user_id: str) -> dict:
+        """Получение данных о клиенте"""
+
+        user_data = (
+            self.orm.session.query(User, Role.role)
+            .join(Role)
+            .filter(User.id == user_id)
+            .first()
+        )
+
+        user_data = user_data._asdict()
+
+        return user_data
 
     def _set_user(self, user_data: dict):
         """Добавление данных нового пользователя"""
