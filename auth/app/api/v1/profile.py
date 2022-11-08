@@ -1,15 +1,23 @@
 from http import HTTPStatus
 
 from config.limiter import limiter
-from core.responses import (EMAIL_CHANGE, PASSWORD_CHANGE, PASSWORD_NOT_MATCH,
-                            PASSWORDS_EQUALS)
-from core.schemas.profile_schemas import (DeviceRequest, DeviceResponse,
-                                          EmailChangeReqeust,
-                                          EmailChangeResponse,
-                                          PasswordChangeReqeust,
-                                          PasswordChangeResponse,
-                                          PasswordEquals, PasswordNotMatch,
-                                          ProfileResponse)
+from core.responses import (
+    EMAIL_CHANGE,
+    PASSWORD_CHANGE,
+    PASSWORD_NOT_MATCH,
+    PASSWORDS_EQUALS,
+)
+from core.schemas.profile_schemas import (
+    DeviceRequest,
+    DeviceResponse,
+    EmailChangeReqeust,
+    EmailChangeResponse,
+    PasswordChangeReqeust,
+    PasswordChangeResponse,
+    PasswordEquals,
+    PasswordNotMatch,
+    ProfileResponse,
+)
 from core.spec_core import spec
 from flask import Blueprint, request
 from services.service_user_profile import profile_service

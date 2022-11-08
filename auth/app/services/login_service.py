@@ -13,7 +13,7 @@ from core.spec_core import (
     RouteResponse,
 )
 from core.responses import USER_NOT_FOUND, PASSWORD_NOT_MATCH
-from jwt_api import (
+from core.jwt_api import (
     get_token_time_to_end,
     generate_tokens,
     decode_access_token,

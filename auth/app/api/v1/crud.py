@@ -1,13 +1,24 @@
 from http import HTTPStatus
 
-from core.responses import (BAD_REQUEST, DEFAULT_ROLE_NOT_DELETE, ROLE_CHANGE,
-                            ROLE_CREATE, ROLE_DELETE, ROLE_EXISTS,
-                            ROLE_NOT_EXIST)
-from core.schemas.crud_schemas import (AddRoleExist, AddRoleRequest,
-                                       ChangeRoleRequest,
-                                       DeleteRoleDefaultRole,
-                                       DeleteRoleNotExist, DeleteRoleRequest,
-                                       RoleResponse, UserRoleRequest)
+from core.responses import (
+    BAD_REQUEST,
+    DEFAULT_ROLE_NOT_DELETE,
+    ROLE_CHANGE,
+    ROLE_CREATE,
+    ROLE_DELETE,
+    ROLE_EXISTS,
+    ROLE_NOT_EXIST,
+)
+from core.schemas.crud_schemas import (
+    AddRoleExist,
+    AddRoleRequest,
+    ChangeRoleRequest,
+    DeleteRoleDefaultRole,
+    DeleteRoleNotExist,
+    DeleteRoleRequest,
+    RoleResponse,
+    UserRoleRequest,
+)
 from core.spec_core import RouteResponse, spec
 from flask import Blueprint, request
 from services.crud import DefaultRole, crud

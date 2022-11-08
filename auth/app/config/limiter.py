@@ -12,8 +12,10 @@ limiter: Optional[Limiter] = None
 def limiter_init(app: Flask):
     global limiter
     limiter = Limiter(
-        app, key_func=get_remote_address,
-        storage_uri=(f"redis://{settings.redis_host}:"
-                     f"{settings.redis_port}"),
+        app,
+        key_func=get_remote_address,
+        storage_uri=(
+            f"redis://{settings.redis_host}:" f"{settings.redis_port}"
+        ),
         strategy="fixed-window",
     )

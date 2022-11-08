@@ -6,8 +6,11 @@ from flask import redirect
 from config.settings import settings
 from config.limiter import limiter
 from core.responses import LOGOUT, TOKEN_WRONG_FORMAT
-from core.schemas.login_schemas import (LoginPasswordNotMatch, LoginRequest,
-                                        LoginUserNotMatch)
+from core.schemas.login_schemas import (
+    LoginPasswordNotMatch,
+    LoginRequest,
+    LoginUserNotMatch,
+)
 from core.spec_core import RouteResponse, spec
 from flask import Blueprint, request
 from services.login_service import login_api

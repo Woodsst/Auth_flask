@@ -9,6 +9,7 @@ from storages.postgres.db_models import (
     User,
     Device,
     UserDevice,
+    Role,
 )
 from werkzeug.security import generate_password_hash
 

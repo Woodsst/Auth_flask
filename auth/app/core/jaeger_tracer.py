@@ -3,7 +3,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-from config.settings import default_settings
+from config.settings import settings
 
 
 def configure_tracer():
@@ -13,8 +13,8 @@ def configure_tracer():
     trace.get_tracer_provider().add_span_processor(
         BatchSpanProcessor(
             JaegerExporter(
-                agent_host_name=default_settings.jaeger_host,
-                agent_port=default_settings.jaeger_port,
+                agent_host_name=settings.jaeger_host,
+                agent_port=settings.jaeger_port,
             )
         )
     )
