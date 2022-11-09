@@ -23,3 +23,6 @@ opentelemetry-instrumentation-flask==0.35b0
 opentelemetry-exporter-jaeger==1.14.0
 requests==2.28.1
 Flask-Limiter==2.7.0
+ua-parser==0.16.1
+user-agents==2.2.0
+Flask-JWT-Extended==4.4.4

@@ -44,7 +44,3 @@ def create_admin():
     email = input("Email:")
 
     add_admin(login, password, email)
-
-
-if __name__ == "__main__":
-    app.run()
