@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask
 
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from core.jaeger_tracer import configure_tracer
@@ -33,13 +33,6 @@ app.register_blueprint(registration_page)
 app.register_blueprint(login_page)
 app.register_blueprint(profile)
 app.register_blueprint(crud_pages)
-
-
-@app.before_request
-def before_request():
-    request_id = request.headers.get("X-Request-Id")
-    if not request_id:
-        raise RuntimeError("request id is required")
 
 
 @app.cli.command("createadmin")

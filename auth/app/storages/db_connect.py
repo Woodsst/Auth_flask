@@ -21,7 +21,7 @@ def postgres_init(app: Flask):
 def redis_init():
     global redis_conn
     redis_conn = Redis(
-        host=settings.redis_host,
-        port=settings.redis_port,
+        host=settings.redis.host,
+        port=settings.redis.port,
         db=0,
     )

@@ -113,11 +113,11 @@ class LoginAPI(ServiceBase):
         data = {
             "grant_type": "authorization_code",
             "code": code,
-            "client_id": settings.yandex_client_id,
-            "client_secret": settings.yandex_client_secret,
+            "client_id": settings.yandex.client_id,
+            "client_secret": settings.yandex.client_secret,
         }
         data = urlencode(data)
-        tokens = post(f"{settings.yandex_baseurl}token", data)
+        tokens = post(f"{settings.yandex.baseurl}token", data)
         tokens = tokens.json()
         return tokens
 
