@@ -23,6 +23,7 @@ from flask import Blueprint, request
 from services.service_user_profile import profile_service
 from services.tokens_service import token_required
 from spectree import Response
+from flask_jwt_extended import get_jwt_identity
 
 profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
 
@@ -119,3 +120,18 @@ def change_user_password():
     if profile_service().change_password(token[1], password, new_password):
         return PasswordChangeResponse(result=PASSWORD_CHANGE), HTTPStatus.OK
     return PasswordNotMatch(result=PASSWORD_NOT_MATCH), HTTPStatus.FORBIDDEN
+
+
+@profile.route("/login/history", methods=["GET"])
+@token_required()
+@limiter.limit("10/second", override_defaults=False)
+# @spec.validate(
+#     resp=Response(HTTP_200=ProfileResponse),
+#     tags=["Profile"],
+#     security={"apiKey": []},
+# )
+def user_login_history():
+    """Ендпоинт для запроса данных пользователя"""
+    user_id: str = get_jwt_identity()
+    data = profile_service()._get_user_signin_history(user_id)
+    return ProfileResponse(data)

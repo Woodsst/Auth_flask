@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask
 
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from core.jaeger_tracer import configure_tracer
@@ -35,13 +35,6 @@ app.register_blueprint(profile)
 app.register_blueprint(crud_pages)
 
 
-@app.before_request
-def before_request():
-    request_id = request.headers.get("X-Request-Id")
-    if not request_id:
-        raise RuntimeError("request id is required")
-
-
 @app.cli.command("createadmin")
 def create_admin():
     """Команда для добавления пользователя с ролью администратора"""
@@ -51,3 +44,7 @@ def create_admin():
     email = input("Email:")
 
     add_admin(login, password, email)
+
+
+if __name__ == "__main__":
+    app.run()

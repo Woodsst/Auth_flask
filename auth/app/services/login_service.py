@@ -20,11 +20,17 @@ from core.jwt_api import (
     decode_yandex_jwt,
 )
 from services.service_base import ServiceBase
-from storages.postgres.db_models import User, Device, UserDevice
+from storages.postgres.db_models import User, Device, UserDevice, UserSignIn
 
 
 class LoginAPI(ServiceBase):
-    def login(self, login: str, password: str, user_agent: str) -> Response:
+    def login(
+            self,
+            login: str,
+            password: str,
+            user_agent: str,
+            is_pc: bool
+    ) -> Response:
         """Проверка введенных данных пользователя"""
 
         try:
@@ -36,6 +42,7 @@ class LoginAPI(ServiceBase):
                     "role": str(user_data.get("role")),
                 }
                 self._set_device(user_agent, user.id)
+                self._set_user_signin(user.id, is_pc, user_agent)
                 return RouteResponse(result=generate_tokens(payload))
             return (
                 LoginPasswordNotMatch(result=PASSWORD_NOT_MATCH),
@@ -56,6 +63,20 @@ class LoginAPI(ServiceBase):
         user_device = UserDevice(device_id=id, user_id=user_id)
         self.orm.session.add(device)
         self.orm.session.add(user_device)
+        self.orm.session.commit()
+
+    def _set_user_signin(self, user_id: str, is_pc: bool, user_agent: str):
+        """Добавляет информацию о входе пользователя"""
+        if is_pc is True:
+            device_type = 'pc'
+        else:
+            device_type = 'mobile'
+        user_signin = UserSignIn(
+            user_id=user_id,
+            user_agent=user_agent,
+            user_device_type=device_type)
+
+        self.orm.session.add(user_signin)
         self.orm.session.commit()
 
     def logout(self, access_token: str):

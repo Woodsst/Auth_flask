@@ -9,7 +9,7 @@ from storages.postgres.db_models import (
     User,
     Device,
     UserDevice,
-    Role,
+    Role, UserSignIn,
 )
 from werkzeug.security import generate_password_hash
 
@@ -126,6 +126,17 @@ class ProfileService(ServiceBase):
                 .paginate(page=page, per_page=page_size, count=False)
             )
             return device_history
+        except werkzeug.exceptions.NotFound:
+            return
+
+    @d_trace
+    def _get_user_signin_history(self, user_id: str) -> Optional[list]:
+        """Получение истории входов пользователя"""
+        try:
+            signin_history = (
+                self.orm.session.query(
+                    UserSignIn).filter(User.id == user_id).first())
+            return signin_history
         except werkzeug.exceptions.NotFound:
             return
 

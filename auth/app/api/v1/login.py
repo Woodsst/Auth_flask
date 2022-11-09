@@ -16,6 +16,7 @@ from flask import Blueprint, request
 from services.login_service import login_api
 from services.tokens_service import token_required
 from spectree import Response
+from user_agents import parse
 
 login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
 
@@ -34,11 +35,13 @@ login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
 def login_user():
     """Обмен логина пароля на пару токенов access refresh"""
 
+    ua_string = request.headers.get('User-Agent')
+    is_pc = parse(ua_string).is_pc
     user_agent = request.user_agent.string
     login = request.get_json().get("login")
     password = request.get_json().get("password")
 
-    response = login_api().login(login, password, user_agent)
+    response = login_api().login(login, password, user_agent, is_pc)
     return response
 
 

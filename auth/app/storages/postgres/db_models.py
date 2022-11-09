@@ -1,6 +1,9 @@
 import datetime
 import uuid
 from copy import copy
+import datetime
+from sqlalchemy import UniqueConstraint
+
 
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -85,3 +88,33 @@ class Role(db.Model):
     role_id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.String, nullable=False, unique=True)
     description = db.Column(db.String, nullable=False)
+
+
+def create_partition(target, connection, **kw) -> None:
+    """ creating partition by user_sign_in """
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "user_sign_in_pc" PARTITION OF "users_sign_in" FOR VALUES IN ('pc')"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "user_sign_in_mobile" PARTITION OF "users_sign_in" FOR VALUES IN ('mobile')"""
+    )
+
+
+class UserSignIn(db.Model):
+    __tablename__ = 'users_sign_in'
+    __table_args__ = (
+        UniqueConstraint('id', 'user_device_type'),
+        {
+            'postgresql_partition_by': 'LIST (user_device_type)',
+            'listeners': [('after_create', create_partition)],
+        }
+    )
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'))
+    logged_in_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    user_agent = db.Column(db.Text)
+    user_device_type = db.Column(db.Text, primary_key=True)
+
+    def __repr__(self):
+        return f'<UserSignIn {self.user_id}:{self.logged_in_at }>'
