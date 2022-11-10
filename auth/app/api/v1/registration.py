@@ -9,7 +9,7 @@ from core.schemas.registration_schemas import (
 )
 from core.spec_core import RouteResponse, spec
 from flask import Blueprint, request
-from services.service_registration import registration_api
+from services.service_registration import registration_api, Registration
 from spectree import Response
 
 registration_page = Blueprint(
@@ -24,11 +24,11 @@ registration_page = Blueprint(
     resp=Response(HTTP_201=RouteResponse, HTTP_409=RegistrationFailed),
     tags=["Registration"],
 )
-def registration_user():
+def registration_user(service: Registration = registration_api()):
     """Ендпоинт регистрации клиента, принимает POST запрос с данными клиента
     в теле запроса"""
     user_data = json.loads(request.data)
-    response = registration_api().registration(user_data)
+    response = service.registration(user_data)
 
     if response:
         return RouteResponse(result=REGISTRATION_COMPLETE), HTTPStatus.CREATED

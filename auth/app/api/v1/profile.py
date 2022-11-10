@@ -20,7 +20,7 @@ from core.schemas.profile_schemas import (
 )
 from core.spec_core import spec
 from flask import Blueprint, request
-from services.service_user_profile import profile_service
+from services.service_user_profile import profile_service, ProfileService
 from services.tokens_service import token_required
 from spectree import Response
 
@@ -38,7 +38,7 @@ profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
     ),
     security={"apiKey": []},
 )
-def user_device_history():
+def user_device_history(service: ProfileService = profile_service()):
     """Ендпоинт для запроса истории девайсов с которых была авторизация"""
 
     token = request.headers.get("Authorization").split(" ")
@@ -50,7 +50,7 @@ def user_device_history():
     if page_size is None:
         page_size = 20
     page_size = int(page_size)
-    user_devices_data = profile_service().get_devices_user_history(
+    user_devices_data = service.get_devices_user_history(
         token[1], page, page_size
     )
     return DeviceResponse(history=user_devices_data)
@@ -64,11 +64,11 @@ def user_device_history():
     tags=["Profile"],
     security={"apiKey": []},
 )
-def user_full_information():
+def user_full_information(service: ProfileService = profile_service()):
     """Ендпоинт для запроса данных пользователя"""
     token = request.headers.get("Authorization").split(" ")
 
-    user_data = profile_service().get_all_user_info(token[1])
+    user_data = service.get_all_user_info(token[1])
     return ProfileResponse(**user_data)
 
 
@@ -83,12 +83,12 @@ def user_full_information():
     tags=["Profile"],
     security={"apiKey": []},
 )
-def change_user_email():
+def change_user_email(service: ProfileService = profile_service()):
     """Ендпоинт для изменения почтового адреса пользователя"""
 
     new_email = request.get_json().get("new_email")
     token = request.headers.get("Authorization").split(" ")
-    profile_service().change_email(token[1], new_email)
+    service.change_email(token[1], new_email)
     return EmailChangeResponse(result=EMAIL_CHANGE), HTTPStatus.OK
 
 
@@ -105,7 +105,7 @@ def change_user_email():
     tags=["Profile"],
     security={"apiKey": []},
 )
-def change_user_password():
+def change_user_password(service: ProfileService = profile_service()):
     """Ендпоинт для изменения пароля пользователя"""
 
     user_data = request.get_json()
@@ -116,6 +116,6 @@ def change_user_password():
         return PasswordEquals(result=PASSWORDS_EQUALS), HTTPStatus.BAD_REQUEST
 
     token = request.headers.get("Authorization").split(" ")
-    if profile_service().change_password(token[1], password, new_password):
+    if service.change_password(token[1], password, new_password):
         return PasswordChangeResponse(result=PASSWORD_CHANGE), HTTPStatus.OK
     return PasswordNotMatch(result=PASSWORD_NOT_MATCH), HTTPStatus.FORBIDDEN

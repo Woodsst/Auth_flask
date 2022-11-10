@@ -4,6 +4,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from config.settings import settings
+from flask import request
 
 
 def configure_tracer():
@@ -27,7 +28,9 @@ def d_trace(f):
     """Декоратор для трассировки"""
 
     def decor(*args, **kwargs):
-        with tracer.start_as_current_span(f.__name__):
-            return f(*args, **kwargs)
+        r_id = request.headers.get("X-Request-Id")
+        with tracer.start_as_current_span(f.__name__) as span:
+            span.set_attribute("request.id", r_id)
+        return f(*args, **kwargs)
 
     return decor

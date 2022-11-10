@@ -35,6 +35,7 @@ class ServiceBase:
             .first()
         )[0]
 
+    @d_trace
     def _get_user_data(self, user_id: str) -> dict:
         """Получение данных о клиенте"""
 
@@ -49,6 +50,7 @@ class ServiceBase:
 
         return user_data
 
+    @d_trace
     def _set_user(self, user_data: dict):
         """Добавление данных нового пользователя"""
         try:
@@ -67,6 +69,7 @@ class ServiceBase:
             return False
         return True
 
+    @d_trace
     def _set_social(self, login: str, social_name: str, social_url: str):
         user_id = User.query.filter_by(login=login).first()
         id = uuid.uuid4()

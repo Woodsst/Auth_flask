@@ -21,7 +21,7 @@ from core.schemas.crud_schemas import (
 )
 from core.spec_core import RouteResponse, spec
 from flask import Blueprint, request
-from services.crud import DefaultRole, crud
+from services.crud import DefaultRole, crud, Crud
 from services.tokens_service import token_required
 from spectree import Response
 
@@ -36,13 +36,13 @@ crud_pages = Blueprint("crud_pages", __name__, url_prefix="/api/v1/crud")
     tags=["CRUD"],
     security={"apiKey": []},
 )
-def add_role():
+def add_role(service: Crud = crud()):
     """Ендпоинт добавления роли, доступ только у администратора"""
 
     role = request.get_json().get("role")
     description = request.get_json().get("description")
 
-    if crud().add_role(role, description):
+    if service.add_role(role, description):
         return RouteResponse(result=ROLE_CREATE)
     return AddRoleExist(result=ROLE_EXISTS), HTTPStatus.BAD_REQUEST
 
@@ -59,7 +59,7 @@ def add_role():
     tags=["CRUD"],
     security={"apiKey": []},
 )
-def delete_role():
+def delete_role(service: Crud = crud()):
     """Удаление роли, если были пользователи с удаляемой ролью, они получают
     стандартную роль User"""
 
@@ -71,7 +71,7 @@ def delete_role():
             HTTPStatus.CONFLICT,
         )
 
-    if crud().delete_role(role):
+    if service.delete_role(role):
         return RouteResponse(result=ROLE_DELETE)
 
     return DeleteRoleNotExist(result=ROLE_NOT_EXIST), HTTPStatus.BAD_REQUEST
@@ -89,7 +89,7 @@ def delete_role():
     tags=["CRUD"],
     security={"apiKey": []},
 )
-def change_role():
+def change_role(service: Crud = crud()):
     """Изменение роли или описания роли, изменить можно как только роль
     так и только описание"""
 
@@ -114,7 +114,7 @@ def change_role():
             HTTPStatus.CONFLICT,
         )
 
-    if crud().change_role(role, change_for_description, change_for_role):
+    if service.change_role(role, change_for_description, change_for_role):
         return RouteResponse(result=ROLE_CHANGE)
 
     return DeleteRoleNotExist(result=ROLE_NOT_EXIST), HTTPStatus.BAD_REQUEST
@@ -127,9 +127,9 @@ def change_role():
     security={"apiKey": []},
     resp=Response(HTTP_200=RoleResponse),
 )
-def get_roles():
+def get_roles(service: Crud = crud()):
     """Получение всех возможных ролей и их индексов"""
-    roles = crud().all_role()
+    roles = service.all_role()
     return RoleResponse(roles=roles)
 
 
@@ -141,13 +141,13 @@ def get_roles():
     tags=["CRUD"],
     security={"apiKey": []},
 )
-def set_user_role():
+def set_user_role(service: Crud = crud()):
     """Назначить пользователю роль, задает любую из возможных ролей"""
     request_data = request.get_json()
     user_id = request_data.get("user_id")
     role = request_data.get("role")
 
-    if crud().set_user_role(user_id, role):
+    if service.set_user_role(user_id, role):
         return RouteResponse(result=ROLE_CHANGE)
 
     return RouteResponse(result=BAD_REQUEST), HTTPStatus.BAD_REQUEST

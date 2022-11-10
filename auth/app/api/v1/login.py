@@ -13,7 +13,7 @@ from core.schemas.login_schemas import (
 )
 from core.spec_core import RouteResponse, spec
 from flask import Blueprint, request
-from services.login_service import login_api
+from services.login_service import login_api, LoginAPI
 from services.tokens_service import token_required
 from spectree import Response
 
@@ -31,14 +31,14 @@ login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
     ),
     tags=["Login"],
 )
-def login_user():
+def login_user(service: LoginAPI = login_api()):
     """Обмен логина пароля на пару токенов access refresh"""
 
     user_agent = request.user_agent.string
     login = request.get_json().get("login")
     password = request.get_json().get("password")
 
-    response = login_api().login(login, password, user_agent)
+    response = service.login(login, password, user_agent)
     return response
 
 
@@ -52,14 +52,12 @@ def yandex_oauth():
 
 @login_page.route("/oauth", methods=["GET"])
 @spec.validate(resp=Response(HTTP_200=RouteResponse), tags=["Login"])
-def oauth():
+def oauth(service: LoginAPI = login_api()):
     """Аутентификация или регистрация пользователя через yandex"""
 
     code = request.url.split("=")
-    tokens = login_api().get_tokens(code[1])
-    result = login_api().oauth(
-        tokens=tokens, user_agent=request.user_agent.string
-    )
+    tokens = service.get_tokens(code[1])
+    result = service.oauth(tokens=tokens, user_agent=request.user_agent.string)
     return result
 
 
@@ -71,11 +69,11 @@ def oauth():
     tags=["Login"],
     security={"apiKey": []},
 )
-def logout_user():
+def logout_user(service: LoginAPI = login_api()):
     """Логаут пользователя, вносит действующие токены в невалидные"""
 
     access_token = request.headers.get("Authorization").split(" ")
-    if login_api().logout(access_token[1]):
+    if service.logout(access_token[1]):
         return RouteResponse(result=LOGOUT), HTTPStatus.OK
 
     return RouteResponse(result=TOKEN_WRONG_FORMAT), HTTPStatus.BAD_REQUEST

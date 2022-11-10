@@ -9,7 +9,6 @@ from storages.postgres.db_models import (
     User,
     Device,
     UserDevice,
-    Role,
 )
 from werkzeug.security import generate_password_hash
 
@@ -95,21 +94,6 @@ class ProfileService(ServiceBase):
             {"password": password}, synchronize_session="fetch"
         )
         self.orm.session.commit()
-
-    @d_trace
-    def _get_user_data(self, user_id: str) -> dict:
-        """Получение данных о клиенте"""
-
-        user_data = (
-            self.orm.session.query(User, Role.role)
-            .join(Role)
-            .filter(User.id == user_id)
-            .first()
-        )
-
-        user_data = user_data._asdict()
-
-        return user_data
 
     @d_trace
     def _get_user_device_history(
