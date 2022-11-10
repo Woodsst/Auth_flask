@@ -38,7 +38,7 @@ class Yandex(BaseSettings):
         "https://oauth.yandex.ru/authorize?"
         "response_type=code"
         "&client_id=5bdb6d7a8bbc4fd9beae90ab0741f54a"
-        "&redirect_uri=http://localhost:5000/api/v1/oauth"
+        "&redirect_uri=http://localhost/api/v1/oauth"
         "&scope=login:email login:info"
     )
 
