@@ -1,17 +1,13 @@
-from typing import Union, Optional
+from typing import Optional, Union
 
 import werkzeug.exceptions
-
 from core.jaeger_tracer import d_trace
 from core.jwt_api import get_user_id_from_token
-from services.service_base import ServiceBase
-from storages.postgres.db_models import (
-    User,
-    Device,
-    UserDevice,
-    Role, UserSignIn,
-)
+from storages.postgres.db_models import (Device, LoginHistory, Role, User,
+                                         UserDevice)
 from werkzeug.security import generate_password_hash
+
+from services.service_base import ServiceBase
 
 
 class ProfileService(ServiceBase):
@@ -46,6 +42,31 @@ class ProfileService(ServiceBase):
             history = self._format_devices_history(raw_history)
             return history
         return []
+
+    def get_user_login_history(
+        self, token: str, page: int, page_size: int
+    ) -> Union[dict, list]:
+        """Получение устройств с которых входили в профиль"""
+
+        user_id = get_user_id_from_token(token)
+        raw_login_history_class = self._get_user_login_history(
+            user_id, page, page_size
+        )
+        if raw_login_history_class is not None:
+            return self._format_user_login_history(raw_login_history_class)
+        return []
+
+    @staticmethod
+    def _format_user_login_history(raw_login_history_class: list) -> dict:
+        """Форматирование данных истории входов пользователя"""
+        login_history_list = []
+        for item in raw_login_history_class:
+            login_history_dict = item.to_dict()
+            login_history_dict['device_type'] = item.device_type.value
+            del login_history_dict['event_type']
+            del login_history_dict['id']
+            login_history_list.append(login_history_dict)
+        return login_history_list
 
     @staticmethod
     def _format_devices_history(raw_history: list) -> dict:
@@ -130,13 +151,17 @@ class ProfileService(ServiceBase):
             return
 
     @d_trace
-    def _get_user_signin_history(self, user_id: str) -> Optional[list]:
+    def _get_user_login_history(
+            self, user_id: str, page: int, page_size: int
+    ) -> Optional[list]:
         """Получение истории входов пользователя"""
         try:
-            signin_history = (
-                self.orm.session.query(
-                    UserSignIn).filter(User.id == user_id).first())
-            return signin_history
+            login_history = (
+                self.orm.session.query(LoginHistory).filter(
+                    User.id == user_id
+                ).paginate(page=page, per_page=page_size, count=False)
+            )
+            return login_history
         except werkzeug.exceptions.NotFound:
             return
 

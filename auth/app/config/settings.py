@@ -33,6 +33,7 @@ class Settings(BaseSettings):
         "&redirect_uri=http://localhost:5000/api/v1/oauth"
         "&scope=login:email login:info"
     )
+    get_ip = 'http://httpbin.org/ip'
 
 
 settings = Settings()

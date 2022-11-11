@@ -1,18 +1,13 @@
 from http import HTTPStatus
 
-from flask import redirect
-
-
-from config.settings import settings
+import requests as requests
 from config.limiter import limiter
+from config.settings import settings
 from core.responses import LOGOUT, TOKEN_WRONG_FORMAT
-from core.schemas.login_schemas import (
-    LoginPasswordNotMatch,
-    LoginRequest,
-    LoginUserNotMatch,
-)
+from core.schemas.login_schemas import (LoginPasswordNotMatch, LoginRequest,
+                                        LoginUserNotMatch)
 from core.spec_core import RouteResponse, spec
-from flask import Blueprint, request
+from flask import Blueprint, redirect, request
 from services.login_service import login_api
 from services.tokens_service import token_required
 from spectree import Response
@@ -38,10 +33,11 @@ def login_user():
     ua_string = request.headers.get('User-Agent')
     is_pc = parse(ua_string).is_pc
     user_agent = request.user_agent.string
+    login_ip = requests.get(settings.get_ip).json()['origin']
     login = request.get_json().get("login")
     password = request.get_json().get("password")
 
-    response = login_api().login(login, password, user_agent, is_pc)
+    response = login_api().login(login, password, user_agent, is_pc, login_ip)
     return response
 
 

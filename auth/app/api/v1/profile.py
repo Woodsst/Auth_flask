@@ -1,29 +1,22 @@
 from http import HTTPStatus
 
 from config.limiter import limiter
-from core.responses import (
-    EMAIL_CHANGE,
-    PASSWORD_CHANGE,
-    PASSWORD_NOT_MATCH,
-    PASSWORDS_EQUALS,
-)
-from core.schemas.profile_schemas import (
-    DeviceRequest,
-    DeviceResponse,
-    EmailChangeReqeust,
-    EmailChangeResponse,
-    PasswordChangeReqeust,
-    PasswordChangeResponse,
-    PasswordEquals,
-    PasswordNotMatch,
-    ProfileResponse,
-)
+from core.responses import (EMAIL_CHANGE, PASSWORD_CHANGE, PASSWORD_NOT_MATCH,
+                            PASSWORDS_EQUALS)
+from core.schemas.profile_schemas import (DeviceRequest, DeviceResponse,
+                                          EmailChangeReqeust,
+                                          EmailChangeResponse,
+                                          PasswordChangeReqeust,
+                                          PasswordChangeResponse,
+                                          PasswordEquals, PasswordNotMatch,
+                                          ProfileResponse,
+                                          UserLoginHistoryDeviceRequest,
+                                          UserLoginHistoryDeviceResponse)
 from core.spec_core import spec
 from flask import Blueprint, request
 from services.service_user_profile import profile_service
 from services.tokens_service import token_required
 from spectree import Response
-from flask_jwt_extended import get_jwt_identity
 
 profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
 
@@ -125,13 +118,24 @@ def change_user_password():
 @profile.route("/login/history", methods=["GET"])
 @token_required()
 @limiter.limit("10/second", override_defaults=False)
-# @spec.validate(
-#     resp=Response(HTTP_200=ProfileResponse),
-#     tags=["Profile"],
-#     security={"apiKey": []},
-# )
+@spec.validate(
+    query=UserLoginHistoryDeviceRequest,
+    resp=Response(HTTP_200=UserLoginHistoryDeviceResponse),
+    tags=["Profile"],
+    security={"apiKey": []},
+)
 def user_login_history():
     """Ендпоинт для запроса данных пользователя"""
-    user_id: str = get_jwt_identity()
-    data = profile_service()._get_user_signin_history(user_id)
-    return ProfileResponse(data)
+    token = request.headers.get("Authorization").split(" ")[1]
+    page = request.args.get("page")
+    page_size = request.args.get("page_size")
+    if page is None:
+        page = 1
+    page = int(page)
+    if page_size is None:
+        page_size = 20
+    page_size = int(page_size)
+    login_history = profile_service().get_user_login_history(
+        token, page, page_size
+    )
+    return UserLoginHistoryDeviceResponse(login_history=login_history)

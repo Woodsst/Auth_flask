@@ -60,6 +60,41 @@ class DeviceResponse(BaseModel):
         }
 
 
+class UserLoginHistoryDeviceRequest(BaseModel):
+    """Схема запроса истории входов пользователя"""
+
+    page: Optional[conint(gt=0)] = None
+    page_size: Optional[conint(gt=0)] = None
+
+
+class UserLoginHistoryDeviceResponse(BaseModel):
+    """Схема ответа при запросе истории входов пользователя"""
+
+    login_history: list[dict]
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "login_history": [
+                    {
+                        "user_id": "de644bc4-6e2c-4b61-88f4-22ca767b448f",
+                        "created_at": "2022-11-10 20:46:16.167442",
+                        "device_type": "mobile",
+                        "user_agent": "PostmanRuntime/7.29.2",
+                        "login_ip": "'146.120.78.61'",
+                    },
+                    {
+                        "user_id": "de644bc4-6e2c-4b61-88f4-22ca767b448f",
+                        "created_at": "2022-11-10 20:46:16.167442",
+                        "device_type": "mobile",
+                        "user_agent": "PostmanRuntime/7.29.2",
+                        "login_ip": "'146.120.78.61'",
+                    },
+                ]
+            }
+        }
+
+
 class EmailChangeReqeust(BaseModel):
     """Схема запроса для изменения почтового адреса пользователя"""
 
