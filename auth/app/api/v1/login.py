@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from flask import redirect
-
+import requests
 
 from config.settings import settings
 from config.limiter import limiter
@@ -16,6 +16,7 @@ from flask import Blueprint, request
 from services.login_service import login_api, LoginAPI
 from services.tokens_service import token_required
 from spectree import Response
+from user_agents import parse
 
 login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
 
@@ -34,11 +35,14 @@ login_page = Blueprint("login_page", __name__, url_prefix="/api/v1")
 def login_user(service: LoginAPI = login_api()):
     """Обмен логина пароля на пару токенов access refresh"""
 
+    ua_string = request.headers.get("User-Agent")
+    is_pc = parse(ua_string).is_pc
     user_agent = request.user_agent.string
+    login_ip = requests.get(settings.get_ip).json()["origin"]
     login = request.get_json().get("login")
     password = request.get_json().get("password")
 
-    response = service.login(login, password, user_agent)
+    response = service.login(login, password, user_agent, is_pc, login_ip)
     return response
 
 
@@ -55,9 +59,17 @@ def yandex_oauth():
 def oauth(service: LoginAPI = login_api()):
     """Аутентификация или регистрация пользователя через yandex"""
 
+    ua_string = request.headers.get("User-Agent")
+    is_pc = parse(ua_string).is_pc
+    login_ip = requests.get(settings.get_ip).json()["origin"]
     code = request.url.split("=")
     tokens = service.get_tokens(code[1])
-    result = service.oauth(tokens=tokens, user_agent=request.user_agent.string)
+    result = service.oauth(
+        tokens=tokens,
+        user_agent=request.user_agent.string,
+        is_pc=is_pc,
+        login_ip=login_ip,
+    )
     return result
 
 

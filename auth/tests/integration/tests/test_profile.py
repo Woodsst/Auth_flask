@@ -52,7 +52,7 @@ def test_profile_devices_200(http_con, clear_databases):
     при запросе устройств с которых был вход в профиль"""
     access_token = get_access_token(http_con)
     response = http_con.get(
-        f"{PROFILE_URL}devices?page=1&page_size=3",
+        f"{PROFILE_URL}login/history?page=1&page_size=3",
         headers={
             "Authorization": access_token,
             "Content-Type": "application/json",
@@ -62,20 +62,20 @@ def test_profile_devices_200(http_con, clear_databases):
 
     assert response.status_code == HTTPStatus.OK
 
-    response_data = response.json().get("history")
+    response_data = response.json().get("login_history")
 
     assert isinstance(response_data, list)
     first_device = response_data[0]
     assert isinstance(first_device, dict)
-    assert len(first_device) == 2
-    assert first_device.get("device") == "python-requests/2.28.1"
+    assert len(first_device) == 5
+    assert first_device.get("user_agent") == "python-requests/2.28.1"
 
 
 def test_profile_devices_422(http_con, clear_databases):
     """Проверка доступа к получению устройств в профиле"""
     access_token = "bad token"
     response = http_con.get(
-        f"{PROFILE_URL}devices",
+        f"{PROFILE_URL}login/history",
         headers={
             "Authorization": access_token,
             "X-request-Id": str(uuid.uuid4()),

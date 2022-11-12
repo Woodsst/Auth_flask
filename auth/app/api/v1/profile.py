@@ -8,8 +8,6 @@ from core.responses import (
     PASSWORDS_EQUALS,
 )
 from core.schemas.profile_schemas import (
-    DeviceRequest,
-    DeviceResponse,
     EmailChangeReqeust,
     EmailChangeResponse,
     PasswordChangeReqeust,
@@ -17,6 +15,8 @@ from core.schemas.profile_schemas import (
     PasswordEquals,
     PasswordNotMatch,
     ProfileResponse,
+    UserLoginHistoryDeviceRequest,
+    UserLoginHistoryDeviceResponse,
 )
 from core.spec_core import spec
 from flask import Blueprint, request
@@ -25,35 +25,6 @@ from services.tokens_service import token_required
 from spectree import Response
 
 profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
-
-
-@profile.route("/devices", methods=["GET"])
-@token_required()
-@limiter.limit("10/second", override_defaults=False)
-@spec.validate(
-    query=DeviceRequest,
-    tags=["Profile"],
-    resp=Response(
-        HTTP_200=DeviceResponse,
-    ),
-    security={"apiKey": []},
-)
-def user_device_history(service: ProfileService = profile_service()):
-    """Ендпоинт для запроса истории девайсов с которых была авторизация"""
-
-    token = request.headers.get("Authorization").split(" ")
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    if page is None:
-        page = 1
-    page = int(page)
-    if page_size is None:
-        page_size = 20
-    page_size = int(page_size)
-    user_devices_data = service.get_devices_user_history(
-        token[1], page, page_size
-    )
-    return DeviceResponse(history=user_devices_data)
 
 
 @profile.route("/", methods=["GET"])
@@ -119,3 +90,29 @@ def change_user_password(service: ProfileService = profile_service()):
     if service.change_password(token[1], password, new_password):
         return PasswordChangeResponse(result=PASSWORD_CHANGE), HTTPStatus.OK
     return PasswordNotMatch(result=PASSWORD_NOT_MATCH), HTTPStatus.FORBIDDEN
+
+
+@profile.route("/login/history", methods=["GET"])
+@token_required()
+@limiter.limit("10/second", override_defaults=False)
+@spec.validate(
+    query=UserLoginHistoryDeviceRequest,
+    resp=Response(HTTP_200=UserLoginHistoryDeviceResponse),
+    tags=["Profile"],
+    security={"apiKey": []},
+)
+def user_login_history():
+    """Ендпоинт для запроса данных пользователя"""
+    token = request.headers.get("Authorization").split(" ")[1]
+    page = request.args.get("page")
+    page_size = request.args.get("page_size")
+    if page is None:
+        page = 1
+    page = int(page)
+    if page_size is None:
+        page_size = 20
+    page_size = int(page_size)
+    login_history = profile_service().get_user_login_history(
+        token, page, page_size
+    )
+    return UserLoginHistoryDeviceResponse(login_history=login_history)

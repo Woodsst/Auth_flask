@@ -55,6 +55,7 @@ class Settings(BaseSettings):
     JWT: JWT = JWT()
     jaeger: Jaeger = Jaeger()
     yandex: Yandex = Yandex()
+    get_ip: str = "http://httpbin.org/ip"
 
 
 settings = Settings()

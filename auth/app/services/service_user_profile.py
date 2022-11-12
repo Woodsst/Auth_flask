@@ -1,16 +1,16 @@
 from typing import Union, Optional
 
 import werkzeug.exceptions
+from werkzeug.security import generate_password_hash
 
 from core.jaeger_tracer import d_trace
 from core.jwt_api import get_user_id_from_token
 from services.service_base import ServiceBase
 from storages.postgres.db_models import (
+    LoginHistory,
+    Role,
     User,
-    Device,
-    UserDevice,
 )
-from werkzeug.security import generate_password_hash
 
 
 class ProfileService(ServiceBase):
@@ -40,11 +40,36 @@ class ProfileService(ServiceBase):
         """Получение устройств с которых входили в профиль"""
 
         user_id = get_user_id_from_token(token)
-        raw_history = self._get_user_device_history(user_id, page, page_size)
+        raw_history = self._get_user_login_history(user_id, page, page_size)
         if raw_history is not None:
             history = self._format_devices_history(raw_history)
             return history
         return []
+
+    def get_user_login_history(
+        self, token: str, page: int, page_size: int
+    ) -> Union[dict, list]:
+        """Получение устройств с которых входили в профиль"""
+
+        user_id = get_user_id_from_token(token)
+        raw_login_history_class = self._get_user_login_history(
+            user_id, page, page_size
+        )
+        if raw_login_history_class is not None:
+            return self._format_user_login_history(raw_login_history_class)
+        return []
+
+    @staticmethod
+    def _format_user_login_history(raw_login_history_class: list) -> dict:
+        """Форматирование данных истории входов пользователя"""
+        login_history_list = []
+        for item in raw_login_history_class:
+            login_history_dict = item.to_dict()
+            login_history_dict["device_type"] = item.device_type.value
+            del login_history_dict["event_type"]
+            del login_history_dict["id"]
+            login_history_list.append(login_history_dict)
+        return login_history_list
 
     @staticmethod
     def _format_devices_history(raw_history: list) -> dict:
@@ -96,20 +121,17 @@ class ProfileService(ServiceBase):
         self.orm.session.commit()
 
     @d_trace
-    def _get_user_device_history(
+    def _get_user_login_history(
         self, user_id: str, page: int, page_size: int
     ) -> Optional[list]:
-        """Получение данных о времени и устройствах
-        на которых клиент логинился в сервис"""
+        """Получение истории входов пользователя"""
         try:
-            device_history = (
-                self.orm.session.query(Device.device, UserDevice.entry_time)
-                .join(User)
-                .join(Device)
-                .filter(UserDevice.user_id == user_id)
+            login_history = (
+                self.orm.session.query(LoginHistory)
+                .filter(User.id == user_id)
                 .paginate(page=page, per_page=page_size, count=False)
             )
-            return device_history
+            return login_history
         except werkzeug.exceptions.NotFound:
             return
 
