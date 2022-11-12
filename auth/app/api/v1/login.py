@@ -55,7 +55,8 @@ def yandex_oauth():
 
 
 @login_page.route("/oauth", methods=["GET"])
-@spec.validate(resp=Response(HTTP_200=RouteResponse), tags=["Login"])
+@spec.validate(resp=Response(HTTP_200=RouteResponse),
+               deprecated=True)
 def oauth(service: LoginAPI = login_api()):
     """Аутентификация или регистрация пользователя через yandex"""
 
