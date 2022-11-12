@@ -1,31 +1,33 @@
-import uuid
 from http import HTTPStatus
 from urllib.parse import urlencode
 
+from flask import Response
+from requests import get, post
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from config.settings import settings
 from core.jaeger_tracer import d_trace
-from core.jwt_api import (decode_access_token, decode_yandex_jwt,
-                          generate_tokens, get_token_time_to_end)
+from core.jwt_api import (
+    decode_access_token,
+    decode_yandex_jwt,
+    generate_tokens,
+    get_token_time_to_end,
+)
 from core.responses import PASSWORD_NOT_MATCH, USER_NOT_FOUND
 from core.schemas.login_schemas import LoginPasswordNotMatch, LoginUserNotMatch
 from core.spec_core import RouteResponse
-from flask import Response
-from requests import get, post
-from storages.postgres.db_models import (Device, LoginHistory, User,
-                                         UserDevice)
-from werkzeug.security import check_password_hash, generate_password_hash
-
 from services.service_base import ServiceBase
+from storages.postgres.db_models import LoginHistory, User
 
 
 class LoginAPI(ServiceBase):
     def login(
-            self,
-            login: str,
-            password: str,
-            user_agent: str,
-            is_pc: bool,
-            login_ip: str
+        self,
+        login: str,
+        password: str,
+        user_agent: str,
+        is_pc: bool,
+        login_ip: str,
     ) -> Response:
         """Проверка введенных данных пользователя"""
 
@@ -37,7 +39,6 @@ class LoginAPI(ServiceBase):
                     "id": str(user.id),
                     "role": str(user_data.get("role")),
                 }
-                self._set_device(user_agent, user.id)
                 self._set_user_signin(user.id, is_pc, user_agent, login_ip)
                 return RouteResponse(result=generate_tokens(payload))
             return (
@@ -51,33 +52,19 @@ class LoginAPI(ServiceBase):
             )
 
     @d_trace
-    def _set_device(self, device: str, user_id: str):
-        """Добавление нового устройства с которого клиент зашел в аккаунт"""
-
-        id = uuid.uuid4()
-        device = Device(id=id, device=device)
-        user_device = UserDevice(device_id=id, user_id=user_id)
-        self.orm.session.add(device)
-        self.orm.session.add(user_device)
-        self.orm.session.commit()
-
     def _set_user_signin(
-            self,
-            user_id: str,
-            is_pc: bool,
-            user_agent: str,
-            login_ip: str
+        self, user_id: str, is_pc: bool, user_agent: str, login_ip: str
     ):
         """Добавляет информацию о входе пользователя"""
         if is_pc is True:
-            device_type: str = 'PC'
+            device_type: str = "PC"
         else:
-            device_type: str = 'MOBILE'
+            device_type: str = "MOBILE"
         user_signin = LoginHistory(
             user_id=user_id,
             user_agent=user_agent,
             device_type=device_type,
-            login_ip=login_ip
+            login_ip=login_ip,
         )
 
         self.orm.session.add(user_signin)
@@ -99,7 +86,7 @@ class LoginAPI(ServiceBase):
             return True
         return False
 
-    def oauth(self, tokens: dict, user_agent: str):
+    def oauth(self, tokens: dict, user_agent: str, is_pc: bool, login_ip: str):
         """Получение данных о пользователе от yandex,
         регистрация нового пользователя если его нет,
         или авторизация если он уже зарегистрирован"""
@@ -119,7 +106,6 @@ class LoginAPI(ServiceBase):
                     "id": str(user.id),
                     "role": str(user.role),
                 }
-                self._set_device(user_agent, user.id)
                 return RouteResponse(result=generate_tokens(payload))
         self._set_user(
             {
@@ -129,7 +115,7 @@ class LoginAPI(ServiceBase):
             }
         )
         self._set_social(login, "Yandex", client_info.get("email"))
-        return self.login(login, password, user_agent)
+        return self.login(login, password, user_agent, is_pc, login_ip)
 
     @staticmethod
     def get_tokens(code: str):

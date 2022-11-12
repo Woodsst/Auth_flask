@@ -10,8 +10,8 @@ from storages.db_connect import db
 
 
 class DeviceType(Enum):
-    PC = 'pc'
-    MOBILE = 'mobile'
+    PC = "pc"
+    MOBILE = "mobile"
 
 
 class LoginHistoryMixin:

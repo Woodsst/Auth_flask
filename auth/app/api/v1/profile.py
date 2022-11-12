@@ -1,53 +1,31 @@
 from http import HTTPStatus
 
-from config.limiter import limiter
-from core.responses import (EMAIL_CHANGE, PASSWORD_CHANGE, PASSWORD_NOT_MATCH,
-                            PASSWORDS_EQUALS)
-from core.schemas.profile_schemas import (DeviceRequest, DeviceResponse,
-                                          EmailChangeReqeust,
-                                          EmailChangeResponse,
-                                          PasswordChangeReqeust,
-                                          PasswordChangeResponse,
-                                          PasswordEquals, PasswordNotMatch,
-                                          ProfileResponse,
-                                          UserLoginHistoryDeviceRequest,
-                                          UserLoginHistoryDeviceResponse)
-from core.spec_core import spec
 from flask import Blueprint, request
-from services.service_user_profile import profile_service
-from services.tokens_service import token_required
 from spectree import Response
 
-profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
-
-
-@profile.route("/devices", methods=["GET"])
-@token_required()
-@limiter.limit("10/second", override_defaults=False)
-@spec.validate(
-    query=DeviceRequest,
-    tags=["Profile"],
-    resp=Response(
-        HTTP_200=DeviceResponse,
-    ),
-    security={"apiKey": []},
+from config.limiter import limiter
+from core.responses import (
+    EMAIL_CHANGE,
+    PASSWORD_CHANGE,
+    PASSWORD_NOT_MATCH,
+    PASSWORDS_EQUALS,
 )
-def user_device_history():
-    """Ендпоинт для запроса истории девайсов с которых была авторизация"""
+from core.schemas.profile_schemas import (
+    EmailChangeReqeust,
+    EmailChangeResponse,
+    PasswordChangeReqeust,
+    PasswordChangeResponse,
+    PasswordEquals,
+    PasswordNotMatch,
+    ProfileResponse,
+    UserLoginHistoryDeviceRequest,
+    UserLoginHistoryDeviceResponse,
+)
+from core.spec_core import spec
+from services.service_user_profile import profile_service
+from services.tokens_service import token_required
 
-    token = request.headers.get("Authorization").split(" ")
-    page = request.args.get("page")
-    page_size = request.args.get("page_size")
-    if page is None:
-        page = 1
-    page = int(page)
-    if page_size is None:
-        page_size = 20
-    page_size = int(page_size)
-    user_devices_data = profile_service().get_devices_user_history(
-        token[1], page, page_size
-    )
-    return DeviceResponse(history=user_devices_data)
+profile = Blueprint("profile", __name__, url_prefix="/api/v1/profile")
 
 
 @profile.route("/", methods=["GET"])

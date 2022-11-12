@@ -1,4 +1,3 @@
-import datetime
 import uuid
 from copy import copy
 
@@ -28,7 +27,6 @@ class User(db.Model):
     email = db.Column(db.String, nullable=False, unique=True)
 
     social = relationship("UserSocial", cascade="all, delete")
-    device = relationship("UserDevice", cascade="all, delete")
     roles = relationship("Role")
 
     def __repr__(self):
@@ -59,27 +57,6 @@ class Social(db.Model):
 
     id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
-
-
-class UserDevice(db.Model):
-    __tablename__ = "user_device"
-
-    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    user_id = db.Column(
-        db.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
-    )
-    device_id = db.Column(
-        db.ForeignKey("devices.id", ondelete="CASCADE"), primary_key=True
-    )
-    entry_time = db.Column(db.DateTime, default=datetime.datetime.utcnow())
-    device = relationship("Device", cascade="all, delete")
-
-
-class Device(db.Model):
-    __tablename__ = "devices"
-
-    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True)
-    device = db.Column(db.String, nullable=False)
 
 
 class Role(db.Model):

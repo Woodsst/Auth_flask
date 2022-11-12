@@ -1,13 +1,16 @@
 from typing import Optional, Union
 
 import werkzeug.exceptions
-from core.jaeger_tracer import d_trace
-from core.jwt_api import get_user_id_from_token
-from storages.postgres.db_models import (Device, LoginHistory, Role, User,
-                                         UserDevice)
 from werkzeug.security import generate_password_hash
 
+from core.jaeger_tracer import d_trace
+from core.jwt_api import get_user_id_from_token
 from services.service_base import ServiceBase
+from storages.postgres.db_models import (
+    LoginHistory,
+    Role,
+    User,
+)
 
 
 class ProfileService(ServiceBase):
@@ -62,9 +65,9 @@ class ProfileService(ServiceBase):
         login_history_list = []
         for item in raw_login_history_class:
             login_history_dict = item.to_dict()
-            login_history_dict['device_type'] = item.device_type.value
-            del login_history_dict['event_type']
-            del login_history_dict['id']
+            login_history_dict["device_type"] = item.device_type.value
+            del login_history_dict["event_type"]
+            del login_history_dict["id"]
             login_history_list.append(login_history_dict)
         return login_history_list
 
@@ -138,28 +141,18 @@ class ProfileService(ServiceBase):
     ) -> Optional[list]:
         """Получение данных о времени и устройствах
         на которых клиент логинился в сервис"""
-        try:
-            device_history = (
-                self.orm.session.query(Device.device, UserDevice.entry_time)
-                .join(User)
-                .join(Device)
-                .filter(UserDevice.user_id == user_id)
-                .paginate(page=page, per_page=page_size, count=False)
-            )
-            return device_history
-        except werkzeug.exceptions.NotFound:
-            return
+        pass
 
     @d_trace
     def _get_user_login_history(
-            self, user_id: str, page: int, page_size: int
+        self, user_id: str, page: int, page_size: int
     ) -> Optional[list]:
         """Получение истории входов пользователя"""
         try:
             login_history = (
-                self.orm.session.query(LoginHistory).filter(
-                    User.id == user_id
-                ).paginate(page=page, per_page=page_size, count=False)
+                self.orm.session.query(LoginHistory)
+                .filter(User.id == user_id)
+                .paginate(page=page, per_page=page_size, count=False)
             )
             return login_history
         except werkzeug.exceptions.NotFound:
