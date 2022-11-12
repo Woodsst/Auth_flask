@@ -8,7 +8,6 @@ from core.jwt_api import get_user_id_from_token
 from services.service_base import ServiceBase
 from storages.postgres.db_models import (
     LoginHistory,
-    Role,
     User,
 )
 
@@ -34,18 +33,6 @@ class ProfileService(ServiceBase):
             "role": role,
         }
 
-    def get_devices_user_history(
-        self, token: str, page: int, page_size: int
-    ) -> Union[dict, list]:
-        """Получение устройств с которых входили в профиль"""
-
-        user_id = get_user_id_from_token(token)
-        raw_history = self._get_user_login_history(user_id, page, page_size)
-        if raw_history is not None:
-            history = self._format_devices_history(raw_history)
-            return history
-        return []
-
     def get_user_login_history(
         self, token: str, page: int, page_size: int
     ) -> Union[dict, list]:
@@ -70,18 +57,6 @@ class ProfileService(ServiceBase):
             del login_history_dict["id"]
             login_history_list.append(login_history_dict)
         return login_history_list
-
-    @staticmethod
-    def _format_devices_history(raw_history: list) -> dict:
-        """Форматирование данных истории устройств для отправки пользователю"""
-
-        history = []
-        for entry in raw_history:
-            entry = entry._asdict()
-            entry_time = entry.get("entry_time")
-            entry["entry_time"] = str(entry_time)
-            history.append(entry)
-        return history
 
     def change_email(self, token: str, new_email: str):
         """Изменение почты пользователя"""
