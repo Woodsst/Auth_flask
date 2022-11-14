@@ -80,6 +80,7 @@ class Settings(BaseSettings):
     """Настройки для запуска приложения"""
 
     postgres: str = Field("postgresql://app:123qwe@localhost/clients_database")
+    tracer: bool = Field(False)
     redis: Redis = Redis()
     JWT: JWT = JWT()
     jaeger: Jaeger = Jaeger()

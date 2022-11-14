@@ -28,6 +28,8 @@ def d_trace(f):
     """Декоратор для трассировки"""
 
     def decor(*args, **kwargs):
+        if settings.tracer is False:
+            return f(*args, **kwargs)
         r_id = request.headers.get("X-Request-Id")
         with tracer.start_as_current_span(f.__name__) as span:
             span.set_attribute("request.id", r_id)

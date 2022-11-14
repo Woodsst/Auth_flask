@@ -1,13 +1,14 @@
 from flask import Flask
 
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from core.jaeger_tracer import configure_tracer
-
-configure_tracer()
+from config.settings import settings
 
 app = Flask(__name__)
 
-FlaskInstrumentor().instrument_app(app)
+if settings.tracer:
+    from opentelemetry.instrumentation.flask import FlaskInstrumentor
+    from core.jaeger_tracer import configure_tracer
+    configure_tracer()
+    FlaskInstrumentor().instrument_app(app)
 
 from storages.db_connect import postgres_init, redis_init
 from config.limiter import limiter_init
