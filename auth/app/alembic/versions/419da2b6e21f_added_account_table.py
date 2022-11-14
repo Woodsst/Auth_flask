@@ -17,12 +17,6 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        "devices",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("device", sa.String(), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_table(
         "roles",
         sa.Column("role_id", sa.Integer(), nullable=False),
         sa.Column("role", sa.String(), nullable=False),
@@ -33,9 +27,8 @@ def upgrade() -> None:
     op.create_table(
         "socials",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
+        sa.Column("name", sa.String()),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name"),
     )
     op.create_table(
         "users",
@@ -52,18 +45,6 @@ def upgrade() -> None:
         sa.UniqueConstraint("id"),
         sa.UniqueConstraint("login"),
         sa.UniqueConstraint("password"),
-    )
-    op.create_table(
-        "user_device",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("device_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("entry_time", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(
-            ["device_id"], ["devices.id"], ondelete="CASCADE"
-        ),
-        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id", "user_id", "device_id"),
     )
     op.create_table(
         "user_social",

@@ -9,7 +9,9 @@ def clear_table(con):
 
     con.cursor().execute(
         "delete from users;"
-        "delete from devices;"
+        "delete from login_history;"
+        "delete from login_history_mobile;"
+        "delete from login_history_pc;"
         "delete from socials;"
         "delete from roles where role != 'Admin' and role != 'User'"
     )
