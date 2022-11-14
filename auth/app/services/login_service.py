@@ -1,15 +1,11 @@
 from http import HTTPStatus
-from urllib.parse import urlencode
 
 from flask import Response
-from requests import get, post
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from config.settings import settings
 from core.jaeger_tracer import d_trace
 from core.jwt_api import (
     decode_access_token,
-    decode_yandex_jwt,
     generate_tokens,
     get_token_time_to_end,
 )
@@ -86,19 +82,20 @@ class LoginAPI(ServiceBase):
             return True
         return False
 
-    def oauth(self, tokens: dict, user_agent: str, is_pc: bool, login_ip: str):
-        """Получение данных о пользователе от yandex,
-        регистрация нового пользователя если его нет,
-        или авторизация если он уже зарегистрирован"""
+    def oauth_authentication(
+        self,
+        provider: str,
+        login: str,
+        password: str,
+        email: str,
+        user_agent: str,
+        is_pc: str,
+        login_ip: str,
+    ):
+        """Проверка существования пользователя по данным полученным от
+        провайдера oauth, регистрация или аутентификация в зависимости от
+        того, зарегистрирован пользователь или нет"""
 
-        client_jwt = get(
-            "https://login.yandex.ru/info?format=jwt",
-            headers={"Authorization": f"Oauth {tokens.get('access_token')}"},
-        )
-
-        client_info = decode_yandex_jwt(client_jwt.content.decode())
-        login = client_info.get("login")
-        password = client_info.get("psuid")
         user = User.query.filter_by(login=login).first()
         if user:
             if check_password_hash(user.password, password):
@@ -111,26 +108,11 @@ class LoginAPI(ServiceBase):
             {
                 "login": login,
                 "password": generate_password_hash(password),
-                "email": client_info.get("email"),
+                "email": email,
             }
         )
-        self._set_social(login, "Yandex", client_info.get("email"))
+        self._set_social(login, provider, email)
         return self.login(login, password, user_agent, is_pc, login_ip)
-
-    @staticmethod
-    def get_tokens(code: str):
-        """Получение токенов доступа к информации о пользователе"""
-
-        data = {
-            "grant_type": "authorization_code",
-            "code": code,
-            "client_id": settings.yandex.client_id,
-            "client_secret": settings.yandex.client_secret,
-        }
-        data = urlencode(data)
-        tokens = post(f"{settings.yandex.baseurl}token", data)
-        tokens = tokens.json()
-        return tokens
 
 
 def login_api():

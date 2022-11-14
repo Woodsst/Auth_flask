@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 from core.spec_core import RouteResponse
 from core.responses import PASSWORD_NOT_MATCH, USER_NOT_FOUND
+from core.providers import Providers
 
 
 class LoginRequest(BaseModel):
@@ -23,3 +24,8 @@ class LoginUserNotMatch(RouteResponse):
 
     class Config:
         schema_extra = {"example": USER_NOT_FOUND}
+
+
+class AuthorizeProvider(BaseModel):
+    """Схема запроса аутентификации через провайдера"""
+    provider: Providers

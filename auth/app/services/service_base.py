@@ -1,6 +1,6 @@
 import uuid
 from typing import Optional
-
+import abc
 import sqlalchemy.exc
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
@@ -80,3 +80,19 @@ class ServiceBase:
         self.orm.session.add(social)
         self.orm.session.add(user_social)
         self.orm.session.commit()
+
+
+class OauthBase(abc.ABC):
+    """Абстрактный класс для oauth содержащий обязательные методы
+    для получения данных через Authorization Code Flow"""
+
+    @abc.abstractmethod
+    def get_client_info(self, tokens: dict) -> dict:
+        """Получение данных о пользователе у провайдера"""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def get_tokens(self, code: str) -> dict:
+        """Получение токена доступа к информации
+        о пользователе от Провайдера"""
+        raise NotImplementedError()

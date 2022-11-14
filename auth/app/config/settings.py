@@ -30,6 +30,10 @@ class Jaeger(BaseSettings):
         env_prefix = "JAEGER_"
 
 
+class Provider(BaseSettings):
+    redirect_url: str = Field("http://localhost:5000/api/v1/oauth")
+
+
 class Yandex(BaseSettings):
     client_id: str = Field("5bdb6d7a8bbc4fd9beae90ab0741f54a")
     client_secret: str = Field("99863bf05fab4deea5f5c2a7df890c02")
@@ -38,12 +42,37 @@ class Yandex(BaseSettings):
         "https://oauth.yandex.ru/authorize?"
         "response_type=code"
         "&client_id=5bdb6d7a8bbc4fd9beae90ab0741f54a"
-        "&redirect_uri=http://localhost/api/v1/oauth"
+        f"&redirect_uri={Provider().redirect_url}"
         "&scope=login:email login:info"
+        "&state=yandex"
     )
+    get_user_info_url: str = "https://login.yandex.ru/info?format=jwt"
 
     class Config:
         env_prefix = "YANDEX"
+        env_nested_delimiter = "_"
+
+
+class VK(BaseSettings):
+    client_id: str = Field("51460035")
+    client_secret: str = Field("WoazHZ7YV6MquDzVoOHA")
+    redirect_url: Provider = Provider()
+    oauth_authorize: str = (
+        "https://oauth.vk.com/authorize?"
+        "client_id=51460035"
+        "&display=page"
+        f"&redirect_uri={redirect_url.redirect_url}"
+        "&scope=email"
+        "&response_type=code"
+        "&state=vkontakte"
+    )
+    baseurl: str = "https://oauth.vk.com/access_token?"
+
+    get_user_info_url: str = "https://api.vk.com/method/users.get?"
+    api_version: str = "&v=5.131"
+
+    class Config:
+        env_prefix = "VK"
         env_nested_delimiter = "_"
 
 
@@ -55,6 +84,7 @@ class Settings(BaseSettings):
     JWT: JWT = JWT()
     jaeger: Jaeger = Jaeger()
     yandex: Yandex = Yandex()
+    vk: VK = VK()
     get_ip: str = "http://httpbin.org/ip"
 
 
